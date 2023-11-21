@@ -1,0 +1,220 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Document API
+  description: API for managing documents.
+
+paths:
+  /prod/qa/documents/retriever:
+    post:
+      summary: Retrieve documents based on a query
+      operationId: retrieveDocuments
+      tags:
+        - Documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentQuery'
+      responses:
+        '200':
+          description: Documents retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+  /prod/qa/documents:
+    put:
+      summary: Update a document
+      operationId: updateDocument
+      tags:
+        - Documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Document'
+      responses:
+        '200':
+          description: Document updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+
+components:
+  schemas:
+    DocumentQuery:
+      type: object
+      properties:
+        domain:
+          type: string
+          example: bozuman.cybozu.com
+        query:
+          type: string
+          example: 7/4は何がある？
+        k:
+          type: number
+          example: 7
+    Document:
+      type: object
+      properties:
+        domain:
+          type: string
+          example: bozuman.cybozu.com
+        spaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Space'
+    Space:
+      type: object
+      properties:
+        spaceId:
+          type: string
+          example: 7623
+        guestSpace:
+          type: boolean
+          example: true
+        threads:
+          type: array
+          items:
+            $ref: '#/components/schemas/Thread'
+    Thread:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/Result'
+        success:
+          type: boolean
+          example: true
+    Result:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 4438985
+        body:
+          type: string
+        creator:
+          $ref: '#/components/schemas/Creator'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-07-03T02:06:57.000Z
+        likeCount:
+          type: integer
+          example: 2
+        liked:
+          type: boolean
+          example: false
+        threadId:
+          type: string
+          example: 78911
+        commentCount:
+          type: integer
+          example: 11
+        commentedAt:
+          type: string
+          format: date-time
+          example: 2023-07-21T00:57:52.000Z
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+    Creator:
+      type: object
+      properties:
+        entityType:
+          type: string
+          example: USER
+        isBuiltIn:
+          type: boolean
+          example: false
+        id:
+          type: string
+          example: 7532782697181642979
+        code:
+          type: string
+          example: nakano.kazutoshi@showcase-tv.com
+        name:
+          type: string
+          example: 中野 和俊
+        ctime:
+          type: string
+          format: date-time
+          example: 1970-01-01T00:00:00.000Z
+        mtime:
+          type: string
+          format: date-time
+          example: 1970-01-01T00:00:00.000Z
+        removed:
+          type: boolean
+          example: false
+        valid:
+          type: boolean
+          example: true
+        email:
+          type: string
+          example: nakano.kazutoshi@showcase-tv.com
+        phone:
+          type: string
+          example: 080-4959-6912
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 8642626
+        body:
+          type: string
+        creator:
+          $ref: '#/components/schemas/Creator'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-07-21T00:57:52.000Z
+        likeCount:
+          type: integer
+          example: 1
+        liked:
+          type: boolean
+          example: false
+        postId:
+          type: string
+          example: 4438985
+    DocumentResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentContent'
+    DocumentContent:
+      type: object
+      properties:
+        pageContent:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+    Metadata:
+      type: object
+      properties:
+        creatorName:
+          type: string
+          example: 中野 和俊
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-07-03T02:06:57.000Z
+        linkUrl:
+          type: string
+          example: https://bozuman.cybozu.com/k/guest/7623/#/space/7623/thread/78911/4438985
