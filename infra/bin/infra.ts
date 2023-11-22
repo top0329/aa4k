@@ -1,14 +1,25 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { Aa4kInfraStack } from '../lib/infra-stack';
+import { ContextProps } from '../lib/type';
+import { Aa4kApiStack } from '../lib/api-stack';
+import { Aa4kSecretsStack } from '../lib/secret-stack';
+import { AuroraStack } from '../lib/aurora-stack';
 
 const app = new cdk.App();
-const envKey = app.node.tryGetContext('environment');
-const context = app.node.tryGetContext(envKey);
+const stageName = app.node.tryGetContext('environment');
+const context = app.node.tryGetContext(stageName);
 const envName = context.envName;
 
-new Aa4kInfraStack(app, `Aa4kInfraStack-${envName}`, {
+const contextProps: ContextProps = {
+  stageName: stageName,
+  envName: envName,
+}
+
+const secretsStack = new Aa4kSecretsStack(app, `Aa4k-SecretsStack-${envName}`, contextProps)
+const auroraStack = new AuroraStack(app, `Aa4k-AuroraStack-${envName}`, contextProps)
+
+new Aa4kApiStack(app, `Aa4k-ApiStack-${envName}`, contextProps, secretsStack, auroraStack, {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

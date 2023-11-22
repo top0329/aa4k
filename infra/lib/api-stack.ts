@@ -3,21 +3,16 @@ import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as nodelambda from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
+import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { ContextProps } from './type';
 import { Aa4kSecretsStack } from './secret-stack'
 import { AuroraStack } from './aurora-stack'
-import * as settings from './settings'
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
 
-export class Aa4kInfraStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export class Aa4kApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, props?: cdk.StackProps) {
     super(scope, id, props);
-    const envKey = this.node.tryGetContext('environment');
-    const context = this.node.tryGetContext(envKey);
-    const envName = context.envName;
-
-    const secrets = new Aa4kSecretsStack(this, "SecretsStack")
-    const auroraStack = new AuroraStack(this, "AuroraStack")
+    const envName = contextProps.envName;
 
     // API Gateway
     const accessPolicy = new iam.PolicyDocument({
@@ -43,7 +38,8 @@ export class Aa4kInfraStack extends cdk.Stack {
       ]
     })
 
-    const restapi = new apigateway.RestApi(this, `Aa4k-${envName}-RestAPI`, {
+    const restapi = new apigateway.RestApi(this, 'RestApi', {
+      restApiName: `Aa4k-${envName}-RestAPI`,
       policy: accessPolicy,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
@@ -56,7 +52,7 @@ export class Aa4kInfraStack extends cdk.Stack {
     // ******************************
     // WAF Web ACL
     // ******************************
-    const webAcl = new cdk.aws_wafv2.CfnWebACL(this, "wafV2WebAcl", {
+    const webAcl = new cdk.aws_wafv2.CfnWebACL(this, "WafV2WebAcl", {
       defaultAction: { allow: {} },
       scope: "REGIONAL",
       visibilityConfig: {
@@ -82,16 +78,18 @@ export class Aa4kInfraStack extends cdk.Stack {
       entry: __dirname + "/lambda/authorizer/index.ts",
       handler: 'index.handler',
       vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.securityGroup],
+      securityGroups: [auroraStack.auroraAccessableSG],
       environment: {
-        DB_ACCESS_SECRET_NAME: auroraStack.dbSecretName
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret.secretName
       },
       timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
     })
     const lambdaAuthorizer = new apigateway.RequestAuthorizer(this, 'Authorizer', {
       handler: authorizerFunction,
       identitySources: [apigateway.IdentitySource.header('system_key')]
     });
+    auroraStack.dbAdminSecret.grantRead(authorizerFunction)
 
     // ******************************
     // Lambda関数
@@ -101,15 +99,17 @@ export class Aa4kInfraStack extends cdk.Stack {
       entry: __dirname + "/lambda/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.securityGroup],
+      securityGroups: [auroraStack.auroraAccessableSG],
       environment: {
-        AZURE_SECRET_NAME: secrets.azureSecret.secretName,
-        DB_ACCESS_SECRET_NAME: auroraStack.dbSecretName
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret.secretName,
       },
       timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
     })
-    secrets.azureSecret.grantRead(codeTemplateLambda)
-    restapi.root.addResource("codeTemplate").addProxy({
+    secretsStack.azureSecret.grantRead(codeTemplateLambda)
+    auroraStack.dbAdminSecret.grantRead(codeTemplateLambda)
+    restapi.root.addResource("code_template").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(codeTemplateLambda),
       anyMethod: true,
       defaultMethodOptions: {

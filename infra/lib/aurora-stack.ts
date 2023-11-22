@@ -1,20 +1,20 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from "constructs";
+import { ContextProps } from '../lib/type';
 
-export class AuroraStack extends Construct {
-  readonly securityGroup;
+export class AuroraStack extends cdk.Stack {
+  readonly auroraAccessableSG;
   readonly vpc;
-  readonly dbSecretName;
+  readonly dbAdminSecret;
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, contextProps: ContextProps, props?: cdk.StackProps) {
     super(scope, id);
-    const envKey = this.node.tryGetContext('environment');
-    const context = this.node.tryGetContext(envKey);
-    const envName = context.envName;
+    const envName = contextProps.envName;
 
     // VPC
-    const vpc = new ec2.Vpc(this, "VPC", {
+    this.vpc = new ec2.Vpc(this, "VPC", {
       enableDnsSupport: true,
       subnetConfiguration: [
         {
@@ -29,7 +29,6 @@ export class AuroraStack extends Construct {
         },
       ],
     });
-    this.vpc = vpc
 
 
     // DB Cluster Parameter Group
@@ -65,36 +64,35 @@ export class AuroraStack extends Construct {
     // Subnet Group
     const subnetGroup = new cdk.aws_rds.SubnetGroup(this, "SubnetGroup", {
       description: "description",
-      vpc: vpc,
+      vpc: this.vpc,
       subnetGroupName: "SubnetGroup",
-      vpcSubnets: vpc.selectSubnets({
+      vpcSubnets: this.vpc.selectSubnets({
         onePerAz: true,
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       }),
     });
 
-    // Monitoring Role
-    const monitoringRole = new cdk.aws_iam.Role(this, "MonitoringRole", {
-      assumedBy: new cdk.aws_iam.ServicePrincipal(
-        "monitoring.rds.amazonaws.com"
-      ),
-      managedPolicies: [
-        cdk.aws_iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonRDSEnhancedMonitoringRole"
-        ),
-      ],
-    });
-
     // Security Group
-    this.securityGroup = new ec2.SecurityGroup(this, 'AuroraAccessableSecurityGroup', {
-      vpc,
+    this.auroraAccessableSG = new ec2.SecurityGroup(this, 'AuroraAccessableSecurityGroup', {
+      vpc: this.vpc,
       allowAllOutbound: true,
     })
 
+    // DB Admin User Secret
+    const EXCLUDE_CHARACTERS = ':@/" \'';
+    this.dbAdminSecret = new secretsmanager.Secret(this, "DbAdminSecret", {
+      generateSecretString: {
+        generateStringKey: "password",
+        passwordLength: 32,
+        requireEachIncludedType: true,
+        secretStringTemplate: '{"username": "postgresAdmin"}',
+        excludeCharacters: EXCLUDE_CHARACTERS,
+      },
+      secretName: `${envName}/DbAccessSecret`,
+    });
+
     // DB Cluster
     const dbIdentifierPrefix = `aa4k-${envName}`;
-    this.dbSecretName = `${envName}/DbAccessSecret`;
-    const rdsCredentials: cdk.aws_rds.Credentials = cdk.aws_rds.Credentials.fromGeneratedSecret("postgresAdmin", { secretName: this.dbSecretName, });
     const dbCluster = new cdk.aws_rds.DatabaseCluster(this, "DatabaseCluster", {
       clusterIdentifier: `${dbIdentifierPrefix}-rds`,  // DB クラスター識別子
       engine: cdk.aws_rds.DatabaseClusterEngine.auroraPostgres({
@@ -110,34 +108,93 @@ export class AuroraStack extends Construct {
         enablePerformanceInsights: true, // Performance Insightsを有効にする
         performanceInsightRetention: cdk.aws_rds.PerformanceInsightRetention.DEFAULT, // データ保持期間
       }),
-      securityGroups: [this.securityGroup],
+      securityGroups: [this.auroraAccessableSG],
       backup: { // バックアップ
         retention: cdk.Duration.days(7),  // バックアップ保持期間
         preferredWindow: "16:00-16:30",   // 
       },
       cloudwatchLogsExports: ["postgresql"], // ログのエクスポート
       copyTagsToSnapshot: true, // スナップショットにタグをコピー
-      credentials: rdsCredentials,
-      defaultDatabaseName: "mainDB",  // 最初のデータベース名
+      credentials: cdk.aws_rds.Credentials.fromSecret(this.dbAdminSecret),
+      defaultDatabaseName: "aa4kDB",  // 最初のデータベース名
       deletionProtection: false,  // 削除保護
-      iamAuthentication: true, // IAM データベース認証
+      iamAuthentication: false, // IAM データベース認証
       monitoringInterval: cdk.Duration.minutes(1),  // 拡張モニタリング-詳細度
-      monitoringRole, // モニタリングロール
       parameterGroup: dbClusterParameterGroup,  // パラメータグループ
       storageEncrypted: true, // storageEncrypted
       instanceIdentifierBase: "db-instance",
-      vpc: vpc,
+      vpc: this.vpc,
       subnetGroup,
     });
 
     // RDS Proxy を作成
-    const secrets = dbCluster.secret ? [dbCluster.secret] : [];
     const proxy = new cdk.aws_rds.DatabaseProxy(this, 'DatabaseProxy', {
       proxyTarget: cdk.aws_rds.ProxyTarget.fromCluster(dbCluster),
-      secrets: secrets,
-      vpc,
+      secrets: dbCluster.secret ? [dbCluster.secret] : [],
+      vpc: this.vpc,
       dbProxyName: `${dbIdentifierPrefix}-proxy`,
-      securityGroups: [this.securityGroup],
+      securityGroups: [this.auroraAccessableSG],
     });
+
+
+    // ******************************
+    // 踏み台サーバ (bastion)
+    // ******************************
+    // bastion Security Group
+    const name = `aa4k-${envName}-bastion-sg`
+    const bastionGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
+      vpc: this.vpc,
+      securityGroupName: name,
+      description: name,
+    });
+    // EC2 Instance Connect (ローカル環境から接続)対応
+    bastionGroup.addIngressRule(
+      ec2.Peer.ipv4("118.238.251.130/32"),
+      ec2.Port.tcp(22),
+      "from showcase"
+    );
+    bastionGroup.addIngressRule(
+      ec2.Peer.ipv4("202.210.220.64/28"),
+      ec2.Port.tcp(22),
+      "from showcase"
+    );
+    bastionGroup.addIngressRule(
+      ec2.Peer.ipv4("39.110.232.32/28"),
+      ec2.Port.tcp(22),
+      "from showcase"
+    );
+    // キーペア作成
+    const cfnKeyPair = new ec2.CfnKeyPair(this, 'CfnKeyPair', {
+      keyName: `aa4k-${envName}-bastion`,
+    })
+    cfnKeyPair.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY)
+
+    // EC2作成
+    const instance = new ec2.Instance(this, 'Instance', {
+      instanceName: `aa4k-${envName}-bastion`,
+      vpc: this.vpc,
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.T2,
+        ec2.InstanceSize.MICRO,
+      ),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
+      }),
+      securityGroup: bastionGroup,
+      vpcSubnets: this.vpc.selectSubnets({
+        onePerAz: true,
+        subnetType: ec2.SubnetType.PUBLIC,
+      }),
+      keyName: cdk.Token.asString(cfnKeyPair.ref),
+    })
+    instance.connections.allowFromAnyIpv4(ec2.Port.tcp(22))
+
+
+    // 作成したbastion Security Group を auroraAccessableSG に追加
+    this.auroraAccessableSG.addIngressRule(
+      bastionGroup,
+      ec2.Port.tcp(5432),
+      'from bastion'
+    )
   }
 }
