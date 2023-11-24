@@ -12,7 +12,7 @@ import { AuroraStack } from './aurora-stack'
 export class Aa4kApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, props?: cdk.StackProps) {
     super(scope, id, props);
-    const envName = contextProps.envName;
+    const stageName = contextProps.stageName;
 
     // API Gateway
     const accessPolicy = new iam.PolicyDocument({
@@ -39,7 +39,7 @@ export class Aa4kApiStack extends cdk.Stack {
     })
 
     const restapi = new apigateway.RestApi(this, 'RestApi', {
-      restApiName: `Aa4k-${envName}-RestAPI`,
+      restApiName: `Aa4k-${stageName}-RestAPI`,
       policy: accessPolicy,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,

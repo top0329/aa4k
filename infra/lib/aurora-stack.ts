@@ -11,7 +11,7 @@ export class AuroraStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, contextProps: ContextProps, props?: cdk.StackProps) {
     super(scope, id);
-    const envName = contextProps.envName;
+    const stageName = contextProps.stageName;
 
     // VPC
     this.vpc = new ec2.Vpc(this, "VPC", {
@@ -88,11 +88,11 @@ export class AuroraStack extends cdk.Stack {
         secretStringTemplate: '{"username": "postgresAdmin"}',
         excludeCharacters: EXCLUDE_CHARACTERS,
       },
-      secretName: `${envName}/DbAccessSecret`,
+      secretName: `${stageName}/DbAccessSecret`,
     });
 
     // DB Cluster
-    const dbIdentifierPrefix = `aa4k-${envName}`;
+    const dbIdentifierPrefix = `aa4k-${stageName}`;
     const dbCluster = new cdk.aws_rds.DatabaseCluster(this, "DatabaseCluster", {
       clusterIdentifier: `${dbIdentifierPrefix}-rds`,  // DB クラスター識別子
       engine: cdk.aws_rds.DatabaseClusterEngine.auroraPostgres({
@@ -141,7 +141,7 @@ export class AuroraStack extends cdk.Stack {
     // 踏み台サーバ (bastion)
     // ******************************
     // bastion Security Group
-    const name = `aa4k-${envName}-bastion-sg`
+    const name = `aa4k-${stageName}-bastion-sg`
     const bastionGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
       vpc: this.vpc,
       securityGroupName: name,
@@ -165,13 +165,13 @@ export class AuroraStack extends cdk.Stack {
     );
     // キーペア作成
     const cfnKeyPair = new ec2.CfnKeyPair(this, 'CfnKeyPair', {
-      keyName: `aa4k-${envName}-bastion`,
+      keyName: `aa4k-${stageName}-bastion`,
     })
     cfnKeyPair.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY)
 
     // EC2作成
     const instance = new ec2.Instance(this, 'Instance', {
-      instanceName: `aa4k-${envName}-bastion`,
+      instanceName: `aa4k-${stageName}-bastion`,
       vpc: this.vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,

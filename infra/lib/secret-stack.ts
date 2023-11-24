@@ -8,7 +8,7 @@ export class Aa4kSecretsStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, contextProps: ContextProps, props?: cdk.StackProps) {
     super(scope, id, props);
-    const envName = contextProps.envName;
+    const stageName = contextProps.stageName;
 
     // Azure OpenAI service Secret
     this.azureSecret = new secretsmanager.Secret(this, 'AzureOpenAISecret', {
@@ -16,7 +16,7 @@ export class Aa4kSecretsStack extends cdk.Stack {
         secretStringTemplate: JSON.stringify({}),
         generateStringKey: 'azureOpenAIApiKey',
       },
-      secretName: `${envName}/AzureOpenAISecret`
+      secretName: `${stageName}/AzureOpenAISecret`
     });
   }
 }

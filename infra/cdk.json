@@ -18,13 +18,13 @@
   },
   "context": {
     "dev": {
-      "envName": "dev"
+      "stageName": "dev"
     },
     "stg": {
-      "envName": "stg"
+      "stageName": "stg"
     },
     "prod": {
-      "envName": "prod"
+      "stageName": "prod"
     },
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,

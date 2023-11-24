@@ -7,19 +7,19 @@ import { Aa4kSecretsStack } from '../lib/secret-stack';
 import { AuroraStack } from '../lib/aurora-stack';
 
 const app = new cdk.App();
-const stageName = app.node.tryGetContext('environment');
-const context = app.node.tryGetContext(stageName);
-const envName = context.envName;
+const stageKey = app.node.tryGetContext('environment');
+const context = app.node.tryGetContext(stageKey);
+const stageName = context.stageName;
 
 const contextProps: ContextProps = {
+  stageKey: stageKey,
   stageName: stageName,
-  envName: envName,
 }
 
-const secretsStack = new Aa4kSecretsStack(app, `Aa4k-SecretsStack-${envName}`, contextProps)
-const auroraStack = new AuroraStack(app, `Aa4k-AuroraStack-${envName}`, contextProps)
+const secretsStack = new Aa4kSecretsStack(app, `Aa4k-SecretsStack-${stageName}`, contextProps)
+const auroraStack = new AuroraStack(app, `Aa4k-AuroraStack-${stageName}`, contextProps)
 
-new Aa4kApiStack(app, `Aa4k-ApiStack-${envName}`, contextProps, secretsStack, auroraStack, {
+new Aa4kApiStack(app, `Aa4k-ApiStack-${stageName}`, contextProps, secretsStack, auroraStack, {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
