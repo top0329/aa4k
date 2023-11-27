@@ -14,6 +14,7 @@ const stageName = context.stageName;
 const contextProps: ContextProps = {
   stageKey: stageKey,
   stageName: stageName,
+  deletionProtection: stageName === "prod" ? true : false,
 }
 
 const secretsStack = new Aa4kSecretsStack(app, `Aa4k-SecretsStack-${stageName}`, contextProps)

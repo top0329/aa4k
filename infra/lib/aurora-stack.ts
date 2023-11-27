@@ -117,7 +117,7 @@ export class AuroraStack extends cdk.Stack {
       copyTagsToSnapshot: true, // スナップショットにタグをコピー
       credentials: cdk.aws_rds.Credentials.fromSecret(this.dbAdminSecret),
       defaultDatabaseName: "aa4kDB",  // 最初のデータベース名
-      deletionProtection: false,  // 削除保護
+      deletionProtection: contextProps.deletionProtection,  // 削除保護
       iamAuthentication: false, // IAM データベース認証
       monitoringInterval: cdk.Duration.minutes(1),  // 拡張モニタリング-詳細度
       parameterGroup: dbClusterParameterGroup,  // パラメータグループ
@@ -189,6 +189,19 @@ export class AuroraStack extends cdk.Stack {
     })
     instance.connections.allowFromAnyIpv4(ec2.Port.tcp(22))
 
+    // BastionHostLinux
+    const host = new ec2.BastionHostLinux(this, "BastionHost", {
+      instanceName: `aa4k-${stageName}-bastion`,
+      vpc: this.vpc,
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.T4G,
+        ec2.InstanceSize.NANO
+      ),
+      securityGroup: bastionGroup,
+      subnetSelection: {
+        subnetType: ec2.SubnetType.PUBLIC,
+      },
+    });
 
     // 作成したbastion Security Group を auroraAccessableSG に追加
     this.auroraAccessableSG.addIngressRule(
