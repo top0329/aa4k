@@ -159,26 +159,6 @@ export class AuroraStack extends cdk.Stack {
     })
     cfnKeyPair.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY)
 
-    // EC2作成
-    const instance = new ec2.Instance(this, 'Instance', {
-      instanceName: `aa4k-${stageName}-bastion`,
-      vpc: this.vpc,
-      instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.T2,
-        ec2.InstanceSize.MICRO,
-      ),
-      machineImage: new ec2.AmazonLinuxImage({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
-      }),
-      securityGroup: bastionGroup,
-      vpcSubnets: this.vpc.selectSubnets({
-        onePerAz: true,
-        subnetType: ec2.SubnetType.PUBLIC,
-      }),
-      keyName: cdk.Token.asString(cfnKeyPair.ref),
-    })
-    instance.connections.allowFromAnyIpv4(ec2.Port.tcp(22))
-
     // BastionHostLinux
     const host = new ec2.BastionHostLinux(this, "BastionHost", {
       instanceName: `aa4k-${stageName}-bastion`,
