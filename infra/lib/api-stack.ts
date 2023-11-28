@@ -80,7 +80,7 @@ export class Aa4kApiStack extends cdk.Stack {
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG],
       environment: {
-        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret.secretName
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X
@@ -89,7 +89,7 @@ export class Aa4kApiStack extends cdk.Stack {
       handler: authorizerFunction,
       identitySources: [apigateway.IdentitySource.header('system_key')]
     });
-    auroraStack.dbAdminSecret.grantRead(authorizerFunction)
+    if(auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction)
 
     // ******************************
     // Lambda関数
@@ -102,13 +102,13 @@ export class Aa4kApiStack extends cdk.Stack {
       securityGroups: [auroraStack.auroraAccessableSG],
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
-        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X
     })
     secretsStack.azureSecret.grantRead(codeTemplateLambda)
-    auroraStack.dbAdminSecret.grantRead(codeTemplateLambda)
+    if(auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction)
     restapi.root.addResource("code_template").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(codeTemplateLambda),
       anyMethod: true,

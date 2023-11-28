@@ -78,19 +78,6 @@ export class AuroraStack extends cdk.Stack {
       allowAllOutbound: true,
     })
 
-    // DB Admin User Secret
-    const EXCLUDE_CHARACTERS = ':@/" \'';
-    this.dbAdminSecret = new secretsmanager.Secret(this, "DbAdminSecret", {
-      generateSecretString: {
-        generateStringKey: "password",
-        passwordLength: 32,
-        requireEachIncludedType: true,
-        secretStringTemplate: '{"username": "postgresAdmin"}',
-        excludeCharacters: EXCLUDE_CHARACTERS,
-      },
-      secretName: `${stageName}/DbAccessSecret`,
-    });
-
     // DB Cluster
     const dbIdentifierPrefix = `aa4k-${stageName}`;
     const dbCluster = new cdk.aws_rds.DatabaseCluster(this, "DatabaseCluster", {
@@ -115,7 +102,10 @@ export class AuroraStack extends cdk.Stack {
       },
       cloudwatchLogsExports: ["postgresql"], // ログのエクスポート
       copyTagsToSnapshot: true, // スナップショットにタグをコピー
-      credentials: cdk.aws_rds.Credentials.fromSecret(this.dbAdminSecret),
+      credentials: {
+        username: "postgresAdmin",
+        secretName: `${stageName}/DbAccessSecret`,
+      },
       defaultDatabaseName: "aa4kDB",  // 最初のデータベース名
       deletionProtection: contextProps.deletionProtection,  // 削除保護
       iamAuthentication: false, // IAM データベース認証
@@ -126,16 +116,16 @@ export class AuroraStack extends cdk.Stack {
       vpc: this.vpc,
       subnetGroup,
     });
+    this.dbAdminSecret = dbCluster.secret;
 
     // RDS Proxy を作成
     const proxy = new cdk.aws_rds.DatabaseProxy(this, 'DatabaseProxy', {
       proxyTarget: cdk.aws_rds.ProxyTarget.fromCluster(dbCluster),
-      secrets: dbCluster.secret ? [dbCluster.secret] : [],
+      secrets: this.dbAdminSecret ? [this.dbAdminSecret] : [],
       vpc: this.vpc,
       dbProxyName: `${dbIdentifierPrefix}-proxy`,
       securityGroups: [this.auroraAccessableSG],
     });
-
 
     // ******************************
     // 踏み台サーバ (bastion)
