@@ -23,7 +23,7 @@ export class AuroraStack extends cdk.Stack {
           cidrMask: 24,
         },
         {
-          name: "PrivateSubne",
+          name: "PrivateSubnet",
           subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
           cidrMask: 24,
         },
@@ -95,7 +95,6 @@ export class AuroraStack extends cdk.Stack {
         enablePerformanceInsights: true, // Performance Insightsを有効にする
         performanceInsightRetention: cdk.aws_rds.PerformanceInsightRetention.DEFAULT, // データ保持期間
       }),
-      securityGroups: [this.auroraAccessableSG],
       backup: { // バックアップ
         retention: cdk.Duration.days(7),  // バックアップ保持期間
         preferredWindow: "16:00-16:30",   // 
@@ -117,6 +116,7 @@ export class AuroraStack extends cdk.Stack {
       subnetGroup,
     });
     this.dbAdminSecret = dbCluster.secret;
+    dbCluster.connections.allowFrom(this.auroraAccessableSG, ec2.Port.tcp(5432))
 
     // RDS Proxy を作成
     const proxy = new cdk.aws_rds.DatabaseProxy(this, 'DatabaseProxy', {
@@ -124,41 +124,12 @@ export class AuroraStack extends cdk.Stack {
       secrets: this.dbAdminSecret ? [this.dbAdminSecret] : [],
       vpc: this.vpc,
       dbProxyName: `${dbIdentifierPrefix}-proxy`,
-      securityGroups: [this.auroraAccessableSG],
+      securityGroups: dbCluster.connections.securityGroups,
     });
 
     // ******************************
     // 踏み台サーバ (bastion)
     // ******************************
-    // bastion Security Group
-    const name = `aa4k-${stageName}-bastion-sg`
-    const bastionGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
-      vpc: this.vpc,
-      securityGroupName: name,
-      description: name,
-    });
-    // EC2 Instance Connect (ローカル環境から接続)対応
-    bastionGroup.addIngressRule(
-      ec2.Peer.ipv4("118.238.251.130/32"),
-      ec2.Port.tcp(22),
-      "from showcase"
-    );
-    bastionGroup.addIngressRule(
-      ec2.Peer.ipv4("202.210.220.64/28"),
-      ec2.Port.tcp(22),
-      "from showcase"
-    );
-    bastionGroup.addIngressRule(
-      ec2.Peer.ipv4("39.110.232.32/28"),
-      ec2.Port.tcp(22),
-      "from showcase"
-    );
-    // キーペア作成
-    const cfnKeyPair = new ec2.CfnKeyPair(this, 'CfnKeyPair', {
-      keyName: `aa4k-${stageName}-bastion`,
-    })
-    cfnKeyPair.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY)
-
     // BastionHostLinux
     const host = new ec2.BastionHostLinux(this, "BastionHost", {
       instanceName: `aa4k-${stageName}-bastion`,
@@ -167,17 +138,10 @@ export class AuroraStack extends cdk.Stack {
         ec2.InstanceClass.T4G,
         ec2.InstanceSize.NANO
       ),
-      securityGroup: bastionGroup,
+      securityGroup: this.auroraAccessableSG,
       subnetSelection: {
-        subnetType: ec2.SubnetType.PUBLIC,
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
     });
-
-    // 作成したbastion Security Group を auroraAccessableSG に追加
-    this.auroraAccessableSG.addIngressRule(
-      bastionGroup,
-      ec2.Port.tcp(5432),
-      'from bastion'
-    )
   }
 }
