@@ -8,6 +8,7 @@ export class AuroraStack extends cdk.Stack {
   readonly auroraAccessableSG;
   readonly vpc;
   readonly dbAdminSecret;
+  readonly rdsProxyEndpoint;
 
   constructor(scope: Construct, id: string, contextProps: ContextProps, props?: cdk.StackProps) {
     super(scope, id);
@@ -126,6 +127,7 @@ export class AuroraStack extends cdk.Stack {
       dbProxyName: `${dbIdentifierPrefix}-proxy`,
       securityGroups: dbCluster.connections.securityGroups,
     });
+    this.rdsProxyEndpoint = proxy.endpoint;
 
     // ******************************
     // 踏み台サーバ (bastion)
