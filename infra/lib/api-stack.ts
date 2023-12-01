@@ -89,7 +89,7 @@ export class Aa4kApiStack extends cdk.Stack {
       handler: authorizerFunction,
       identitySources: [apigateway.IdentitySource.header('system_key')]
     });
-    if(auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction)
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction)
 
     // ******************************
     // Lambda関数
@@ -108,7 +108,7 @@ export class Aa4kApiStack extends cdk.Stack {
       runtime: Runtime.NODEJS_20_X
     })
     secretsStack.azureSecret.grantRead(codeTemplateLambda)
-    if(auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction)
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(codeTemplateLambda)
     restapi.root.addResource("code_template").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(codeTemplateLambda),
       anyMethod: true,
@@ -116,6 +116,25 @@ export class Aa4kApiStack extends cdk.Stack {
         authorizationType: apigateway.AuthorizationType.CUSTOM,
         authorizer: lambdaAuthorizer,
       }
+    })
+
+    // LangchainLog Lambda
+    const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
+      entry: __dirname + "/lambda/langchainLog/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG],
+      environment: {
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(langchainLog)
+    restapi.root.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
     })
   }
 }
