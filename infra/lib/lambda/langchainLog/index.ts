@@ -1,29 +1,12 @@
-import { Context, APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyEventHeaders } from 'aws-lambda';
+import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { Client } from "pg";
 import { format, utcToZonedTime } from 'date-fns-tz';
 
+import { LogLangchainRequestheaders, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
 import { insertLangchainProcessLog } from "./sql";
 
-const secretsManagerClient = new SecretsManagerClient({
-  region: "ap-northeast-1",
-});
-
-interface LogLangchainRequestheaders extends APIGatewayProxyEventHeaders {
-  subscription_id: string,
-}
-interface LogLangchainRequestBody {
-  history_id: string,
-  session_id: string,
-  handle_name: string,
-  run_name: string,
-  run_id: string,
-  parent_run_id?: string,
-  content: string,
-  metadata_lang_chain_params?: string,
-  metadata_extra_params?: string,
-  tokens: string,
-}
+const secretsManagerClient = new SecretsManagerClient();
 
 /**
  * Langchain処理ログ登録API
@@ -48,7 +31,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     console.info(startLog);
 
     // 現在日時の取得
-    const currentDate = await getCurrentDate();
+    const currentDate = await getCurrentDateStr();
     // Secret Manager情報の取得
     const secretValue = await getSecretValue();
 
@@ -66,21 +49,12 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     await dbClient.connect();
 
     // SQL クエリの実行
-    const pram = [
-      subscription_id,    // subscription_id
-      body.history_id ? body.history_id : null,    // history_id
-      body.session_id ? body.session_id : null,    // session_id
-      body.handle_name ? body.handle_name : null,   // handle_name
-      body.run_name ? body.run_name : null,    // run_name
-      body.run_id ? body.run_id : null,    // run_id
-      body.parent_run_id ? body.parent_run_id : null,   // parent_run_id
-      body.content ? body.content : null,   // content
-      body.metadata_lang_chain_params ? body.metadata_lang_chain_params : null,    // metadata_lang_chain_params
-      body.metadata_extra_params ? body.metadata_extra_params : null,   // metadata_extra_params
-      body.tokens ? body.tokens : null,    // tokens
-      currentDate,
-    ]
-    const res = await insertLangchainProcessLog(dbClient, pram)
+    const props = {
+      subscription_id,
+      LogLangchainRequestBody: body,
+      currentDate
+    } as InsertLangchainProcessLogProps;
+    const res = await insertLangchainProcessLog(dbClient, props)
 
     // データベース接続を閉じる
     await dbClient.end();
@@ -113,7 +87,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
  * 現在日時の取得
  * @returns 現在日時
  */
-const getCurrentDate = () => {
+const getCurrentDateStr = () => {
 
   const timeZone = 'Asia/Tokyo';
 
@@ -131,7 +105,7 @@ const getCurrentDate = () => {
 
 /**
  * Secret Manager情報の取得
- * @returns 現在日時
+ * @returns Secret Manager情報
  */
 const getSecretValue = async () => {
   // 環境変数からSecretManagerのnameを取得
@@ -143,7 +117,10 @@ const getSecretValue = async () => {
       VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
     })
   );
-  const SecretValue = result.SecretString ? JSON.parse(result.SecretString) : {};
+  // 取得できない場合はエラー
+  if(!result.SecretString) throw 'raise Internal server error';
+
+  const SecretValue = JSON.parse(result.SecretString);
   return SecretValue;
 }
 
