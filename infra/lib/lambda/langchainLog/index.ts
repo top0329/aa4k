@@ -18,6 +18,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
   let response: APIGatewayProxyResult;
   let subscription_id;
   let dbClient;
+  let retErrorMessage = "Internal server error";
   try {
     const headers = event.headers as LogLangchainRequestheaders;
     const body = (event.body ? JSON.parse(event.body) : {}) as LogLangchainRequestBody;
@@ -33,7 +34,10 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     // 現在日時の取得
     const currentDate = await getCurrentDateStr();
     // Secret Manager情報の取得
-    const secretValue = await getSecretValue();
+    const secretValue = await getSecretValue().catch(async (err) => {
+      retErrorMessage = "raise Internal server error";
+      throw err;
+    });
 
     // データベース接続
     const dbConfig = {
@@ -77,7 +81,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     console.error(errorMessage);
     response = {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Internal server error' })
+      body: JSON.stringify({ message: retErrorMessage })
     };
   }
   return response;
@@ -118,7 +122,7 @@ const getSecretValue = async () => {
     })
   );
   // 取得できない場合はエラー
-  if(!result.SecretString) throw 'raise Internal server error';
+  if (!result.SecretString) throw 'Secret value is empty';
 
   const SecretValue = JSON.parse(result.SecretString);
   return SecretValue;
