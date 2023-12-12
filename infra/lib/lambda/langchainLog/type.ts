@@ -1,4 +1,5 @@
 import { APIGatewayProxyEventHeaders } from 'aws-lambda';
+import { z } from "zod";
 
 // リクエストヘッダ
 export interface LogLangchainRequestheaders extends APIGatewayProxyEventHeaders {
@@ -6,18 +7,20 @@ export interface LogLangchainRequestheaders extends APIGatewayProxyEventHeaders 
 }
 
 // リクエストボディ
-export interface LogLangchainRequestBody {
-  history_id: string,
-  session_id: string,
-  handle_name: string,
-  run_name: string,
-  run_id: string,
-  parent_run_id?: string,
-  content: string,
-  metadata_lang_chain_params?: string,
-  metadata_extra_params?: string,
-  tokens: string,
-}
+// スキーマを定義する
+export const LogLangchainRequestBodySchema = z.object({
+  history_id: z.string().max(36),
+  session_id: z.string().max(36),
+  handle_name: z.string().max(50),
+  run_name: z.string().max(50),
+  run_id: z.string().max(36),
+  parent_run_id: z.string().max(36).optional(),
+  content: z.string(),
+  metadata_lang_chain_params: z.string().optional(),
+  metadata_extra_params: z.string().optional(),
+  tokens: z.number().optional(),
+})
+export type LogLangchainRequestBody = z.infer<typeof LogLangchainRequestBodySchema>
 
 // Langchain実行ログTBL登録
 export interface InsertLangchainProcessLogProps {

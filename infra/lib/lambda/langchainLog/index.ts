@@ -2,8 +2,9 @@ import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { Client } from "pg";
 import { format, utcToZonedTime } from 'date-fns-tz';
+import { z } from "zod";
 
-import { LogLangchainRequestheaders, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
+import { LogLangchainRequestBodySchema, LogLangchainRequestheaders, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
 import { insertLangchainProcessLog } from "./sql";
 
 const secretsManagerClient = new SecretsManagerClient();
@@ -17,12 +18,21 @@ const secretsManagerClient = new SecretsManagerClient();
 exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
   let response: APIGatewayProxyResult;
   let subscription_id;
+  let body;
   let dbClient;
+  let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
   try {
     const headers = event.headers as LogLangchainRequestheaders;
-    const body = (event.body ? JSON.parse(event.body) : {}) as LogLangchainRequestBody;
     subscription_id = headers.subscription_id;
+    body = (event.body ? JSON.parse(event.body) : {}) as LogLangchainRequestBody;
+    // リクエストのバリデーション
+    await validationRequestParam(subscription_id, body).catch(async (err) => {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+      throw err;
+    });
+
 
     // 開始ログの出力
     const startLog = {
@@ -76,11 +86,12 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     // エラーログの出力
     const errorMessage = ({
       subscription_id: subscription_id,
+      body: body,
       error: err,
     });
     console.error(errorMessage);
     response = {
-      statusCode: 500,
+      statusCode: retErrorStatus,
       body: JSON.stringify({ message: retErrorMessage })
     };
   }
@@ -128,3 +139,18 @@ const getSecretValue = async () => {
   return SecretValue;
 }
 
+/**
+ * リクエストパラメータのバリデーション
+ */
+const validationRequestParam = async (subscription_id: string, reqBody: LogLangchainRequestBody) => {
+  try {
+    // ヘッダー.サブスクリプションID
+    const uuidSchema = z.string().uuid();
+    uuidSchema.parse(subscription_id);
+    // ボディ
+    LogLangchainRequestBodySchema.parse(reqBody);
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
