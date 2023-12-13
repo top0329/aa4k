@@ -5,7 +5,7 @@ import { format, utcToZonedTime } from 'date-fns-tz';
 import { z } from "zod";
 
 import { LogLangchainRequestBodySchema, LogLangchainRequestheaders, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
-import { insertLangchainProcessLog } from "./sql";
+import { insertLangchainProcessLog } from "./dao";
 
 const secretsManagerClient = new SecretsManagerClient();
 
@@ -17,17 +17,17 @@ const secretsManagerClient = new SecretsManagerClient();
  */
 exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
   let response: APIGatewayProxyResult;
-  let subscription_id;
+  let subscriptionId;
   let body;
   let dbClient;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
   try {
     const headers = event.headers as LogLangchainRequestheaders;
-    subscription_id = headers.subscription_id;
+    subscriptionId = headers.subscription_id;
     body = (event.body ? JSON.parse(event.body) : {}) as LogLangchainRequestBody;
     // リクエストのバリデーション
-    await validationRequestParam(subscription_id, body).catch(async (err) => {
+    await validationRequestParam(subscriptionId, body).catch(async (err) => {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
       throw err;
@@ -37,7 +37,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     // 開始ログの出力
     const startLog = {
       message: "Langchain処理ログ登録API開始",
-      subscription_id: subscription_id,
+      subscriptionId: subscriptionId,
     };
     console.info(startLog);
 
@@ -45,7 +45,6 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     const currentDate = await getCurrentDateStr();
     // Secret Manager情報の取得
     const secretValue = await getSecretValue().catch(async (err) => {
-      retErrorMessage = "raise Internal server error";
       throw err;
     });
 
@@ -64,28 +63,20 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
 
     // SQL クエリの実行
     const props = {
-      subscription_id,
-      LogLangchainRequestBody: body,
+      subscriptionId,
+      body,
       currentDate
     } as InsertLangchainProcessLogProps;
-    const res = await insertLangchainProcessLog(dbClient, props)
-
-    // データベース接続を閉じる
-    await dbClient.end();
+    await insertLangchainProcessLog(dbClient, props)
 
     response = {
       statusCode: 200,
       body: JSON.stringify({ message: 'Success', }),
     };
   } catch (err: unknown) {
-    if (dbClient) {
-      // データベース接続を閉じる
-      await dbClient.end();
-    }
-
     // エラーログの出力
     const errorMessage = ({
-      subscription_id: subscription_id,
+      subscriptionId: subscriptionId,
       body: body,
       error: err,
     });
@@ -94,6 +85,11 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
       statusCode: retErrorStatus,
       body: JSON.stringify({ message: retErrorMessage })
     };
+  } finally {
+    if (dbClient) {
+      // データベース接続を閉じる
+      await dbClient.end();
+    }
   }
   return response;
 };
@@ -124,11 +120,11 @@ const getCurrentDateStr = () => {
  */
 const getSecretValue = async () => {
   // 環境変数からSecretManagerのnameを取得
-  const secret_name = process.env.DB_ACCESS_SECRET_NAME;
+  const secretName = process.env.DB_ACCESS_SECRET_NAME;
   // Secret Managerから情報取得
   const result = await secretsManagerClient.send(
     new GetSecretValueCommand({
-      SecretId: secret_name,
+      SecretId: secretName,
       VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
     })
   );
@@ -142,11 +138,11 @@ const getSecretValue = async () => {
 /**
  * リクエストパラメータのバリデーション
  */
-const validationRequestParam = async (subscription_id: string, reqBody: LogLangchainRequestBody) => {
+const validationRequestParam = async (subscriptionId: string, reqBody: LogLangchainRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
-    uuidSchema.parse(subscription_id);
+    uuidSchema.parse(subscriptionId);
     // ボディ
     LogLangchainRequestBodySchema.parse(reqBody);
 

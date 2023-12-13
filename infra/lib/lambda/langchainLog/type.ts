@@ -24,7 +24,7 @@ export type LogLangchainRequestBody = z.infer<typeof LogLangchainRequestBodySche
 
 // Langchain実行ログTBL登録
 export interface InsertLangchainProcessLogProps {
-  subscription_id: string,
-  LogLangchainRequestBody: LogLangchainRequestBody,
+  subscriptionId: string,
+  body: LogLangchainRequestBody,
   currentDate: string,
 }
