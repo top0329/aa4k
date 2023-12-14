@@ -5,7 +5,7 @@ import { InsertLangchainProcessLogProps } from "./type";
  * Langchain実行ログTBL登録
  * @param dbClient 
  * @param props 
- * @returns クリ実行結果
+ * @returns クエリ実行結果
  */
 export const insertLangchainProcessLog = async (dbClient: Client, props: InsertLangchainProcessLogProps) => {
   const pram = [
