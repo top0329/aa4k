@@ -13,6 +13,10 @@ npm 10.2.3
 1. `npx cdk deploy --all -c environment=<環境> --profile <AWS Profile>`
 1. Secrets Manager を AWS コンソールから開き、正しいキーを設定する
 1. 作成された Nat Gateway の IP をAWS コンソールから調べ、Azure Open AI のIP制限ホワイトリストに加える
+1. DB設定
+   1. `infra/bin/db/public`配下のSQLファイルを順番に実行
+   1. `infra/bin/db/customer`配下のSQLファイルを順番に実行（全顧客別スキーマ分）
+
 
 ### dev環境
 1. `npm run cdk synth -- -c environment=dev`

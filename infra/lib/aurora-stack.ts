@@ -46,6 +46,7 @@ export class AuroraStack extends cdk.Stack {
           "pgaudit.log": "all",
           "pgaudit.role": "rds_pgaudit",
           shared_preload_libraries: "pgaudit",
+          timezone: "Asia/Tokyo",
         },
       }
     );
