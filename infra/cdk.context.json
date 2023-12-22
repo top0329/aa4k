@@ -1,0 +1,8 @@
+{
+  "availability-zones:account=254440508415:region=ap-northeast-1": [
+    "ap-northeast-1a",
+    "ap-northeast-1c",
+    "ap-northeast-1d"
+  ],
+  "ssm:account=254440508415:parameterName=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-arm64:region=ap-northeast-1": "ami-0df6ca065fa7f3b7b"
+}

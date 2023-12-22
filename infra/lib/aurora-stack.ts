@@ -11,7 +11,7 @@ export class AuroraStack extends cdk.Stack {
   readonly rdsProxyEndpoint;
 
   constructor(scope: Construct, id: string, contextProps: ContextProps, props?: cdk.StackProps) {
-    super(scope, id);
+    super(scope, id, props);
     const stageName = contextProps.stageName;
 
     // VPC
@@ -141,6 +141,11 @@ export class AuroraStack extends cdk.Stack {
         ec2.InstanceClass.T4G,
         ec2.InstanceSize.NANO
       ),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
+        cpuType: ec2.AmazonLinuxCpuType.ARM_64,
+        cachedInContext: true,
+      }),
       securityGroup: this.auroraAccessableSG,
       subnetSelection: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
