@@ -18,8 +18,8 @@ export const insertTmplateCode = async (dbClient: Client, id: string, code: stri
   sql += ` (`;
   sql += ` template_code_id`;
   sql += ` , template_code`;
-  sql += ` , create_date`;
-  sql += ` , update_date`;
+  sql += ` , create_at`;
+  sql += ` , update_at`;
   sql += ` )`;
   sql += ` values`;
   sql += ` (`;
@@ -69,7 +69,7 @@ export const updateTmplateCode = async (dbClient: Client, id: string, code: stri
   sql += ` template_code`;
   sql += ` set`;
   sql += ` template_code = $1`;
-  sql += ` , update_date = now()`;
+  sql += ` , update_at = now()`;
   sql += ` where`;
   sql += ` template_code_id = $2`;
 
@@ -91,26 +91,6 @@ export const deleteTmplateCode = async (dbClient: Client, id: string) => {
   sql += ` template_code`;
   sql += ` where`;
   sql += ` template_code_id = $1`;
-
-  return await dbClient.query(sql, pram);
-};
-
-/**
- * langChain_EmbeddingTBL削除
- * @param dbClient 
- * @param id
- * @returns クエリ実行結果
- */
-export const deleteLangchainEmbedding = async (dbClient: Client, id: string) => {
-  const pram = [
-    id,
-  ]
-  let sql = "";
-  sql += `delete`;
-  sql += ` from`;
-  sql += ` langchain_embedding`;
-  sql += ` where`;
-  sql += ` metadata->>'templateCodeId' = $1`;
 
   return await dbClient.query(sql, pram);
 };

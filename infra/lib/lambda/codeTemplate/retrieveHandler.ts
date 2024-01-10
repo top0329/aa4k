@@ -1,32 +1,27 @@
 import { Response, Request } from "express"
-import { SecretsManagerClient, GetSecretValueCommand, } from "@aws-sdk/client-secrets-manager";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PGVectorStore } from "langchain/vectorstores/pgvector";
 import { Client } from "pg";
 import { z } from "zod";
-import { RetriveRequestBody, RetriveRequestBodySchema } from "../type"
+import { RetrieveRequestBody, RetrieveRequestBodySchema } from "./type"
 import { selectTmplateCode } from "./dao";
-
-const secretsManagerClient = new SecretsManagerClient();
+import { getSecretValue, getDbConfig, pgVectorInitialize } from "./common"
 
 export const retrieveHandler = async (req: Request, res: Response) => {
   let subscriptionId;
   let body;
-  let dbClient;
+  let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
 
   try {
     subscriptionId = req.header("subscription_id") as string;
-    const apiKye = req.header("api_kye") as string;
-    body = (req.body ? JSON.parse(req.body) : {}) as RetriveRequestBody;
+    const apiKey = req.header("api_key") as string;
+    body = (req.body ? JSON.parse(req.body) : {}) as RetrieveRequestBody;
     // リクエストのバリデーション
-    await validationRequestParam(subscriptionId, body).catch(async (err) => {
+    await validateRequestParam(subscriptionId, body).catch(async (err) => {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
       throw err;
     });
-
 
     // 開始ログの出力
     const startLog = {
@@ -34,8 +29,6 @@ export const retrieveHandler = async (req: Request, res: Response) => {
       subscriptionId: subscriptionId,
     };
     console.info(startLog);
-
-
 
     // Secret Manager情報の取得(DB_ACCESS_SECRET_NAME)
     const dbAccessSecretName = process.env.DB_ACCESS_SECRET_NAME ? process.env.DB_ACCESS_SECRET_NAME : "";
@@ -48,56 +41,16 @@ export const retrieveHandler = async (req: Request, res: Response) => {
       throw err;
     });
 
-    let embeddings;
-    if (apiKye) {
-      // トライアルの場合
-      embeddings = new OpenAIEmbeddings({
-        modelName: "text-embedding-ada-002",
-        openAIApiKey: apiKye,
-      })
-    } else {
-      // 本契約の場合
-      embeddings = new OpenAIEmbeddings({
-        modelName: "text-embedding-ada-002",
-        azureOpenAIApiKey: azureSecretValue.azureOpenAIApiKey,
-        azureOpenAIApiVersion: azureSecretValue.azureOpenAIEmbeddingApiVersion,
-        azureOpenAIApiInstanceName: azureSecretValue.azureOpenAIApiInstanceName,
-        azureOpenAIApiDeploymentName: azureSecretValue.azureOpenAIEmbeddingApiDeploymentName,
-      })
-    }
-
     // データベース接続情報
-    const dbConfig = {
-      type: dbAccessSecretValue.engine,
-      host: process.env.RDS_PROXY_ENDPOINT,
-      database: dbAccessSecretValue.dbname,
-      user: dbAccessSecretValue.username,
-      password: dbAccessSecretValue.password,
-      port: dbAccessSecretValue.port,
-      ssl: true,
-    };
+    const dbConfig = await getDbConfig(dbAccessSecretValue)
     // データベース接続
     dbClient = new Client(dbConfig);
     await dbClient.connect();
 
-    // pgvectorStorの初期設定
-    const pgvectorStore = await PGVectorStore.initialize(
-      embeddings,
-      {
-        postgresConnectionOptions: dbConfig,
-        collectionTableName: "langchain_embedding_collection",
-        collectionName: "codeTemplate",
-        tableName: "langchain_embedding",
-        columns: {
-          idColumnName: "id",
-          vectorColumnName: "vector",
-          contentColumnName: "content",
-          metadataColumnName: "metadata",
-        },
-      }
-    );
+    // pgvectorStoreの初期設定
+    const pgvectorStore = await pgVectorInitialize(dbConfig, azureSecretValue, apiKey)
 
-    // pgvectorStorを使用して検索
+    // pgvectorStoreを使用して検索
     const documents = await pgvectorStore.similaritySearchWithScore(body.query, body.k);
 
     for (const [doc, num] of documents) {
@@ -111,7 +64,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
     // 完了
     res.status(200).json({ documents });
-  } catch (err: unknown) {
+  } catch (err) {
     // エラーログの出力
     const errorMessage = ({
       subscriptionId: subscriptionId,
@@ -130,42 +83,20 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
 
 
-
-/**
- * Secret Manager情報の取得
- * @param secretName 
- * @returns Secret Manager情報
- */
-const getSecretValue = async (secretName: string) => {
-  // Secret Managerから情報取得
-  const result = await secretsManagerClient.send(
-    new GetSecretValueCommand({
-      SecretId: secretName,
-      VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
-    })
-  );
-  // 取得できない場合はエラー
-  if (!result.SecretString) throw 'Secret value is empty';
-
-  const SecretValue = JSON.parse(result.SecretString);
-  return SecretValue;
-}
-
-
 /**
  * リクエストパラメータのバリデーション
  * @param subscriptionId 
  * @param reqBody 
  */
-const validationRequestParam = async (subscriptionId: string, reqBody: RetriveRequestBody) => {
+const validateRequestParam = async (subscriptionId: string, reqBody: RetrieveRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
     uuidSchema.parse(subscriptionId);
     // ボディ
-    RetriveRequestBodySchema.parse(reqBody);
+    RetrieveRequestBodySchema.parse(reqBody);
 
-  } catch (err: unknown) {
+  } catch (err) {
     throw err;
   }
 }

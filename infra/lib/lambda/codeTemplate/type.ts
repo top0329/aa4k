@@ -3,18 +3,18 @@ import { z } from "zod";
 // リクエストヘッダ
 export interface RequestHeaders {
   "subscription_id": string,
-  "api_kye": string
+  "api_key": string
 }
 
 // ******************************
-// Retrive
+// Retrieve
 // ******************************
 // リクエストボディ
-export const RetriveRequestBodySchema = z.object({
+export const RetrieveRequestBodySchema = z.object({
   query: z.string(),
   k: z.number().optional(),
 })
-export type RetriveRequestBody = z.infer<typeof RetriveRequestBodySchema>
+export type RetrieveRequestBody = z.infer<typeof RetrieveRequestBodySchema>
 
 // ******************************
 // 登録
@@ -48,3 +48,23 @@ export const DeleteRequestBodySchema = z.array(
   })
 )
 export type DeleteRequestBody = z.infer<typeof DeleteRequestBodySchema>
+
+
+// Secret Manager情報(AZURE_SECRET_NAME)
+export interface AzureSecretValue {
+  azureOpenAIApiKey: string,
+  azureOpenAIEmbeddingApiVersion: string,
+  azureOpenAIApiInstanceName: string,
+  azureOpenAIEmbeddingApiDeploymentName: string,
+}
+
+
+// Secret Manager情報(DB_ACCESS_SECRET_NAME)
+export interface DbAccessSecretName {
+  engine: string,
+  env: string,
+  dbname: string,
+  username: string,
+  password: string,
+  port: number,
+}

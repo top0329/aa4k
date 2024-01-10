@@ -30,6 +30,6 @@ ALTER TABLE langchain_embedding
 CREATE TABLE IF NOT EXISTS template_code (
     template_code_id varchar(36),
     template_code text,
-    create_date timestamp,
-    update_date timestamp
+    create_at timestamp,
+    update_at timestamp
 );
