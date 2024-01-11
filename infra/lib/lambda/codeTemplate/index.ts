@@ -7,7 +7,9 @@ import { deleteHandler } from './deleteHandler';
 
 const app = express();
 
-app.post('/retriever', retrieveHandler);
+app.post('/retrieve', retrieveHandler);
+
+// TODO: 下記は管理用APIなので公開時にセキュリティ考慮が必要
 app.post('/insert', insertHandler);
 app.post('/update', updateHandler);
 app.post('/delete', deleteHandler);

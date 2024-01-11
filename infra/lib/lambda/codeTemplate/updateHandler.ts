@@ -3,7 +3,7 @@ import { Client } from "pg";
 import { z } from "zod";
 import { UpdateRequestBody, UpdateRequestBodySchema } from "./type"
 import { updateTmplateCode } from "./dao";
-import { getSecretValue, getDbConfig, pgVectorInitialize } from "./common"
+import { getSecretValues, getDbConfig, pgVectorInitialize } from "./common"
 import { Document } from "langchain/document";
 
 export const updateHandler = async (req: Request, res: Response) => {
@@ -16,6 +16,7 @@ export const updateHandler = async (req: Request, res: Response) => {
   try {
     subscriptionId = req.header("subscription_id") as string;
     body = (req.body ? JSON.parse(req.body) : {}) as UpdateRequestBody;
+    const { templateCodes } = body;
     // リクエストのバリデーション
     await validateRequestParam(subscriptionId, body).catch(async (err) => {
       retErrorStatus = 400;
@@ -30,16 +31,8 @@ export const updateHandler = async (req: Request, res: Response) => {
     };
     console.info(startLog);
 
-    // Secret Manager情報の取得(DB_ACCESS_SECRET_NAME)
-    const dbAccessSecretName = process.env.DB_ACCESS_SECRET_NAME ? process.env.DB_ACCESS_SECRET_NAME : "";
-    const dbAccessSecretValue = await getSecretValue(dbAccessSecretName).catch(async (err) => {
-      throw err;
-    });
-    // Secret Manager情報の取得(AZURE_SECRET_NAME)
-    const azureSecretName = process.env.AZURE_SECRET_NAME ? process.env.AZURE_SECRET_NAME : "";
-    const azureSecretValue = await getSecretValue(azureSecretName).catch(async (err) => {
-      throw err;
-    });
+    // Secret Manager情報の取得(DB_ACCESS_SECRET, AZURE_SECRET)
+    const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
 
     // データベース接続情報
     const dbConfig = await getDbConfig(dbAccessSecretValue)
@@ -48,31 +41,32 @@ export const updateHandler = async (req: Request, res: Response) => {
     await dbClient.connect();
 
     // pgvectorStoreの初期設定
-    const pgvectorStore = await pgVectorInitialize(dbConfig, azureSecretValue)
+    const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue })
 
     // リクエストパラメータ分ループ
     let documents: Document[] = [];
-    for (const obj of body) {
+    for (const templateCode of templateCodes) {
       // --------------------
       // 更新・削除
       // --------------------
       // テンプレートコードTBL更新
-      await updateTmplateCode(dbClient, obj.templateCodeId, obj.templateCode)
+      await updateTmplateCode(dbClient, templateCode.templateCodeId, templateCode.templateCode)
       // langChain_EmbeddingTBL削除
-      await pgvectorStore.delete({ filter: { templateCodeId: obj.templateCodeId } })
+      await pgvectorStore.delete({ filter: { templateCodeId: templateCode.templateCodeId } })
 
       // --------------------
       // 登録
       // --------------------
       // ベクター登録する情報
       const document = [
-        { pageContent: obj.templateCodeDescription, metadata: { templateCodeId: obj.templateCodeId, } }
+        { pageContent: templateCode.templateCodeDescription, metadata: { templateCodeId: templateCode.templateCodeId, } }
       ] as Document[];
       documents.push(document[0])
       // pgvectorStoreへの登録
       await pgvectorStore.addDocuments(document);
     }
 
+    // 終了
     res.status(200).json({ documents });
   } catch (err) {
     // エラーログの出力

@@ -1,7 +1,7 @@
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { AzureSecretValue, DbAccessSecretName } from "./type"
-import { Client, ClientConfig } from "pg";
+import { AzureSecretValue, DbAccessSecretValue, pgVectorInitializeOptions } from "./type"
+import { ClientConfig } from "pg";
 import { PGVectorStore } from "langchain/vectorstores/pgvector";
 
 const secretsManagerClient = new SecretsManagerClient();
@@ -27,11 +27,29 @@ export const getSecretValue = async (secretName: string) => {
 }
 
 /**
+ * Secret Manager情報（DB, Azure）の取得
+ * @returns Secret Manager情報
+ */
+export const getSecretValues = async () => {
+  const dbAccessSecretName = process.env.DB_ACCESS_SECRET_NAME ? process.env.DB_ACCESS_SECRET_NAME : "";
+  const azureSecretName = process.env.AZURE_SECRET_NAME ? process.env.AZURE_SECRET_NAME : "";
+  // 並列で2個取得させる
+  const [db, azure] = await Promise.all([
+    getSecretValue(dbAccessSecretName),
+    getSecretValue(azureSecretName)
+  ])
+
+  const dbAccessSecretValue = JSON.parse(db.SecretString) as DbAccessSecretValue;
+  const azureSecretValue = JSON.parse(azure.SecretString) as AzureSecretValue;
+  return { dbAccessSecretValue, azureSecretValue };
+}
+
+/**
  * DB接続情報
  * @param dbAccessSecretValue 
  * @returns DB接続情報
  */
-export const getDbConfig = async (dbAccessSecretValue: DbAccessSecretName) => {
+export const getDbConfig = async (dbAccessSecretValue: DbAccessSecretValue) => {
   return {
     type: dbAccessSecretValue.engine,
     host: process.env.RDS_PROXY_ENDPOINT,
@@ -47,25 +65,27 @@ export const getDbConfig = async (dbAccessSecretValue: DbAccessSecretName) => {
 /**
  * PGVectorStoreのインスタンス生成
  * @param dbConfig 
- * @param azureSecretValue 
- * @param apiKey 
+ * @param options 
  * @returns PGVectorStore
  */
-export const pgVectorInitialize = async (dbConfig: ClientConfig, azureSecretValue: AzureSecretValue, apiKey?: string) => {
+export const pgVectorInitialize = async (dbConfig: ClientConfig, options: pgVectorInitializeOptions) => {
   let embeddings;
-  if (apiKey) {
+  if (options.openAiApiKey) {
     embeddings = new OpenAIEmbeddings({
       modelName: "text-embedding-ada-002",
-      openAIApiKey: apiKey,
+      openAIApiKey: options.openAiApiKey,
     });
-  } else {
+  } else if (options.azureSecretValue) {
     embeddings = new OpenAIEmbeddings({
       modelName: "text-embedding-ada-002",
-      azureOpenAIApiKey: azureSecretValue.azureOpenAIApiKey,
-      azureOpenAIApiVersion: azureSecretValue.azureOpenAIEmbeddingApiVersion,
-      azureOpenAIApiInstanceName: azureSecretValue.azureOpenAIApiInstanceName,
-      azureOpenAIApiDeploymentName: azureSecretValue.azureOpenAIEmbeddingApiDeploymentName,
+      azureOpenAIApiKey: options.azureSecretValue.azureOpenAIApiKey,
+      azureOpenAIApiVersion: options.azureSecretValue.azureOpenAIEmbeddingApiVersion,
+      azureOpenAIApiInstanceName: options.azureSecretValue.azureOpenAIApiInstanceName,
+      azureOpenAIApiDeploymentName: options.azureSecretValue.azureOpenAIEmbeddingApiDeploymentName,
     });
+  }
+  else {
+    throw "azureSecretかopenAiApiKeyの指定が必要";
   }
 
   return await PGVectorStore.initialize(
@@ -73,7 +93,7 @@ export const pgVectorInitialize = async (dbConfig: ClientConfig, azureSecretValu
     {
       postgresConnectionOptions: dbConfig,
       collectionTableName: "langchain_embedding_collection",
-      collectionName: "codeTemplate",
+      collectionName: "kintone_codeTemplate",
       tableName: "langchain_embedding",
       columns: {
         idColumnName: "id",

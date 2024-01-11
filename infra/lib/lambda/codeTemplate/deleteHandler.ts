@@ -1,9 +1,9 @@
 import { Response, Request } from "express"
 import { Client } from "pg";
 import { z } from "zod";
-import { DeleteRequestBody, DeleteRequestBodySchema, AzureSecretValue, DbAccessSecretName } from "./type"
+import { DeleteRequestBody, DeleteRequestBodySchema } from "./type"
 import { deleteTmplateCode } from "./dao";
-import { getSecretValue, getDbConfig, pgVectorInitialize } from "./common"
+import { getSecretValues, getDbConfig, pgVectorInitialize } from "./common"
 
 export const deleteHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -15,6 +15,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
   try {
     subscriptionId = req.header("subscription_id") as string;
     body = (req.body ? JSON.parse(req.body) : {}) as DeleteRequestBody;
+    const { templateCodeIds } = body;
     // リクエストのバリデーション
     await validateRequestParam(subscriptionId, body).catch(async (err) => {
       retErrorStatus = 400;
@@ -29,17 +30,8 @@ export const deleteHandler = async (req: Request, res: Response) => {
     };
     console.info(startLog);
 
-    // Secret Manager情報の取得(DB_ACCESS_SECRET_NAME)
-    const dbAccessSecretName = process.env.DB_ACCESS_SECRET_NAME ? process.env.DB_ACCESS_SECRET_NAME : "";
-    const dbAccessSecretValue = await getSecretValue(dbAccessSecretName).catch(async (err) => {
-      throw err;
-    }) as DbAccessSecretName;
-
-    // Secret Manager情報の取得(AZURE_SECRET_NAME)
-    const azureSecretName = process.env.AZURE_SECRET_NAME ? process.env.AZURE_SECRET_NAME : "";
-    const azureSecretValue = await getSecretValue(azureSecretName).catch(async (err) => {
-      throw err;
-    }) as AzureSecretValue;
+    // Secret Manager情報の取得(DB_ACCESS_SECRET, AZURE_SECRET)
+    const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
 
     // データベース接続情報
     const dbConfig = await getDbConfig(dbAccessSecretValue)
@@ -48,19 +40,20 @@ export const deleteHandler = async (req: Request, res: Response) => {
     await dbClient.connect();
 
     // pgvectorStoreの初期設定
-    const pgvectorStore = await pgVectorInitialize(dbConfig, azureSecretValue)
+    const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue })
 
     // リクエストパラメータ分ループ
-    for (const obj of body) {
+    for (const templateCodeId of templateCodeIds) {
       // --------------------
       // 削除
       // --------------------
       // テンプレートコードTBL削除
-      await deleteTmplateCode(dbClient, obj.templateCodeId)
+      await deleteTmplateCode(dbClient, templateCodeId)
       // langChain_EmbeddingTBL削除
-      await pgvectorStore.delete({ filter: { templateCodeId: obj.templateCodeId } })
+      await pgvectorStore.delete({ filter: { templateCodeId: templateCodeId } })
     }
 
+    // 終了
     res.status(200).json({ body });
   } catch (err) {
     // エラーログの出力
