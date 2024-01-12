@@ -35,8 +35,8 @@ export const updateHandler = async (req: Request, res: Response) => {
     const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
 
     // データベース接続情報
-    const dbConfig = await getDbConfig(dbAccessSecretValue)
-    // データベース接続情報
+    const dbConfig = getDbConfig(dbAccessSecretValue)
+    // データベース接続
     dbClient = new Client(dbConfig);
     await dbClient.connect();
 
@@ -58,12 +58,10 @@ export const updateHandler = async (req: Request, res: Response) => {
       // 登録
       // --------------------
       // ベクター登録する情報
-      const document = [
-        { pageContent: templateCode.templateCodeDescription, metadata: { templateCodeId: templateCode.templateCodeId, } }
-      ] as Document[];
-      documents.push(document[0])
+      const document = new Document({ pageContent: templateCode.templateCodeDescription, metadata: { templateCodeId: templateCode.templateCodeId, } })
       // pgvectorStoreへの登録
-      await pgvectorStore.addDocuments(document);
+      await pgvectorStore.addDocuments([document]);
+      documents.push(document)
     }
 
     // 終了

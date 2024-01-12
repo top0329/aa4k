@@ -34,7 +34,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
     const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
 
     // データベース接続情報
-    const dbConfig = await getDbConfig(dbAccessSecretValue)
+    const dbConfig = getDbConfig(dbAccessSecretValue)
     // データベース接続
     dbClient = new Client(dbConfig);
     await dbClient.connect();

@@ -39,8 +39,8 @@ export const getSecretValues = async () => {
     getSecretValue(azureSecretName)
   ])
 
-  const dbAccessSecretValue = JSON.parse(db.SecretString) as DbAccessSecretValue;
-  const azureSecretValue = JSON.parse(azure.SecretString) as AzureSecretValue;
+  const dbAccessSecretValue = db as DbAccessSecretValue;
+  const azureSecretValue = azure as AzureSecretValue;
   return { dbAccessSecretValue, azureSecretValue };
 }
 
@@ -49,7 +49,7 @@ export const getSecretValues = async () => {
  * @param dbAccessSecretValue 
  * @returns DB接続情報
  */
-export const getDbConfig = async (dbAccessSecretValue: DbAccessSecretValue) => {
+export const getDbConfig = (dbAccessSecretValue: DbAccessSecretValue) => {
   return {
     type: dbAccessSecretValue.engine,
     host: process.env.RDS_PROXY_ENDPOINT,

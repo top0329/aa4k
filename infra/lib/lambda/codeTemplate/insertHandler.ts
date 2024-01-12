@@ -36,20 +36,19 @@ export const insertHandler = async (req: Request, res: Response) => {
     const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
 
     // データベース接続情報
-    const dbConfig = await getDbConfig(dbAccessSecretValue)
-    // データベース接続情報
+    const dbConfig = getDbConfig(dbAccessSecretValue)
+    // データベース接続
     dbClient = new Client(dbConfig);
     await dbClient.connect();
 
     // pgvectorStoreの初期設定
     const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue })
 
-    // リクエストパラメータ分ループ
-    let documents: Document[] = [];
-
     // collection作成
     pgvectorStore.getOrCreateCollection();
 
+    // リクエストパラメータ分ループ
+    let documents: Document[] = [];
     for (const templateCode of templateCodes) {
       const uuid = crypto.randomUUID();
       // ベクター登録する情報
