@@ -8,9 +8,10 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { ContextProps } from './type';
 import { Aa4kSecretsStack } from './secret-stack'
 import { AuroraStack } from './aurora-stack'
+import { Aa4kElastiCacheStack } from './elasticache-stack'
 
 export class Aa4kApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, elastiCacheStack : Aa4kElastiCacheStack, props?: cdk.StackProps) {
     super(scope, id, props);
     const stageName = contextProps.stageName;
 
@@ -99,11 +100,13 @@ export class Aa4kApiStack extends cdk.Stack {
       entry: __dirname + "/lambda/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.auroraAccessableSG],
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
         DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
         RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X

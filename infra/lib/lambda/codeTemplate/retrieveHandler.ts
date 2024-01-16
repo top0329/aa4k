@@ -3,7 +3,9 @@ import { Client } from "pg";
 import { z } from "zod";
 import { RetrieveRequestBody, RetrieveRequestBodySchema } from "./type"
 import { selectTmplateCode } from "./dao";
-import { getSecretValues, getDbConfig, pgVectorInitialize } from "./common"
+import { getSecretValues, pgVectorInitialize } from "./common";
+import { getDbConfig } from "../utils";
+import { checkPluginVersion } from "../utils/versionCheck";
 
 export const retrieveHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -13,8 +15,9 @@ export const retrieveHandler = async (req: Request, res: Response) => {
   let retErrorMessage = "Internal server error";
 
   try {
-    subscriptionId = req.header("subscription_id") as string;
-    const openAiApiKey = req.header("api_key") as string;
+    subscriptionId = req.header("aa4k-subscription-id") as string;
+    const openAiApiKey = req.header("aa4k-api-key") as string;
+    const pluginVersion = req.header("aa4k-plugin-version") as string;
     body = (req.body ? JSON.parse(req.body) : {}) as RetrieveRequestBody;
     // リクエストのバリデーション
     await validateRequestParam(subscriptionId, body).catch(async (err) => {
@@ -32,6 +35,13 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
     // Secret Manager情報の取得(DB_ACCESS_SECRET, AZURE_SECRET)
     const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
+
+    // プラグインバージョンチェック
+    const isVersionOk = await checkPluginVersion(pluginVersion, dbAccessSecretValue);
+    if (!isVersionOk) {
+      res.status(422).json({ message: "Unsupported Version" });
+      return;
+    }
 
     // データベース接続情報
     const dbConfig = getDbConfig(dbAccessSecretValue)

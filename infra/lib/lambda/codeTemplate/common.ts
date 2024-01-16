@@ -1,6 +1,7 @@
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { AzureSecretValue, DbAccessSecretValue, pgVectorInitializeOptions } from "./type"
+import { AzureSecretValue, pgVectorInitializeOptions } from "./type";
+import { DbAccessSecretValue } from "../utils/type";
 import { ClientConfig } from "pg";
 import { PGVectorStore } from "langchain/vectorstores/pgvector";
 
@@ -43,24 +44,6 @@ export const getSecretValues = async () => {
   const azureSecretValue = azure as AzureSecretValue;
   return { dbAccessSecretValue, azureSecretValue };
 }
-
-/**
- * DB接続情報
- * @param dbAccessSecretValue 
- * @returns DB接続情報
- */
-export const getDbConfig = (dbAccessSecretValue: DbAccessSecretValue) => {
-  return {
-    type: dbAccessSecretValue.engine,
-    host: process.env.RDS_PROXY_ENDPOINT,
-    database: dbAccessSecretValue.dbname,
-    user: dbAccessSecretValue.username,
-    password: dbAccessSecretValue.password,
-    port: dbAccessSecretValue.port,
-    ssl: true,
-  };
-}
-
 
 /**
  * PGVectorStoreのインスタンス生成

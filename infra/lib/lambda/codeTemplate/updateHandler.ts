@@ -3,7 +3,8 @@ import { Client } from "pg";
 import { z } from "zod";
 import { UpdateRequestBody, UpdateRequestBodySchema } from "./type"
 import { updateTmplateCode } from "./dao";
-import { getSecretValues, getDbConfig, pgVectorInitialize } from "./common"
+import { getSecretValues, pgVectorInitialize } from "./common";
+import { getDbConfig } from "../utils";
 import { Document } from "langchain/document";
 
 export const updateHandler = async (req: Request, res: Response) => {
@@ -14,7 +15,7 @@ export const updateHandler = async (req: Request, res: Response) => {
   let retErrorMessage = "Internal server error";
 
   try {
-    subscriptionId = req.header("subscription_id") as string;
+    subscriptionId = req.header("aa4k-subscription-id") as string;
     body = (req.body ? JSON.parse(req.body) : {}) as UpdateRequestBody;
     const { templateCodes } = body;
     // リクエストのバリデーション

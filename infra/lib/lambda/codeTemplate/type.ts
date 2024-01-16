@@ -2,8 +2,9 @@ import { z } from "zod";
 
 // リクエストヘッダ
 export interface RequestHeaders {
-  "subscription_id": string,
-  "api_key": string
+  "aa4k-subscription-id": string,
+  "aa4k-api-key": string,
+  "aa4k-plugin-version": string
 }
 
 // ******************************
@@ -64,15 +65,4 @@ export interface AzureSecretValue {
   azureOpenAIEmbeddingApiVersion: string,
   azureOpenAIApiInstanceName: string,
   azureOpenAIEmbeddingApiDeploymentName: string,
-}
-
-
-// Secret Manager情報(DB_ACCESS_SECRET_NAME)
-export interface DbAccessSecretValue {
-  engine: string,
-  env: string,
-  dbname: string,
-  username: string,
-  password: string,
-  port: number,
 }
