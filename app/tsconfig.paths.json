@@ -1,0 +1,11 @@
+// tsconfig.paths.json
+{
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"],
+    },
+    "forceConsistentCasingInFileNames": true,
+  }
+}
