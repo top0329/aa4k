@@ -120,7 +120,61 @@ export class Aa4kApiStack extends cdk.Stack {
         authorizationType: apigateway.AuthorizationType.CUSTOM,
         authorizer: lambdaAuthorizer,
       }
-    })
+    });
+
+    // conversationHistory Lambda
+    const conversationHistoryLambda = new nodelambda.NodejsFunction(this, "ConversationHistoryLambda", {
+      entry: __dirname + "/lambda/conversationHistory/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    });
+    secretsStack.azureSecret.grantRead(conversationHistoryLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(conversationHistoryLambda);
+    restapi.root.addResource("conversation_history").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(conversationHistoryLambda),
+      anyMethod: true,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
+        authorizer: lambdaAuthorizer,
+      }
+    });
+
+    // generatedCode Lambda
+    const generatedCodeLambda = new nodelambda.NodejsFunction(this, "GeneratedCodeLambda", {
+      entry: __dirname + "/lambda/generatedCode/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    });
+    secretsStack.azureSecret.grantRead(generatedCodeLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(generatedCodeLambda);
+    restapi.root.addResource("generated_code").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(generatedCodeLambda),
+      anyMethod: true,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
+        authorizer: lambdaAuthorizer,
+      }
+    });
 
     // LangchainLog Lambda
     const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {

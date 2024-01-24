@@ -3,8 +3,9 @@ import { Client } from "pg";
 import { z } from "zod";
 import { DeleteRequestBody, DeleteRequestBodySchema } from "./type"
 import { deleteTmplateCode } from "./dao";
-import { getSecretValues, pgVectorInitialize } from "./common";
-import { getDbConfig } from "../utils";
+import { pgVectorInitialize } from "./common";
+import { getDbConfig, getSecretValues } from "../utils";
+import { RequestHeaderName } from "../utils/type";
 
 export const deleteHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -14,7 +15,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
   let retErrorMessage = "Internal server error";
 
   try {
-    subscriptionId = req.header("aa4k-subscription-id") as string;
+    subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
     body = (req.body ? JSON.parse(req.body) : {}) as DeleteRequestBody;
     const { templateCodeIds } = body;
     // リクエストのバリデーション

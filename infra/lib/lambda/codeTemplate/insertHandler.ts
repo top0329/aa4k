@@ -4,8 +4,9 @@ import * as crypto from 'crypto'
 import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./type"
 import { insertTmplateCode } from "./dao";
-import { getSecretValues, pgVectorInitialize } from "./common";
-import { getDbConfig } from "../utils";
+import { pgVectorInitialize } from "./common";
+import { getDbConfig, getSecretValues } from "../utils";
+import { RequestHeaderName } from "../utils/type";
 import { Document } from "langchain/document";
 
 export const insertHandler = async (req: Request, res: Response) => {
@@ -16,7 +17,7 @@ export const insertHandler = async (req: Request, res: Response) => {
   let retErrorMessage = "Internal server error";
 
   try {
-    subscriptionId = req.header("aa4k-subscription-id") as string;
+    subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
     body = (req.body ? JSON.parse(req.body) : {}) as InsertRequestBody;
     const { templateCodes } = body;
     // リクエストのバリデーション

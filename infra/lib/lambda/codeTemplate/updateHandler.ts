@@ -3,8 +3,8 @@ import { Client } from "pg";
 import { z } from "zod";
 import { UpdateRequestBody, UpdateRequestBodySchema } from "./type"
 import { updateTmplateCode } from "./dao";
-import { getSecretValues, pgVectorInitialize } from "./common";
-import { getDbConfig } from "../utils";
+import { pgVectorInitialize } from "./common";
+import { getDbConfig, getSecretValues } from "../utils";
 import { Document } from "langchain/document";
 
 export const updateHandler = async (req: Request, res: Response) => {

@@ -1,11 +1,5 @@
 import { z } from "zod";
-
-// リクエストヘッダ
-export interface RequestHeaders {
-  "aa4k-subscription-id": string,
-  "aa4k-api-key": string,
-  "aa4k-plugin-version": string
-}
+import { AzureSecretValue } from "../utils/type";
 
 // ******************************
 // Retrieve
@@ -57,12 +51,4 @@ export type DeleteRequestBody = z.infer<typeof DeleteRequestBodySchema>
 export interface pgVectorInitializeOptions {
   azureSecretValue?: AzureSecretValue,
   openAiApiKey?: string,
-}
-
-// Secret Manager情報(AZURE_SECRET_NAME)
-export interface AzureSecretValue {
-  azureOpenAIApiKey: string,
-  azureOpenAIEmbeddingApiVersion: string,
-  azureOpenAIApiInstanceName: string,
-  azureOpenAIEmbeddingApiDeploymentName: string,
 }

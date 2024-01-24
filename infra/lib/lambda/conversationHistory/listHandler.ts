@@ -1,15 +1,16 @@
-import { Response, Request } from "express"
+import { Response, Request } from "express";
 import { Client } from "pg";
 import { z } from "zod";
-import { RetrieveRequestBody, RetrieveRequestBodySchema } from "./type"
-import { selectTmplateCode } from "./dao";
-import { pgVectorInitialize } from "./common";
-import { getDbConfig, getSecretValues } from "../utils";
+import { ListRequestBody, ListRequestBodySchema } from "./type";
+import { selectConversationHistory } from "./dao";
+import { getSecretValues, getDbConfig } from "../utils";
+import { changeSchemaSearchPath } from "../utils/dao";
 import { RequestHeaderName } from "../utils/type";
 import { checkPluginVersion } from "../utils/versionCheck";
 
-export const retrieveHandler = async (req: Request, res: Response) => {
+export const listHandler = async (req: Request, res: Response) => {
   let subscriptionId;
+  let pluginVersion;
   let body;
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
@@ -17,11 +18,10 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
-    const openAiApiKey = req.header(RequestHeaderName.aa4kApiKey) as string;
-    const pluginVersion = req.header(RequestHeaderName.aa4kPluginVersion) as string;
-    body = (req.body ? JSON.parse(req.body) : {}) as RetrieveRequestBody;
+    pluginVersion = req.header(RequestHeaderName.aa4kPluginVersion) as string;
+    body = (req.body ? JSON.parse(req.body) : {}) as ListRequestBody;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, body).catch(async (err) => {
+    await validateRequestParam(subscriptionId, pluginVersion, body).catch(async (err) => {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
       throw err;
@@ -29,13 +29,14 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
     // 開始ログの出力
     const startLog = {
-      message: "コードテンプレート管理API(retriever)開始",
+      message: "会話履歴API(会話履歴取得)開始",
       subscriptionId: subscriptionId,
+      pluginVersion: pluginVersion,
     };
     console.info(startLog);
 
-    // Secret Manager情報の取得(DB_ACCESS_SECRET, AZURE_SECRET)
-    const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
+    // Secret Manager情報の取得(DB_ACCESS_SECRET)
+    const { dbAccessSecretValue } = await getSecretValues();
 
     // プラグインバージョンチェック
     const isVersionOk = await checkPluginVersion(pluginVersion, dbAccessSecretValue);
@@ -50,23 +51,16 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     dbClient = new Client(dbConfig);
     await dbClient.connect();
 
-    // pgvectorStoreの初期設定
-    const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey })
+    // スキーマ検索パスを変更
+    // TODO: スキーマ名は契約管理TBLから取得予定（契約管理TBLは現在未作成）
+    await changeSchemaSearchPath(dbClient, "service");
 
-    // pgvectorStoreを使用して検索
-    const documents = await pgvectorStore.similaritySearchWithScore(body.query, body.k);
-
-    for (const [doc, num] of documents) {
-      const templateCodeId = doc.metadata.templateCodeId;
-      // SQL クエリの実行（取得したtemplateCodeIdに該当するコードを取得）
-      const result = await selectTmplateCode(dbClient, templateCodeId);
-      // 取得したコードをオブジェクトに追加
-      const templateCode = result.rows[0].template_code
-      doc.metadata.templateCode = templateCode
-    }
+    // 会話履歴一覧の取得
+    const queryResult  = await selectConversationHistory(dbClient, body);
+    const conversationHistoryList = queryResult.rows;
 
     // 終了
-    res.status(200).json({ documents });
+    res.status(200).json({ conversationHistoryList });
   } catch (err) {
     // エラーログの出力
     const errorMessage = ({
@@ -84,21 +78,21 @@ export const retrieveHandler = async (req: Request, res: Response) => {
   }
 }
 
-
-
 /**
  * リクエストパラメータのバリデーション
  * @param subscriptionId 
- * @param reqBody 
+ * @param reqQuery 
  */
-const validateRequestParam = async (subscriptionId: string, reqBody: RetrieveRequestBody) => {
+const validateRequestParam = async (subscriptionId: string, pluginVersion: string, body: ListRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
     uuidSchema.parse(subscriptionId);
+    // ヘッダー.プラグインバージョン
+    const pluginVersionSchema = z.string();
+    pluginVersionSchema.parse(pluginVersion);
     // ボディ
-    RetrieveRequestBodySchema.parse(reqBody);
-
+    ListRequestBodySchema.parse(body);
   } catch (err) {
     throw err;
   }
