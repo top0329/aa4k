@@ -1,13 +1,11 @@
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { Client } from "pg";
 import { format, utcToZonedTime } from 'date-fns-tz';
 import { z } from "zod";
-
-import { LogLangchainRequestBodySchema, LogLangchainRequestheaders, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
+import { LogLangchainRequestBodySchema, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
 import { insertLangchainProcessLog } from "./dao";
-
-const secretsManagerClient = new SecretsManagerClient();
+import { getSecretValues, getDbConfig } from "../utils";
+import { RequestHeaderName } from '../utils/type'
 
 /**
  * Langchain処理ログ登録API
@@ -18,16 +16,17 @@ const secretsManagerClient = new SecretsManagerClient();
 exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
   let response: APIGatewayProxyResult;
   let subscriptionId;
+  let pluginVersion;
   let body;
   let dbClient;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
   try {
-    const headers = event.headers as LogLangchainRequestheaders;
-    subscriptionId = headers.subscription_id;
+    subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId] as string;
+    pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;
     body = (event.body ? JSON.parse(event.body) : {}) as LogLangchainRequestBody;
     // リクエストのバリデーション
-    await validationRequestParam(subscriptionId, body).catch(async (err) => {
+    await validateRequestParam(subscriptionId, pluginVersion, body).catch(async (err) => {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
       throw err;
@@ -43,22 +42,13 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
 
     // 現在日時の取得
     const currentDate = await getCurrentDateStr();
-    // Secret Manager情報の取得
-    const secretValue = await getSecretValue().catch(async (err) => {
-      throw err;
-    });
+    // Secret Manager情報の取得(DB_ACCESS_SECRET)
+    const { dbAccessSecretValue } = await getSecretValues();
 
+    // データベース接続情報
+    const dbConfig = getDbConfig(dbAccessSecretValue)
     // データベース接続
-    const dbConfig = {
-      host: process.env.RDS_PROXY_ENDPOINT,
-      database: secretValue.dbname,
-      user: secretValue.username,
-      password: secretValue.password,
-      port: secretValue.port,
-      ssl: true,
-    };
     dbClient = new Client(dbConfig);
-    // データベース接続を開始する
     await dbClient.connect();
 
     // SQL クエリの実行
@@ -115,30 +105,9 @@ const getCurrentDateStr = () => {
 }
 
 /**
- * Secret Manager情報の取得
- * @returns Secret Manager情報
- */
-const getSecretValue = async () => {
-  // 環境変数からSecretManagerのnameを取得
-  const secretName = process.env.DB_ACCESS_SECRET_NAME;
-  // Secret Managerから情報取得
-  const result = await secretsManagerClient.send(
-    new GetSecretValueCommand({
-      SecretId: secretName,
-      VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
-    })
-  );
-  // 取得できない場合はエラー
-  if (!result.SecretString) throw 'Secret value is empty';
-
-  const SecretValue = JSON.parse(result.SecretString);
-  return SecretValue;
-}
-
-/**
  * リクエストパラメータのバリデーション
  */
-const validationRequestParam = async (subscriptionId: string, reqBody: LogLangchainRequestBody) => {
+const validateRequestParam = async (subscriptionId: string, pluginVersion: string, reqBody: LogLangchainRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();

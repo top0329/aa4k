@@ -19,6 +19,8 @@ export interface AzureSecretValue {
 // Parameter Store情報(AA4K_CONST_PARAMETER_NAME)
 export interface AA4KConstParameterValue {
   allowedCidrs: string[],
+  retrieveMaxCount: number,
+  retrieveScoreThreshold: number,
 }
 
 // リクエストヘッダ

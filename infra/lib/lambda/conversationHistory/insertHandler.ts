@@ -6,7 +6,6 @@ import { insertConversationHistory, updateConversationHistory } from "./dao";
 import { getSecretValues, getDbConfig } from "../utils";
 import { changeSchemaSearchPath } from "../utils/dao";
 import { MessageDiv, RequestHeaderName } from "../utils/type";
-import { checkPluginVersion } from "../utils/versionCheck";
 
 export const insertHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -37,13 +36,6 @@ export const insertHandler = async (req: Request, res: Response) => {
 
     // Secret Manager情報の取得(DB_ACCESS_SECRET)
     const { dbAccessSecretValue } = await getSecretValues();
-
-    // プラグインバージョンチェック
-    const isVersionOk = await checkPluginVersion(pluginVersion, dbAccessSecretValue);
-    if (!isVersionOk) {
-      res.status(422).json({ message: "Unsupported Version" });
-      return;
-    }
 
     // データベース接続情報
     const dbConfig = getDbConfig(dbAccessSecretValue)

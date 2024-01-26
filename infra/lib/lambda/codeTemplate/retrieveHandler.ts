@@ -6,7 +6,6 @@ import { selectTmplateCode } from "./dao";
 import { pgVectorInitialize } from "./common";
 import { getDbConfig, getSecretValues } from "../utils";
 import { RequestHeaderName } from "../utils/type";
-import { checkPluginVersion } from "../utils/versionCheck";
 
 export const retrieveHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -36,13 +35,6 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
     // Secret Manager情報の取得(DB_ACCESS_SECRET, AZURE_SECRET)
     const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
-
-    // プラグインバージョンチェック
-    const isVersionOk = await checkPluginVersion(pluginVersion, dbAccessSecretValue);
-    if (!isVersionOk) {
-      res.status(422).json({ message: "Unsupported Version" });
-      return;
-    }
 
     // データベース接続情報
     const dbConfig = getDbConfig(dbAccessSecretValue)

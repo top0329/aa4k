@@ -33,7 +33,9 @@ export class Aa4kParameterStack extends cdk.Stack {
         "118.238.251.130/32",   // SC-VPNのIPアドレス
         "202.210.220.64/28",    // SC-VPNのIPアドレス
         "39.110.232.32/28",     // SC-VPNのIPアドレス
-      ]
+      ],
+      "retrieveMaxCount": 30,
+      "retrieveScoreThreshold": 0.2,
     };
 
     // ParameterStore

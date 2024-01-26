@@ -1,10 +1,4 @@
-import { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import { z } from "zod";
-
-// リクエストヘッダ
-export interface LogLangchainRequestheaders extends APIGatewayProxyEventHeaders {
-  subscription_id: string,
-}
 
 // リクエストボディ
 // スキーマを定義する
