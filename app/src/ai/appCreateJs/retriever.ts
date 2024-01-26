@@ -8,6 +8,7 @@ export class CodeTemplateRetriever extends BaseRetriever {
   }
 
   async getRelevantDocuments(query: string): Promise<Document[]> {
+    // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
     const response = await kintone.proxy(
       `${import.meta.env.VITE_API_ENDPOINT}/code_template/retrieve`,
       "POST",

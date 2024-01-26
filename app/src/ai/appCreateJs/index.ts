@@ -72,6 +72,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     // 最新JSの取得（from DB）
     // --------------------
+    // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
     const res_jsCodeForDb = await kintone.proxy(
       `${import.meta.env.VITE_API_ENDPOINT}/generated_code/get-code`,
       "POST",
@@ -179,6 +180,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     // 回答メッセージと生成したコードの登録（会話履歴TBL）
     // --------------------
+    // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
     await kintone.proxy(
       `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
       "POST",
