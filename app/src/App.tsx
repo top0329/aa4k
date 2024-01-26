@@ -1,8 +1,6 @@
 // src/App.tsx
-import { Box } from "@radix-ui/themes";
+import CornerDialog from "./components/feature/CornerDialog/CornerDialog";
 
-const App = () => {
-  return <Box>App</Box>
-}
-
+const App = () =>
+  <CornerDialog />
 export default App;

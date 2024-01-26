@@ -1,3 +1,4 @@
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import svgr from "vite-plugin-svgr";
@@ -28,5 +29,5 @@ export default defineConfig({
     // typescriptエラーで起動しないので一旦コメントアウト
     // https: true,
   },
-  plugins: [mkcert(), svgr()],
+  plugins: [mkcert(), svgr(), vanillaExtractPlugin()],
 });

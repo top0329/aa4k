@@ -1,0 +1,8 @@
+// tsconfig.storybook.json
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "../src/**/*",
+    "../node_modules/@kintone/dts-gen/kintone.d.ts"
+  ]
+}

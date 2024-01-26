@@ -1,0 +1,32 @@
+/* theme-config.css */
+html {
+  box-sizing: border-box;
+  font-family: "Noto Sans JP", sans-serif;
+  line-height: 1.65;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+button,
+fieldset,
+input {
+  all: unset;
+  box-sizing: border-box;
+}
+
+#corner-dialog-fab {
+  position: relative;
+  z-index: 9999;
+}
+
+.radix-themes {
+  --default-font-size: 18px;
+}
+
+.rt-TextAreaRoot.rt-r-size-3 {
+  min-height: 20px; /* Adjust this value based on your needs */
+}
