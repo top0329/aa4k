@@ -9,11 +9,13 @@ type ContractDiv = "trial" | "active" | "expired";
  */
 export function openAIModel(contractDiv: ContractDiv) {
   if (contractDiv === "trial") {
-    // トライアル契約
+    // トライアル契約 TODO: Azure OpenAIアクセス用プロキシのURLを設定
     return new ChatOpenAI({
       temperature: 0,
       openAIApiKey: process.env.OPENAI_API_KEY,
-      modelName: "gpt-4-1106-preview"
+      modelName: "gpt-4-1106-preview",
+    // }, {
+    //   baseURL: `${import.meta.env.VITE_API_ENDPOINT}/xxxxxxx`
     });
 
   } else if (contractDiv === "active") {
