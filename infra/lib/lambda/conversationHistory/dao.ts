@@ -8,8 +8,10 @@ import {
 // 型定義
 // 会話履歴取得クエリ結果行
 interface ConversationHistoryResultRow {
+  id: string,
   user_message: string,
   ai_message: string,
+  user_rating: string,
 }
 
 // 会話履歴登録クエリ結果行

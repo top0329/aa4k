@@ -1,4 +1,8 @@
 import { APIGatewayRequestAuthorizerEvent, PolicyDocument } from 'aws-lambda';
+import ipCidr from 'ip-cidr';
+import { getParameterValues, getSecretValues } from "../utils";
+import { RequestHeaderName } from "../utils/type";
+import { getSubscriptionData } from "../utils/getSubscriptionData"
 
 interface AllowPolicy {
   principalId: string;
@@ -6,23 +10,50 @@ interface AllowPolicy {
 }
 
 export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<AllowPolicy> => {
-  // これらの情報はSecrets Managerなどに持たせる必要がありそう
-  const allowedCidr: string = '103.79.14.0/24';
-  const allowedSystemKey: string = 'abcdefghijklmn';
+  let subscriptionId: string | undefined;
 
-  const sourceIp: string = event.requestContext.identity.sourceIp;
-  const systemKey: string | undefined = event.headers?.system_key || event.headers?.system_key;
+  try {
+    const sourceIp: string = event.requestContext.identity.sourceIp;
+    if (event.headers) subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId];
 
+    if (!subscriptionId) {
+      // subscriptionIdを取得できない場合はアクセスを拒否する
+      return generateDenyPolicy(event.methodArn);
+    }
 
-  if (!sourceIp.startsWith(allowedCidr.slice(0, -4))) {
-    throw new Error('Unauthorized IP address');
+    // 並列でSecret Manager情報とParameter Store情報を取得させる
+    const [secret, parameter] = await Promise.all([
+      getSecretValues(),
+      getParameterValues(),
+    ]);
+
+    // IPアドレスチェック
+    const isIpExist = parameter.aa4kConstParameterValue.allowedCidrs.some((allowedCidr) => {
+      const cidr = new ipCidr(allowedCidr);
+      return cidr.contains(sourceIp);
+    });
+    if (!isIpExist) {
+      // 許可IPアドレスでない場合はアクセスを拒否する
+      return generateDenyPolicy(event.methodArn);
+    }
+
+    const subscriptionData = await getSubscriptionData(subscriptionId, secret.dbAccessSecretValue)
+    if (!subscriptionData) {
+      return generateDenyPolicy(event.methodArn);
+    }
+
+    // アクセスを許可する
+    return generateAllowPolicy(event.methodArn);
+  } catch (err) {
+    // エラーログの出力
+    const errorMessage = ({
+      subscriptionId: subscriptionId,
+      error: err,
+    });
+    console.error(errorMessage);
+
+    return generateDenyPolicy(event.methodArn);
   }
-  if (systemKey !== allowedSystemKey) {
-    throw new Error('Unauthorized system_key');
-  }
-
-  // ここでAWSのポリシーを返し、API Gatewayがアクセスを許可するようにします。
-  return generateAllowPolicy(event.methodArn);
 };
 
 function generateAllowPolicy(methodArn: string): AllowPolicy {
@@ -34,6 +65,23 @@ function generateAllowPolicy(methodArn: string): AllowPolicy {
         {
           Action: 'execute-api:Invoke',
           Effect: 'Allow',
+          Resource: methodArn
+        }
+      ]
+    }
+  };
+  return policy;
+}
+
+function generateDenyPolicy(methodArn: string): AllowPolicy {
+  const policy: AllowPolicy = {
+    principalId: 'user',
+    policyDocument: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Action: 'execute-api:Invoke',
+          Effect: 'Deny',
           Resource: methodArn
         }
       ]

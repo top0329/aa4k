@@ -16,6 +16,11 @@ export interface AzureSecretValue {
   azureOpenAIEmbeddingApiDeploymentName: string,
 }
 
+// Parameter Store情報(AA4K_CONST_PARAMETER_NAME)
+export interface AA4KConstParameterValue {
+  allowedCidrs: string[],
+}
+
 // リクエストヘッダ
 export const RequestHeaderName = {
   aa4kSubscriptionId: "aa4k-subscription-id",
@@ -41,3 +46,11 @@ export const ContractStatus = {
   active: "active",
   expired: "expired",
 } as const;
+
+// redis空レコード
+export type RedisEmptyRecord = Record<string, never>
+
+// redis空レコード判定
+export function isRedisEmptyRecord(record: Record<string, string>): record is RedisEmptyRecord {
+  return Object.keys(record).length === 0;
+}
