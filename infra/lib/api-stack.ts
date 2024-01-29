@@ -204,7 +204,7 @@ export class Aa4kApiStack extends cdk.Stack {
     secretsStack.azureSecret.grantRead(preCheck);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(preCheck)
     parameterStack.aa4kConstParameter.grantRead(preCheck);
-    restapi.root.addResource("pre-check").addMethod("POST", new apigateway.LambdaIntegration(preCheck), {
+    restapi.root.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(preCheck), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })

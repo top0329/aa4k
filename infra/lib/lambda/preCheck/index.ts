@@ -37,10 +37,13 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     };
     console.info(startLog);
 
-    // Parameter Store情報の取得(aa4kConst)
-    const { aa4kConstParameterValue } = await getParameterValues();
-    // Secret Manager情報の取得(DB_ACCESS_SECRET)
-    const { dbAccessSecretValue } = await getSecretValues();
+    // 並列でSecret Manager情報とParameter Store情報を取得させる
+    const [secret, parameter] = await Promise.all([
+      getSecretValues(),
+      getParameterValues(),
+    ]);
+    const dbAccessSecretValue = secret.dbAccessSecretValue;
+    const aa4kConstParameterValue = parameter.aa4kConstParameterValue;
 
     // プラグインバージョンチェック
     const isVersionOk = await checkPluginVersion(pluginVersion, dbAccessSecretValue);
