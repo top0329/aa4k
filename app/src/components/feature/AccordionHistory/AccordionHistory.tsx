@@ -1,5 +1,6 @@
 // src/components/feature/AccordionHistory/AccordionHistory.tsx
 import * as Accordion from '@radix-ui/react-accordion';
+import { Box } from '@radix-ui/themes';
 import AccordionContent from '~/components/ui/Accordion/AccordionContent';
 import AccordionTrigger from '~/components/ui/Accordion/AccordionTrigger';
 import { Conversation } from '~/types/agents';
@@ -19,7 +20,22 @@ export const AccordionHistory = ({ conversations }: AccordionHistoryProps) => (
         {conversation.chatHistory?.map(aiMessage => (
           <AccordionContent
             key={aiMessage.content}
-          >{aiMessage.content}</AccordionContent>
+          >
+            <Box
+              style={{
+                whiteSpace: "pre-wrap"
+              }}
+            >
+              固定文言
+            </Box>
+            <Box
+              style={{
+                whiteSpace: "pre-wrap"
+              }}
+            >
+              {aiMessage.content}
+            </Box>
+          </AccordionContent>
         ))}
       </Accordion.Item>
     ))}
