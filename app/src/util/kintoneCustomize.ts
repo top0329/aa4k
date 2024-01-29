@@ -1,5 +1,14 @@
+import { DeviceDiv } from "../types"
+
+// 下記の型は以下(kintone/js-sdk)を参考に設定
+// https://github.com/kintone/js-sdk/blob/master/packages/rest-api-client/src/client/types/app/customize.ts
 export type Revision = string | number;
-export type AppCustomizeScope = "ALL" | "ADMIN" | "NONE";
+export const AppCustomizeScope = {
+  all: "ALL",
+  admin: "ADMIN",
+  none: "NONE",
+} as const;
+export type AppCustomizeScope = (typeof AppCustomizeScope)[keyof typeof AppCustomizeScope];
 export type AppCustomizeResourceForResponse = {
   type: "URL";
   url: string;
@@ -27,17 +36,18 @@ export type AppCustomize = {
  * kintoneカスタマイズからjavascriptファイルを取得
  * @param appId 
  * @param deviceDiv 
+ * @param isGuestSpace
  * @returns { kintoneCustomizeFiles targetFileKey jsCodeForKintone }
  */
-export async function getKintoneCustomizeJs(appId: string, deviceDiv: string) {
+export async function getKintoneCustomizeJs(appId: string, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
   let jsCodeForKintone = "";
   let targetFileKey: string = "";
 
   const kintoneCustomizeFiles = await kintone.api(
-    kintone.api.url("/k/v1/preview/app/customize.json", false),
+    kintone.api.url("/k/v1/preview/app/customize.json", isGuestSpace),
     "GET", { app: appId },
   ) as AppCustomize;
-  const jsFiles = (deviceDiv === "desktop") ? kintoneCustomizeFiles.desktop.js : kintoneCustomizeFiles.mobile.js
+  const jsFiles = (deviceDiv === DeviceDiv.desktop) ? kintoneCustomizeFiles.desktop.js : kintoneCustomizeFiles.mobile.js
 
   for (const jsFile of jsFiles) {
     if (!(jsFile.type === "FILE")) continue;
@@ -45,7 +55,7 @@ export async function getKintoneCustomizeJs(appId: string, deviceDiv: string) {
 
     targetFileKey = jsFile.file.fileKey;
     const resp = await fetch(
-      `/k/v1/file.json?fileKey=${targetFileKey}`,
+      kintone.api.urlForGet('/k/v1/file.json', { fileKey: targetFileKey }, isGuestSpace),
       {
         method: "GET",
         headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -63,8 +73,9 @@ export async function getKintoneCustomizeJs(appId: string, deviceDiv: string) {
  * @param kintoneCustomizeFiles 
  * @param appId 
  * @param deviceDiv 
+ * @param isGuestSpace 
  */
-export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: string, kintoneCustomizeFiles: AppCustomize, appId: string, deviceDiv: string) {
+export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: string, kintoneCustomizeFiles: AppCustomize, appId: string, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
   // JSコードを一時保存領域へアップロード
   const blob = new Blob([jsCode], {
     type: "application/javascript",
@@ -75,11 +86,14 @@ export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: 
   const headers = {
     "X-Requested-With": "XMLHttpRequest",
   };
-  const resp = await fetch("/k/v1/file.json", {
-    method: "POST",
-    headers,
-    body: formData,
-  });
+  const resp = await fetch(
+    kintone.api.url("/k/v1/file.json", isGuestSpace),
+    {
+      method: "POST",
+      headers,
+      body: formData,
+    }
+  );
   const respData = await resp.json();
   const fileKey = respData.fileKey;
 
@@ -88,11 +102,11 @@ export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: 
   const addFile = { type: "FILE", file: { fileKey: fileKey, }, } as AppCustomizeResourceForResponse
 
   // AA4kのファイルを除外
-  const filterTarget = (deviceDiv === "desktop") ? kintoneCustomizeFiles.desktop.js : kintoneCustomizeFiles.mobile.js;
+  const filterTarget = (deviceDiv === DeviceDiv.desktop) ? kintoneCustomizeFiles.desktop.js : kintoneCustomizeFiles.mobile.js;
   const filteredJs = filterTarget!.filter(
     (item: AppCustomizeResourceForResponse) => (item.type === "FILE" && item.file.fileKey !== existingFileKey),
   );
-  if (deviceDiv === "desktop") {
+  if (deviceDiv === DeviceDiv.desktop) {
     kintoneCustomizeFiles.desktop.js = filteredJs;  // AA4kのファイルを除外したものに洗い替え
     kintoneCustomizeFiles.desktop.js.push(addFile); // 一時保管領域にアップロードしたファイル情報を追記
   } else {
@@ -103,11 +117,11 @@ export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: 
   // 一時保管領域にアップロードしたファイルと既存のファイル情報を、アプリのjavascriptファイルとして設定
   const body = {
     app: appId,
-    scope: "ALL",
+    scope: AppCustomizeScope.all,
     desktop: kintoneCustomizeFiles.desktop,
     mobile: kintoneCustomizeFiles.mobile,
   };
-  await kintone.api(kintone.api.url("/k/v1/preview/app/customize.json", false),
+  await kintone.api(kintone.api.url("/k/v1/preview/app/customize.json", isGuestSpace),
     "PUT",
     body,
   )

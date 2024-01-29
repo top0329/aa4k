@@ -1,11 +1,18 @@
-import { DocumentInterface } from "@langchain/core/documents";
-import { BaseRetriever } from "langchain/schema/retriever";
-import { Document } from "langchain/document";
+import { DocumentInterface, Document } from "@langchain/core/documents";
+import { BaseRetriever, BaseRetrieverInput } from "langchain/schema/retriever";
 
 export class CodeTemplateRetriever extends BaseRetriever {
+  k: number;
+  threshold: number;
+
   get lc_namespace() {
     return ["langchain", "retrievers", "base"];
   }
+  constructor(k: number, threshold: number, fields?: BaseRetrieverInput) {
+    super(fields);
+    this.k = k;
+    this.threshold = threshold;
+  };
 
   async getRelevantDocuments(query: string): Promise<Document[]> {
     // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
@@ -22,12 +29,12 @@ export class CodeTemplateRetriever extends BaseRetriever {
 
     const documents = resJson.documents as [DocumentInterface, number][];
     const resultDocuments = documents
-      .filter((document: [DocumentInterface, number]) => document[1] < 0.2)
-      .map((document: [DocumentInterface, number]) => {
-        const metaData = document[0].metadata;
-        return metaData.templateCode;
-      }) as Document[];
+      .filter(([_doc, score]) => score < 0.2)
+      .map(([doc, _score]) => {
+        const metaData = doc.metadata;
+        return new Document(metaData.templateCode)
+      });
 
-    return resultDocuments as Document[];
+    return resultDocuments;
   }
 }

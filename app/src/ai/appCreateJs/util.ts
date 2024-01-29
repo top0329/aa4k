@@ -25,7 +25,7 @@ export function addLineNumbersToText(code: string) {
  * @param endLine 
  * @param delCount 
  * @param newCode 
- * @returns 
+ * @returns 編集後のコード
  */
 export function modifyCode(originalCode: string, startLine: number, endLine: number, delCount: number, newCode: string) {
   // コードを行ごとに分割
