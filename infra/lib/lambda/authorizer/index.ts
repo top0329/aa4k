@@ -45,7 +45,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
     }
 
     // 契約ステータスチェック
-    const contractStatus = getContractStatus(subscriptionData.trial_start_date, subscriptionData.trial_end_date, subscriptionData.contract_start_date, subscriptionData.contract_end_date);
+    const contractStatus = getContractStatus(subscriptionData);
     if (contractStatus === ContractStatus.expired) {
       return generateDenyPolicy(event.methodArn);
     }

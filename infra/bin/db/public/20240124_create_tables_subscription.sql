@@ -1,4 +1,5 @@
-create table subscription (
+-- サブスクリプションテーブル
+CREATE TABLE IF NOT EXISTS subscription (
   subscription_id character varying(36) not null
   , company_id character varying(36) not null
   , schema_name character varying(60) not null

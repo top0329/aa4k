@@ -48,7 +48,7 @@ export const ContractStatus = {
   active: "active",
   expired: "expired",
 } as const;
-
+export type ContractStatus = keyof typeof ContractStatus
 // redis空レコード
 export type RedisEmptyRecord = Record<string, never>
 

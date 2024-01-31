@@ -26,12 +26,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;
     body = (event.body ? JSON.parse(event.body) : {}) as LogLangchainRequestBody;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, pluginVersion, body).catch(async (err) => {
-      retErrorStatus = 400;
-      retErrorMessage = "Bad Request";
-      throw err;
-    });
-
+    validateRequestParam(subscriptionId, pluginVersion, body);
 
     // 開始ログの出力
     const startLog = {
@@ -63,7 +58,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
       statusCode: 200,
       body: JSON.stringify({ message: 'Success', }),
     };
-  } catch (err: unknown) {
+  } catch (err) {
     // エラーログの出力
     const errorMessage = ({
       subscriptionId: subscriptionId,
@@ -71,6 +66,10 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
       error: err,
     });
     console.error(errorMessage);
+    if (err instanceof ValidationError) {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+    }
     response = {
       statusCode: retErrorStatus,
       body: JSON.stringify({ message: retErrorMessage })
@@ -107,7 +106,13 @@ const getCurrentDateStr = () => {
 /**
  * リクエストパラメータのバリデーション
  */
-const validateRequestParam = async (subscriptionId: string, pluginVersion: string, reqBody: LogLangchainRequestBody) => {
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+const validateRequestParam = (subscriptionId: string, pluginVersion: string, reqBody: LogLangchainRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
@@ -115,7 +120,7 @@ const validateRequestParam = async (subscriptionId: string, pluginVersion: strin
     // ボディ
     LogLangchainRequestBodySchema.parse(reqBody);
 
-  } catch (err: unknown) {
-    throw err;
+  } catch (err) {
+    throw new ValidationError('Invalid request parameters');
   }
 }

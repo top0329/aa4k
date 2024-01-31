@@ -22,11 +22,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId] as string;
     pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, pluginVersion).catch(async (err) => {
-      retErrorStatus = 400;
-      retErrorMessage = "Bad Request";
-      throw err;
-    });
+    validateRequestParam(subscriptionId, pluginVersion)
 
     // 開始ログの出力
     const startLog = {
@@ -57,16 +53,13 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     // サブスクリプション情報の取得
     const subscriptionData = await getSubscriptionData(subscriptionId, dbAccessSecretValue)
     if (subscriptionData) {
-      const contractStatus = getContractStatus(subscriptionData.trial_start_date, subscriptionData.trial_end_date, subscriptionData.contract_start_date, subscriptionData.contract_end_date)
+      const contractStatus = getContractStatus(subscriptionData)
       response = {
         statusCode: 200,
         body: JSON.stringify({ contractStatus: contractStatus, systemSettings: { retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount, retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold } }),
       };
     } else {
-      response = {
-        statusCode: 200,
-        body: JSON.stringify({ contractStatus: "", systemSettings: { retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount, retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold } }),
-      };
+      throw new Error("Not Found SubscriptionData")
     }
 
   } catch (err) {
@@ -76,6 +69,10 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
       error: err,
     });
     console.error(errorMessage);
+    if (err instanceof ValidationError) {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+    }
     response = {
       statusCode: retErrorStatus,
       body: JSON.stringify({ message: retErrorMessage })
@@ -90,7 +87,13 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
  * @param subscriptionId 
  * @param pluginVersion 
  */
-const validateRequestParam = async (subscriptionId: string, pluginVersion: string) => {
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+const validateRequestParam = (subscriptionId: string, pluginVersion: string) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
@@ -99,6 +102,6 @@ const validateRequestParam = async (subscriptionId: string, pluginVersion: strin
     const pluginVersionSchema = z.string();
     pluginVersionSchema.parse(pluginVersion);
   } catch (err) {
-    throw err;
+    throw new ValidationError('Invalid request parameters');
   }
 }

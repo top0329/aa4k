@@ -18,13 +18,9 @@ export const insertHandler = async (req: Request, res: Response) => {
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
     pluginVersion = req.header(RequestHeaderName.aa4kPluginVersion) as string;
-    body = (req.body ? JSON.parse(req.body) : {})  as InsertRequestBody;
+    body = (req.body ? JSON.parse(req.body) : {}) as InsertRequestBody;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, pluginVersion, body).catch(async (err) => {
-      retErrorStatus = 400;
-      retErrorMessage = "Bad Request";
-      throw err;
-    });
+    validateRequestParam(subscriptionId, pluginVersion, body);
 
     // 開始ログの出力
     const startLog = {
@@ -70,6 +66,10 @@ export const insertHandler = async (req: Request, res: Response) => {
       error: err,
     });
     console.error(errorMessage);
+    if (err instanceof ValidationError) {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+    }
     res.status(retErrorStatus).json({ message: retErrorMessage });
   } finally {
     if (dbClient) {
@@ -84,7 +84,13 @@ export const insertHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqQuery 
  */
-const validateRequestParam = async (subscriptionId: string, pluginVersion: string, body: InsertRequestBody) => {
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+const validateRequestParam = (subscriptionId: string, pluginVersion: string, body: InsertRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
@@ -95,6 +101,6 @@ const validateRequestParam = async (subscriptionId: string, pluginVersion: strin
     // ボディ
     InsertRequestBodySchema.parse(body);
   } catch (err) {
-    throw err;
+    throw new ValidationError('Invalid request parameters');
   }
 }

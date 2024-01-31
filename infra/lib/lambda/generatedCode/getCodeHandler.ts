@@ -20,11 +20,7 @@ export const getCodeHandler = async (req: Request, res: Response) => {
     pluginVersion = req.header(RequestHeaderName.aa4kPluginVersion) as string;
     body = (req.body ? JSON.parse(req.body) : {}) as GetCodeRequestBody;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, pluginVersion, body).catch(async (err) => {
-      retErrorStatus = 400;
-      retErrorMessage = "Bad Request";
-      throw err;
-    });
+    validateRequestParam(subscriptionId, pluginVersion, body);
 
     // 開始ログの出力
     const startLog = {
@@ -48,7 +44,7 @@ export const getCodeHandler = async (req: Request, res: Response) => {
     await changeSchemaSearchPath(dbClient, "service");
 
     // 最新JSコードの取得
-    const queryResult  = await selectLatestJavascriptCode(dbClient, body);
+    const queryResult = await selectLatestJavascriptCode(dbClient, body);
     const javascriptCode = queryResult.rows.length > 0 ? queryResult.rows[0].javascript_code : "";
 
     // 終了
@@ -61,6 +57,10 @@ export const getCodeHandler = async (req: Request, res: Response) => {
       error: err,
     });
     console.error(errorMessage);
+    if (err instanceof ValidationError) {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+    }
     res.status(retErrorStatus).json({ message: retErrorMessage });
   } finally {
     if (dbClient) {
@@ -75,7 +75,13 @@ export const getCodeHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqQuery 
  */
-const validateRequestParam = async (subscriptionId: string, pluginVersion: string, body: GetCodeRequestBody) => {
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+const validateRequestParam = (subscriptionId: string, pluginVersion: string, body: GetCodeRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
@@ -86,6 +92,6 @@ const validateRequestParam = async (subscriptionId: string, pluginVersion: strin
     // ボディ
     GetCodeRequestBodySchema.parse(body);
   } catch (err) {
-    throw err;
+    throw new ValidationError('Invalid request parameters');
   }
 }
