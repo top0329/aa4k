@@ -52,15 +52,16 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
 
     // サブスクリプション情報の取得
     const subscriptionData = await getSubscriptionData(subscriptionId, dbAccessSecretValue)
-    if (subscriptionData) {
-      const contractStatus = getContractStatus(subscriptionData)
-      response = {
-        statusCode: 200,
-        body: JSON.stringify({ contractStatus: contractStatus, systemSettings: { retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount, retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold } }),
-      };
-    } else {
+    if (!subscriptionData) {
       throw new Error("Not Found SubscriptionData")
     }
+
+    // 契約ステータスの取得
+    const contractStatus = getContractStatus(subscriptionData)
+    response = {
+      statusCode: 200,
+      body: JSON.stringify({ contractStatus: contractStatus, systemSettings: { retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount, retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold } }),
+    };
 
   } catch (err) {
     // エラーログの出力
