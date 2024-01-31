@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS conversation_history (
     device_div CHARACTER VARYING (20) NOT NULL,
     user_message TEXT,
     ai_message TEXT,
+    ai_message_additional TEXT,
     javascript_code TEXT,
     user_rating CHARACTER (1),
     user_message_at TIMESTAMP(6) WITHOUT TIME zone,

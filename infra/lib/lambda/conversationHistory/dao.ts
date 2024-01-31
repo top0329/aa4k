@@ -11,6 +11,7 @@ interface ConversationHistoryResultRow {
   id: string,
   user_message: string,
   ai_message: string,
+  ai_message_additional: string,
   user_rating: string,
 }
 
@@ -36,6 +37,7 @@ export const selectConversationHistory = async (dbClient: Client, reqBody: ListR
   sql += ` id`;
   sql += ` , user_message`;
   sql += ` , ai_message`;
+  sql += ` , ai_message_additional`;
   sql += ` , user_rating`;
   sql += ` from`;
   sql += ` conversation_history`;
@@ -94,6 +96,7 @@ export const insertConversationHistory = async (dbClient: Client, reqBody: Inser
 export const updateConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<QueryResultRow>> => {
   const pram = [
     reqBody.message,
+    reqBody.messageAdditional,
     reqBody.javascriptCode,
     reqBody.conversationId,
   ];
@@ -102,10 +105,11 @@ export const updateConversationHistory = async (dbClient: Client, reqBody: Inser
   sql += ` conversation_history`;
   sql += ` set`;
   sql += ` ai_message = $1`;
-  sql += ` , javascript_code = $2`;
+  sql += ` , ai_message_additional = $2`;
+  sql += ` , javascript_code = $3`;
   sql += ` , ai_message_at = now()`;
   sql += ` where`;
-  sql += ` id = $3`;
+  sql += ` id = $4`;
 
   return await dbClient.query(sql, pram);
 };

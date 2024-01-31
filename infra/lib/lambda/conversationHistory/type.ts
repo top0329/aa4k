@@ -21,6 +21,7 @@ export const InsertRequestBodySchema = z.object({
   deviceDiv: z.nativeEnum(DeviceDiv),
   messageDiv: z.nativeEnum(MessageDiv),
   message: z.string(),
+  messageAdditional: z.string().optional(),
   conversationId: z.string().optional(),
   javascriptCode: z.string().optional(),
 })
