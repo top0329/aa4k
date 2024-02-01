@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, Button, Flex } from '@radix-ui/themes';
 import React from 'react';
 import { PromtTextArea } from "../PromtTextarea/PromtTextArea";
-import { useFormLogic } from './FormLogic';
+import { useFormLogic } from './useFormLogic';
 
 type FormProps = {
   onSubmit: (data: { example: string }) => void;

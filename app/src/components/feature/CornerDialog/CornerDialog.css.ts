@@ -23,14 +23,16 @@ export const DialogOverlay = style({
   },
 });
 
-export const DialogContent = style({
+export const DialogChat = style({
   background: `rgba(255, 255, 255, 0.96)`,
   boxShadow: `0px 0px 32px 0 ${vars.color.grayA.grayA5}`,
   borderRadius: 16,
   position: `fixed`,
   bottom: `64px`,
-  right: `12px`,
+  right: 8,
   display: `flex`,
+  justifyContent: "flex-end",
+  alignItems: "flex-end",
   width: 640,
   height: `90vh`,
   overflowY: `auto`,
@@ -41,31 +43,8 @@ export const DialogContent = style({
   },
 });
 
-export const JustifyFlexEnd = style({
-  display: "flex",
-  justifyContent: "flex-end",
-});
-
 export const Sticky = style({
   position: "sticky",
   bottom: 0,
   zIndex: 102,
-});
-
-export const Textarea = style({
-  width: "100%",
-  borderRadius: 8,
-  background: `rgba(255, 255, 255, 0.96)`,
-  padding: `12px 14px`,
-  border: "none",
-  resize: "none",
-  boxShadow: ` 0px 0px 32px 0px rgba(0, 0, 0, 0.1)`,
-});
-
-export const TextareaContainer = style({
-  position: "relative",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: 12,
 });
