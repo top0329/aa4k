@@ -278,7 +278,7 @@ async function createJs(
   let editedCode = originalCode;
   resProperties.forEach((obj) => {
     const method = obj.method;
-    if (method === "CREATE") {
+    if (method === CodeCreateMethod.create) {
       editedCode = obj.javascriptCode;
     } else {
       editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
