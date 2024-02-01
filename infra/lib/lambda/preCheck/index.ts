@@ -1,6 +1,6 @@
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from "zod";
-import { getParameterValues, getSecretValues } from "../utils";
+import { getParameterValues, getSecretValues, ValidationError } from "../utils";
 import { getContractStatus } from "../utils/getContractStatus";
 import { RequestHeaderName } from '../utils/type'
 import { checkPluginVersion } from "../utils/versionCheck";
@@ -88,12 +88,6 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
  * @param subscriptionId 
  * @param pluginVersion 
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, pluginVersion: string) => {
   try {
     // ヘッダー.サブスクリプションID

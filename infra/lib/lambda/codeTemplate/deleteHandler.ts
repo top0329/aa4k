@@ -4,7 +4,7 @@ import { z } from "zod";
 import { DeleteRequestBody, DeleteRequestBodySchema } from "./type"
 import { deleteTmplateCode } from "./dao";
 import { pgVectorInitialize } from "./common";
-import { getDbConfig, getSecretValues } from "../utils";
+import { getDbConfig, getSecretValues, ValidationError } from "../utils";
 import { RequestHeaderName } from "../utils/type";
 
 export const deleteHandler = async (req: Request, res: Response) => {
@@ -80,12 +80,6 @@ export const deleteHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqBody 
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, reqBody: DeleteRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID

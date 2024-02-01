@@ -5,7 +5,7 @@ import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./type"
 import { insertTmplateCode } from "./dao";
 import { pgVectorInitialize } from "./common";
-import { getDbConfig, getSecretValues } from "../utils";
+import { getDbConfig, getSecretValues, ValidationError } from "../utils";
 import { RequestHeaderName } from "../utils/type";
 import { Document } from "langchain/document";
 
@@ -89,12 +89,6 @@ export const insertHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqBody 
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, reqBody: InsertRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID

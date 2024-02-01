@@ -4,7 +4,7 @@ import { z } from "zod";
 import { UpdateRequestBody, UpdateRequestBodySchema } from "./type"
 import { updateTmplateCode } from "./dao";
 import { pgVectorInitialize } from "./common";
-import { getDbConfig, getSecretValues } from "../utils";
+import { getDbConfig, getSecretValues, ValidationError } from "../utils";
 import { Document } from "langchain/document";
 
 export const updateHandler = async (req: Request, res: Response) => {
@@ -92,12 +92,6 @@ export const updateHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqBody 
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, reqBody: UpdateRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID

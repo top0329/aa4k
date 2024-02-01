@@ -4,7 +4,7 @@ import { z } from "zod";
 import { RetrieveRequestBody, RetrieveRequestBodySchema } from "./type"
 import { selectTmplateCode } from "./dao";
 import { pgVectorInitialize } from "./common";
-import { getDbConfig, getSecretValues } from "../utils";
+import { getDbConfig, getSecretValues, ValidationError } from "../utils";
 import { RequestHeaderName } from "../utils/type";
 
 export const retrieveHandler = async (req: Request, res: Response) => {
@@ -83,12 +83,6 @@ export const retrieveHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqBody 
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, reqBody: RetrieveRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID

@@ -3,7 +3,7 @@ import { Client } from "pg";
 import { z } from "zod";
 import { GetCodeRequestBody, GetCodeRequestBodySchema } from "./type";
 import { selectLatestJavascriptCode } from "./dao";
-import { getSecretValues, getDbConfig } from "../utils";
+import { getSecretValues, getDbConfig, ValidationError } from "../utils";
 import { changeSchemaSearchPath } from "../utils/dao";
 import { RequestHeaderName } from "../utils/type";
 
@@ -75,12 +75,6 @@ export const getCodeHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqQuery 
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, pluginVersion: string, body: GetCodeRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID

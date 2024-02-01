@@ -4,7 +4,7 @@ import { format, utcToZonedTime } from 'date-fns-tz';
 import { z } from "zod";
 import { LogLangchainRequestBodySchema, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./type";
 import { insertLangchainProcessLog } from "./dao";
-import { getSecretValues, getDbConfig } from "../utils";
+import { getSecretValues, getDbConfig, ValidationError } from "../utils";
 import { RequestHeaderName } from '../utils/type'
 
 /**
@@ -106,12 +106,6 @@ const getCurrentDateStr = () => {
 /**
  * リクエストパラメータのバリデーション
  */
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
 const validateRequestParam = (subscriptionId: string, pluginVersion: string, reqBody: LogLangchainRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID

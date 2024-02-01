@@ -105,3 +105,13 @@ export const getRedisConfig = () => {
     port: parseInt(process.env.REDIS_ENDPOINT_PORT || '6379', 10),
   };
 }
+
+/**
+ * バリデーションエラークラス
+ */
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
