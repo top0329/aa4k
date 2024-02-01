@@ -9,16 +9,23 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import * as cheerio from "cheerio"
 
 import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
-import { addLineNumbersToText, modifyCode } from "./util"
+import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { langchainCallbacks } from "../langchainCallbacks";
-import { openAIModel } from "../common"
-import { AiResponse, Conversation } from "../../types/ai";
+import { openAIModel, ContractExpiredError } from "../common"
+import { DeviceDiv } from "../../types"
+import { AiResponse, Conversation, MessageType, CodeCreateMethod, AppCreateJsContext, GeneratedCodeGetResponse, kintoneFormFields } from "../../types/ai";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
 
 import * as prettier from "prettier/standalone"
 import parserBabel from "prettier/plugins/babel";
 import * as prettierPluginEstree from "prettier/plugins/estree";
+
+// 定数: LLMに渡す会話履歴数
+const HISTORY_USE_COUNT = 10 as const;
+
+// カスタムエラーオブジェクト
+export class LlmError extends Error { }
 
 /**
  * kintoneカスタマイズJavascript生成
@@ -27,10 +34,9 @@ import * as prettierPluginEstree from "prettier/plugins/estree";
  */
 export const appCreateJs = async (conversation: Conversation): Promise<AiResponse> => {
   const callbackFuncs: Function[] = [];
+  const appCreateJsContext = conversation.context as AppCreateJsContext;
+  const { appId, userId, conversationId, deviceDiv, isGuestSpace } = appCreateJsContext;
   try {
-    const { context = {} } = conversation; // デフォルト値としてchatHistory = [], context = {}を設定
-    const { appId, userId, conversationId, deviceDiv, isGuestSpace } = context;
-
     // --------------------
     // コード生成に必要なリソースの取得
     // --------------------
@@ -64,22 +70,24 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     // 回答メッセージと生成したコードの登録 (会話履歴TBL)
     // --------------------
-    // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
-    kintone.proxy(
-      `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
-      "POST",
-      { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
-      { appId: appId, userId: userId, deviceDiv: deviceDiv, messageDiv: "ai", message: response, conversationId: conversationId, javascriptCode: formattedCode },
-    );
+    insertConversation(appId, userId, deviceDiv, MessageType.ai, response, conversationId, formattedCode)
 
     // --------------------
     // コールバック関数設定(コード生成後の動作)
     // --------------------
-    callbackFuncs.push(() => {
-      if (window.confirm("テスト環境で動作確認を行いますか？「OK」を選択するとテスト環境へ画面遷移します。")) {
-        (location.href = `/k/admin/preview/${appId}/`)
-      }
-    });
+    const redirectPath = `/k/admin/preview/${appId}/`;
+    const currentUrl = location.href;
+    if (currentUrl.includes(redirectPath)) {
+      // プレビュー画面の場合
+      callbackFuncs.push(() => { (location.href = redirectPath) });
+    } else {
+      // 本番画面の場合
+      callbackFuncs.push(() => {
+        if (window.confirm("テスト環境で動作確認を行いますか？「OK」を選択するとテスト環境へ画面遷移します。")) {
+          (location.href = redirectPath)
+        }
+      });
+    }
 
     // 終了
     return {
@@ -93,10 +101,17 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
   } catch (err) {
     console.log("AI機能-kintoneカスタマイズJavascript生成に失敗しました。")
     console.log(err)
-    throw err
+    if (err instanceof LlmError || err instanceof ContractExpiredError) {
+      const message = err.message;
+      insertConversation(appId, userId, deviceDiv, MessageType.system, message, conversationId)
+      return { message: { role: MessageType.system, content: message, } }
+    } else {
+      const message = "システムエラーが発生しました";
+      insertConversation(appId, userId, deviceDiv, MessageType.system, message, conversationId)
+      return { message: { role: MessageType.system, content: message } }
+    }
   }
 }
-
 
 
 
@@ -106,17 +121,18 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
  * @returns isLatestCode, fieldInfo, codingGuideLineList[], codeTemplate, kintoneCustomizeFiles, targetFileKey, originalCode
  */
 async function preGetResource(conversation: Conversation) {
-  const { message, context = {} } = conversation; // デフォルト値としてcontext = {}を設定
-  const { appId, userId, deviceDiv, isGuestSpace, systemSettings } = context;
+  const { message } = conversation;
+  const appCreateJsContext = conversation.context as AppCreateJsContext;
+  const { appId, userId, deviceDiv, isGuestSpace, systemSettings } = appCreateJsContext;
 
   // --------------------
   // フィールド情報の取得
   // --------------------
   const getField_res = await kintone.api(
-    kintone.api.url("/k/v1/app/form/fields", false),
+    kintone.api.url("/k/v1/app/form/fields", isGuestSpace),
     "GET", { app: appId },
-  );
-  const fieldInfo = getField_res["properties"];
+  ) as kintoneFormFields;
+  const fieldInfo = getField_res.properties;
 
   // --------------------
   // コードテンプレートの取得
@@ -153,11 +169,11 @@ async function preGetResource(conversation: Conversation) {
     { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
     { appId: appId, userId: userId, deviceDiv: deviceDiv, },
   );
-  const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]);
+  const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]) as GeneratedCodeGetResponse;
   const jsCodeForDb = resJson_jsCodeForDb.javascriptCode;
 
   // 最新コード比較
-  const isLatestCode = (jsCodeForKintone === jsCodeForDb) ? true : false;
+  const isLatestCode = jsCodeForKintone === jsCodeForDb
 
   // 結果返却
   return {
@@ -170,9 +186,6 @@ async function preGetResource(conversation: Conversation) {
     originalCode: jsCodeForKintone
   }
 }
-
-
-
 
 
 /**
@@ -193,8 +206,9 @@ async function createJs(
   codeTemplate: Document[],
   originalCode: string,
 ) {
-  const { message, chatHistory = [], context = {} } = conversation; // デフォルト値としてchatHistory = [], context = {}を設定
-  const { appId, contractDiv } = context;
+  const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
+  const appCreateJsContext = conversation.context as AppCreateJsContext;
+  const { contractDiv } = appCreateJsContext;
   const codingGuideLine = codingGuideLineList[0];
   const secureCodingGuideline = codingGuideLineList[1];
 
@@ -202,8 +216,7 @@ async function createJs(
   const histories: BaseMessage[] = [];
   if (isLatestCode) {
     // 直近 N個の 会話履歴を使用する
-    const historyUseCount = import.meta.env.VITE_HISTORY_USE_COUNT
-    chatHistory.slice(-historyUseCount).forEach(history => {
+    chatHistory.slice((-1) * HISTORY_USE_COUNT).forEach(history => {
       if (history.role === "human") {
         histories.push(new HumanMessage(history.content));
       } else if (history.role === "ai") {
@@ -215,7 +228,7 @@ async function createJs(
   }
   // 生成（LLM実行）
   const handler = BaseCallbackHandler.fromMethods({ ...langchainCallbacks });
-  const model = openAIModel(contractDiv, appId);
+  const model = openAIModel(contractDiv);
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", APP_CREATE_JS_SYSTEM_PROMPT],
     ...histories,
@@ -231,7 +244,7 @@ async function createJs(
     guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
     properties: z.array(
       z.object({
-        method: z.string().describe("メソッド"),
+        method: z.nativeEnum(CodeCreateMethod).describe("メソッド"),
         startAt: z.number().describe("開始位置"),
         endAt: z.number().describe("終了位置"),
         linesCount: z.number().describe("行数"),
@@ -256,9 +269,9 @@ async function createJs(
     codingGuideLine: codingGuideLine,
     secureCodingGuideline: secureCodingGuideline,
     fieldInfo: JSON.stringify(fieldInfo),
-    originalCode: addLineNumbersToText(originalCode),
+    originalCode: addLineNumbersToCode(originalCode),
     codeTemplate: codeTemplate,
-  }, { callbacks: [handler] })) as LLMResponse;
+  }, { callbacks: [handler] }).catch(() => { throw new LlmError("kintoneカスタマイズJavascriptの生成に失敗しました") })) as LLMResponse;
 
   // 出力コード編集
   const resProperties = llmResponse.properties;
@@ -278,4 +291,27 @@ async function createJs(
     llmResponse,
     formattedCode
   };
+}
+
+
+/**
+ * 会話履歴の登録
+ * @param appId 
+ * @param userId 
+ * @param deviceDiv 
+ * @param message 
+ * @param conversationId 
+ * @param code 
+ */
+function insertConversation(appId: string, userId: string, deviceDiv: DeviceDiv, messageDiv: MessageType, message: string, conversationId: string, javascriptCode?: string) {
+  const body = messageDiv == MessageType.ai ?
+    { appId, userId, deviceDiv, messageDiv, message, conversationId, javascriptCode } :
+    { appId, userId, deviceDiv, messageDiv, message, conversationId }
+  // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
+  kintone.proxy(
+    `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
+    "POST",
+    { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+    body,
+  );
 }

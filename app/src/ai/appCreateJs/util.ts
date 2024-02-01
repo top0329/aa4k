@@ -3,7 +3,7 @@
  * @param code 
  * @returns 行数付きcodeテキスト
  */
-export function addLineNumbersToText(code: string) {
+export function addLineNumbersToCode(code: string) {
   if(!code) return "";
   // 各行を改行で分割
   const lines = code.split('\n');
@@ -19,7 +19,10 @@ export function addLineNumbersToText(code: string) {
 }
 
 /**
- * 指定の行へのコード挿入・削除・更新
+ * コード編集(挿入・更新・削除)
+ *     挿入: originalCodeに対し、startLineにnewCodeを挿入する
+ *     更新: originalCodeに対し、startLineからendLineをnewCodeで上書き更新
+ *     削除: originalCodeに対し、startLineからdelCountの行数を削除
  * @param originalCode 
  * @param startLine 
  * @param endLine 

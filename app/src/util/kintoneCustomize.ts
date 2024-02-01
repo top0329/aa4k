@@ -33,11 +33,14 @@ export type AppCustomize = {
 }
 
 /**
- * kintoneカスタマイズからjavascriptファイルを取得
+ * kintoneカスタマイズからアプリのカスタマイズ情報とAA4Kで作成したjavascript情報を取得する
  * @param appId 
  * @param deviceDiv 
  * @param isGuestSpace
- * @returns { kintoneCustomizeFiles targetFileKey jsCodeForKintone }
+ * @returns {object} {kintoneCustomizeFiles, targetFileKey, jsCodeForKintone}
+ * @returns {AppCustomize} kintoneCustomizeFiles - カスタマイズ設定情報
+ * @returns {string} targetFileKey - AA4kのjavascriptファイルキー
+ * @returns {string} jsCodeForKintone - AA4kのjavascriptコード
  */
 export async function getKintoneCustomizeJs(appId: string, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
   let jsCodeForKintone = "";
@@ -103,7 +106,7 @@ export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: 
 
   // AA4kのファイルを除外
   const filterTarget = (deviceDiv === DeviceDiv.desktop) ? kintoneCustomizeFiles.desktop.js : kintoneCustomizeFiles.mobile.js;
-  const filteredJs = filterTarget!.filter(
+  const filteredJs = filterTarget.filter(
     (item: AppCustomizeResourceForResponse) => (item.type === "FILE" && item.file.fileKey !== existingFileKey),
   );
   if (deviceDiv === DeviceDiv.desktop) {
