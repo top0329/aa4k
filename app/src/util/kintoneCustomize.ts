@@ -42,7 +42,7 @@ export type AppCustomize = {
  * @returns {string} targetFileKey - AA4kのjavascriptファイルキー
  * @returns {string} jsCodeForKintone - AA4kのjavascriptコード
  */
-export async function getKintoneCustomizeJs(appId: string, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
+export async function getKintoneCustomizeJs(appId: number, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
   let jsCodeForKintone = "";
   let targetFileKey: string = "";
 
@@ -78,7 +78,7 @@ export async function getKintoneCustomizeJs(appId: string, deviceDiv: DeviceDiv,
  * @param deviceDiv 
  * @param isGuestSpace 
  */
-export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: string, kintoneCustomizeFiles: AppCustomize, appId: string, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
+export async function updateKintoneCustomizeJs(jsCode: string, existingFileKey: string, kintoneCustomizeFiles: AppCustomize, appId: number, deviceDiv: DeviceDiv, isGuestSpace: boolean) {
   // JSコードを一時保存領域へアップロード
   const blob = new Blob([jsCode], {
     type: "application/javascript",

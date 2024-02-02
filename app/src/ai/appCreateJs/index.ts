@@ -21,9 +21,6 @@ import * as prettier from "prettier/standalone"
 import parserBabel from "prettier/plugins/babel";
 import * as prettierPluginEstree from "prettier/plugins/estree";
 
-// 定数: LLMに渡す会話履歴数
-const HISTORY_USE_COUNT = 10 as const;
-
 // カスタムエラーオブジェクト
 export class LlmError extends Error { }
 
@@ -208,7 +205,7 @@ async function createJs(
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { contractDiv } = appCreateJsContext;
+  const { contractDiv, systemSettings } = appCreateJsContext;
   const codingGuideLine = codingGuideLineList[0];
   const secureCodingGuideline = codingGuideLineList[1];
 
@@ -216,7 +213,8 @@ async function createJs(
   const histories: BaseMessage[] = [];
   if (isLatestCode) {
     // 直近 N個の 会話履歴を使用する
-    chatHistory.slice((-1) * HISTORY_USE_COUNT).forEach(history => {
+    const historyUseCount = systemSettings.historyUseCount;
+    chatHistory.slice((-1) * historyUseCount).forEach(history => {
       if (history.role === "human") {
         histories.push(new HumanMessage(history.content));
       } else if (history.role === "ai") {
@@ -303,7 +301,7 @@ async function createJs(
  * @param conversationId 
  * @param code 
  */
-function insertConversation(appId: string, userId: string, deviceDiv: DeviceDiv, messageDiv: MessageType, message: string, conversationId: string, javascriptCode?: string) {
+function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageDiv: MessageType, message: string, conversationId: string, javascriptCode?: string) {
   const body = messageDiv == MessageType.ai ?
     { appId, userId, deviceDiv, messageDiv, message, conversationId, javascriptCode } :
     { appId, userId, deviceDiv, messageDiv, message, conversationId }

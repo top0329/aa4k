@@ -2,7 +2,7 @@ import { DeviceDiv, ContractDiv } from "./index"
 import { DocumentInterface } from "@langchain/core/documents";
 
 // src/types/agents.ts
-// デバイス区分
+// 繝�繝舌う繧ｹ蛹ｺ蛻�
 export const MessageType = {
   human: "human",
   ai: "ai",
@@ -33,9 +33,10 @@ export type ChatHistory = Array<ChatMessage>;
 export interface SystemSettings {
   retrieveMaxCount: number;
   retrieveScoreThreshold: number;
+  historyUseCount: number;
 }
 export interface AppCreateJsContext {
-  appId: string;
+  appId: number;
   userId: string;
   conversationId: string;
   deviceDiv: DeviceDiv;
@@ -46,7 +47,7 @@ export interface AppCreateJsContext {
 export interface Conversation {
   message: HumanMessage;
   chatHistory?: ChatHistory;
-  context?: Context | AppCreateJsContext;
+  context?: AppCreateJsContext;
 }
 
 export interface AiResponse {
