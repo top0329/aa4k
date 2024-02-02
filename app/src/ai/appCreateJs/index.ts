@@ -301,10 +301,10 @@ async function createJs(
  * @param conversationId 
  * @param code 
  */
-function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageDiv: MessageType, message: string, conversationId: string, javascriptCode?: string) {
-  const body = messageDiv == MessageType.ai ?
-    { appId, userId, deviceDiv, messageDiv, message, conversationId, javascriptCode } :
-    { appId, userId, deviceDiv, messageDiv, message, conversationId }
+function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, javascriptCode?: string) {
+  const body = messageType == MessageType.ai ?
+    { appId, userId, deviceDiv, messageType, message, conversationId, javascriptCode } :
+    { appId, userId, deviceDiv, messageType, message, conversationId }
   // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
   kintone.proxy(
     `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,

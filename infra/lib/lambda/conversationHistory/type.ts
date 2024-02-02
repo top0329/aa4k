@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DeviceDiv, MessageDiv } from "../utils/type";
+import { DeviceDiv, MessageType } from "../utils/type";
 
 // リクエストボディ
 // ******************************
@@ -19,7 +19,7 @@ export const InsertRequestBodySchema = z.object({
   appId: z.union([z.string(), z.number()]),
   userId: z.string(),
   deviceDiv: z.nativeEnum(DeviceDiv),
-  messageDiv: z.nativeEnum(MessageDiv),
+  messageType: z.nativeEnum(MessageType),
   message: z.string(),
   messageAdditional: z.string().optional(),
   conversationId: z.string().optional(),
