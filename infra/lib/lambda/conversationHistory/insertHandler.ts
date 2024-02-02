@@ -3,10 +3,9 @@ import { Client } from "pg";
 import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./type";
 import { insertConversationHistory, updateConversationHistory } from "./dao";
-import { getSecretValues, getDbConfig } from "../utils";
+import { getSecretValues, getDbConfig, ValidationError } from "../utils";
 import { changeSchemaSearchPath } from "../utils/dao";
 import { MessageDiv, RequestHeaderName } from "../utils/type";
-import { checkPluginVersion } from "../utils/versionCheck";
 
 export const insertHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -19,13 +18,9 @@ export const insertHandler = async (req: Request, res: Response) => {
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
     pluginVersion = req.header(RequestHeaderName.aa4kPluginVersion) as string;
-    body = (req.body ? JSON.parse(req.body) : {})  as InsertRequestBody;
+    body = (req.body ? JSON.parse(req.body) : {}) as InsertRequestBody;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, pluginVersion, body).catch(async (err) => {
-      retErrorStatus = 400;
-      retErrorMessage = "Bad Request";
-      throw err;
-    });
+    validateRequestParam(subscriptionId, pluginVersion, body);
 
     // 開始ログの出力
     const startLog = {
@@ -37,13 +32,6 @@ export const insertHandler = async (req: Request, res: Response) => {
 
     // Secret Manager情報の取得(DB_ACCESS_SECRET)
     const { dbAccessSecretValue } = await getSecretValues();
-
-    // プラグインバージョンチェック
-    const isVersionOk = await checkPluginVersion(pluginVersion, dbAccessSecretValue);
-    if (!isVersionOk) {
-      res.status(422).json({ message: "Unsupported Version" });
-      return;
-    }
 
     // データベース接続情報
     const dbConfig = getDbConfig(dbAccessSecretValue)
@@ -78,6 +66,10 @@ export const insertHandler = async (req: Request, res: Response) => {
       error: err,
     });
     console.error(errorMessage);
+    if (err instanceof ValidationError) {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+    }
     res.status(retErrorStatus).json({ message: retErrorMessage });
   } finally {
     if (dbClient) {
@@ -92,7 +84,7 @@ export const insertHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqQuery 
  */
-const validateRequestParam = async (subscriptionId: string, pluginVersion: string, body: InsertRequestBody) => {
+const validateRequestParam = (subscriptionId: string, pluginVersion: string, body: InsertRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
@@ -103,6 +95,6 @@ const validateRequestParam = async (subscriptionId: string, pluginVersion: strin
     // ボディ
     InsertRequestBodySchema.parse(body);
   } catch (err) {
-    throw err;
+    throw new ValidationError('Invalid request parameters');
   }
 }

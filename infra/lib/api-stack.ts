@@ -12,7 +12,7 @@ import { Aa4kElastiCacheStack } from './elasticache-stack'
 import { Aa4kParameterStack } from './parameter-stack'
 
 export class Aa4kApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, elastiCacheStack : Aa4kElastiCacheStack, parameterStack: Aa4kParameterStack, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, elastiCacheStack: Aa4kElastiCacheStack, parameterStack: Aa4kParameterStack, props?: cdk.StackProps) {
     super(scope, id, props);
     const stageName = contextProps.stageName;
 
@@ -184,6 +184,31 @@ export class Aa4kApiStack extends cdk.Stack {
       }
     });
 
+    // pre-check Lambda
+    const preCheck = new nodelambda.NodejsFunction(this, "preCheck", {
+      entry: __dirname + "/lambda/preCheck/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(preCheck);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(preCheck)
+    parameterStack.aa4kConstParameter.grantRead(preCheck);
+    restapi.root.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(preCheck), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
+    })
+
     // LangchainLog Lambda
     const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
       entry: __dirname + "/lambda/langchainLog/index.ts",
@@ -191,12 +216,14 @@ export class Aa4kApiStack extends cdk.Stack {
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG],
       environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
         DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
         RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X
     })
+    secretsStack.azureSecret.grantRead(langchainLog);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(langchainLog)
     restapi.root.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,

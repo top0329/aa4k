@@ -6,7 +6,7 @@ import { DeviceDiv, MessageDiv } from "../utils/type";
 // 会話履歴取得
 // ******************************
 export const ListRequestBodySchema = z.object({
-  appId: z.string(),
+  appId: z.union([z.string(), z.number()]),
   userId: z.string(),
   deviceDiv: z.nativeEnum(DeviceDiv),
 })
@@ -16,7 +16,7 @@ export type ListRequestBody = z.infer<typeof ListRequestBodySchema>;
 // 会話履歴登録
 // ******************************
 export const InsertRequestBodySchema = z.object({
-  appId: z.string(),
+  appId: z.union([z.string(), z.number()]),
   userId: z.string(),
   deviceDiv: z.nativeEnum(DeviceDiv),
   messageDiv: z.nativeEnum(MessageDiv),

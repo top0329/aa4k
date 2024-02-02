@@ -19,13 +19,16 @@ export interface AzureSecretValue {
 // Parameter Store情報(AA4K_CONST_PARAMETER_NAME)
 export interface AA4KConstParameterValue {
   allowedCidrs: string[],
+  retrieveMaxCount: number,
+  retrieveScoreThreshold: number,
+  historyUseCount: number,
 }
 
 // リクエストヘッダ
 export const RequestHeaderName = {
   aa4kSubscriptionId: "aa4k-subscription-id",
-  aa4kPluginVersion : "aa4k-plugin-version",
-  aa4kApiKey : "aa4k-api-key",
+  aa4kPluginVersion: "aa4k-plugin-version",
+  aa4kApiKey: "aa4k-api-key",
 } as const;
 
 // デバイス
@@ -46,7 +49,7 @@ export const ContractStatus = {
   active: "active",
   expired: "expired",
 } as const;
-
+export type ContractStatus = keyof typeof ContractStatus
 // redis空レコード
 export type RedisEmptyRecord = Record<string, never>
 

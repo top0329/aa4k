@@ -4,7 +4,7 @@ import { z } from "zod";
 import { DeleteRequestBody, DeleteRequestBodySchema } from "./type"
 import { deleteTmplateCode } from "./dao";
 import { pgVectorInitialize } from "./common";
-import { getDbConfig, getSecretValues } from "../utils";
+import { getDbConfig, getSecretValues, ValidationError } from "../utils";
 import { RequestHeaderName } from "../utils/type";
 
 export const deleteHandler = async (req: Request, res: Response) => {
@@ -19,11 +19,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
     body = (req.body ? JSON.parse(req.body) : {}) as DeleteRequestBody;
     const { templateCodeIds } = body;
     // リクエストのバリデーション
-    await validateRequestParam(subscriptionId, body).catch(async (err) => {
-      retErrorStatus = 400;
-      retErrorMessage = "Bad Request";
-      throw err;
-    });
+    validateRequestParam(subscriptionId, body);
 
     // 開始ログの出力
     const startLog = {
@@ -65,6 +61,10 @@ export const deleteHandler = async (req: Request, res: Response) => {
       error: err,
     });
     console.error(errorMessage);
+    if (err instanceof ValidationError) {
+      retErrorStatus = 400;
+      retErrorMessage = "Bad Request";
+    }
     res.status(retErrorStatus).json({ message: retErrorMessage });
   } finally {
     if (dbClient) {
@@ -80,7 +80,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
  * @param subscriptionId 
  * @param reqBody 
  */
-const validateRequestParam = async (subscriptionId: string, reqBody: DeleteRequestBody) => {
+const validateRequestParam = (subscriptionId: string, reqBody: DeleteRequestBody) => {
   try {
     // ヘッダー.サブスクリプションID
     const uuidSchema = z.string().uuid();
@@ -89,6 +89,6 @@ const validateRequestParam = async (subscriptionId: string, reqBody: DeleteReque
     DeleteRequestBodySchema.parse(reqBody);
 
   } catch (err) {
-    throw err;
+    throw new ValidationError('Invalid request parameters');
   }
 }

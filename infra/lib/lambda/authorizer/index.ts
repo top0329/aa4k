@@ -1,7 +1,8 @@
 import { APIGatewayRequestAuthorizerEvent, PolicyDocument } from 'aws-lambda';
 import ipCidr from 'ip-cidr';
 import { getParameterValues, getSecretValues } from "../utils";
-import { RequestHeaderName } from "../utils/type";
+import { getContractStatus } from "../utils/getContractStatus";
+import { RequestHeaderName, ContractStatus } from "../utils/type";
 import { getSubscriptionData } from "../utils/getSubscriptionData"
 
 interface AllowPolicy {
@@ -37,8 +38,15 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
       return generateDenyPolicy(event.methodArn);
     }
 
+    // サブスクリプション存在チェック
     const subscriptionData = await getSubscriptionData(subscriptionId, secret.dbAccessSecretValue)
     if (!subscriptionData) {
+      return generateDenyPolicy(event.methodArn);
+    }
+
+    // 契約ステータスチェック
+    const contractStatus = getContractStatus(subscriptionData);
+    if (contractStatus === ContractStatus.expired) {
       return generateDenyPolicy(event.methodArn);
     }
 

@@ -6,7 +6,7 @@ import { DeviceDiv } from "../utils/type";
 // 最新JS取得
 // ******************************
 export const GetCodeRequestBodySchema = z.object({
-  appId: z.string(),
+  appId: z.union([z.string(), z.number()]),
   userId: z.string(),
   deviceDiv: z.nativeEnum(DeviceDiv),
 })
