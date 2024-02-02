@@ -2,7 +2,7 @@ import { DeviceDiv, ContractDiv } from "./index"
 import { DocumentInterface } from "@langchain/core/documents";
 
 // src/types/agents.ts
-// デバイス区分
+// メッセージ種別
 export const MessageType = {
   human: "human",
   ai: "ai",

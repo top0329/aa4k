@@ -37,9 +37,9 @@ export const DeviceDiv = {
   mobile: "mobile",
 } as const;
 
-// 発言区分
-export const MessageDiv = {
-  user: "user",
+// メッセージ種別
+export const MessageType = {
+  human: "human",
   ai: "ai",
   system: "system",
 } as const;
