@@ -2,7 +2,7 @@ import { Response, Request } from "express";
 import { Client } from "pg";
 import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./type";
-import { insertConversationHistory, updateConversationHistory } from "./dao";
+import { insertConversationHistory, updateAiConversationHistory, updateSystemConversationHistory } from "./dao";
 import { getSecretValues, getDbConfig, ValidationError } from "../utils";
 import { changeSchemaSearchPath } from "../utils/dao";
 import { MessageDiv, RequestHeaderName } from "../utils/type";
@@ -51,7 +51,12 @@ export const insertHandler = async (req: Request, res: Response) => {
         break;
       case MessageDiv.ai:
         // 会話履歴TBLへのAI発言の登録
-        await updateConversationHistory(dbClient, body);
+        await updateAiConversationHistory(dbClient, body);
+        res.status(200).json({ conversationId: body.conversationId });
+        break;
+      case MessageDiv.system:
+        // 会話履歴TBLへのシステム発言の登録
+        await updateSystemConversationHistory(dbClient, body);
         res.status(200).json({ conversationId: body.conversationId });
         break;
       default:

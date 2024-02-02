@@ -4,7 +4,6 @@ import {
   InsertRequestBody,
 } from "./type";
 
-
 // 型定義
 // 会話履歴取得クエリ結果行
 interface ConversationHistoryResultRow {
@@ -12,6 +11,7 @@ interface ConversationHistoryResultRow {
   user_message: string,
   ai_message: string,
   ai_message_additional: string,
+  system_message: string,
   user_rating: string,
 }
 
@@ -38,6 +38,7 @@ export const selectConversationHistory = async (dbClient: Client, reqBody: ListR
   sql += ` , user_message`;
   sql += ` , ai_message`;
   sql += ` , ai_message_additional`;
+  sql += ` , system_message`;
   sql += ` , user_rating`;
   sql += ` from`;
   sql += ` conversation_history`;
@@ -48,7 +49,7 @@ export const selectConversationHistory = async (dbClient: Client, reqBody: ListR
   sql += ` order by`;
   sql += ` id asc`;
 
-  return await dbClient.query(sql, pram);
+  return dbClient.query(sql, pram);
 };
 
 /**
@@ -84,32 +85,57 @@ export const insertConversationHistory = async (dbClient: Client, reqBody: Inser
   sql += ` )`;
   sql += ` returning id`;
 
-  return await dbClient.query(sql, pram);
+  return dbClient.query(sql, pram);
 };
 
 /**
- * 会話履歴TBL更新
+ * 会話履歴TBL更新(AI発言)
  * @param dbClient 
  * @param reqBody
  * @returns クエリ実行結果
  */
-export const updateConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<QueryResultRow>> => {
+export const updateAiConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<QueryResultRow>> => {
+    const pram = [
+      reqBody.message,
+      reqBody.messageAdditional,
+      reqBody.javascriptCode,
+      reqBody.conversationId,
+    ];
+
+    let sql = "";
+    sql += `update`;
+    sql += ` conversation_history`;
+    sql += ` set`;
+    sql += ` ai_message = $1`;
+    sql += ` , ai_message_additional = $2`;
+    sql += ` , javascript_code = $3`;
+    sql += ` , ai_message_at = now()`;
+    sql += ` where`;
+    sql += ` id = $4`;
+
+    return dbClient.query(sql, pram);
+};
+
+/**
+ * 会話履歴TBL更新(システム発言)
+ * @param dbClient 
+ * @param reqBody
+ * @returns クエリ実行結果
+ */
+export const updateSystemConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<QueryResultRow>> => {
   const pram = [
     reqBody.message,
-    reqBody.messageAdditional,
-    reqBody.javascriptCode,
     reqBody.conversationId,
   ];
+
   let sql = "";
   sql += `update`;
   sql += ` conversation_history`;
   sql += ` set`;
-  sql += ` ai_message = $1`;
-  sql += ` , ai_message_additional = $2`;
-  sql += ` , javascript_code = $3`;
-  sql += ` , ai_message_at = now()`;
+  sql += ` system_message = $1`;
+  sql += ` , system_message_at = now()`;
   sql += ` where`;
-  sql += ` id = $4`;
+  sql += ` id = $2`;
 
-  return await dbClient.query(sql, pram);
+  return dbClient.query(sql, pram);
 };

@@ -41,6 +41,7 @@ export const DeviceDiv = {
 export const MessageDiv = {
   user: "user",
   ai: "ai",
+  system: "system",
 } as const;
 
 // 契約ステータス
