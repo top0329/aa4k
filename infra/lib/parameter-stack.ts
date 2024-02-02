@@ -36,6 +36,7 @@ export class Aa4kParameterStack extends cdk.Stack {
       ],
       "retrieveMaxCount": 30,
       "retrieveScoreThreshold": 0.2,
+      "historyUseCount": 10,
     };
 
     // ParameterStore

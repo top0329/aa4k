@@ -21,13 +21,14 @@ export interface AA4KConstParameterValue {
   allowedCidrs: string[],
   retrieveMaxCount: number,
   retrieveScoreThreshold: number,
+  historyUseCount: number,
 }
 
 // リクエストヘッダ
 export const RequestHeaderName = {
   aa4kSubscriptionId: "aa4k-subscription-id",
-  aa4kPluginVersion : "aa4k-plugin-version",
-  aa4kApiKey : "aa4k-api-key",
+  aa4kPluginVersion: "aa4k-plugin-version",
+  aa4kApiKey: "aa4k-api-key",
 } as const;
 
 // デバイス

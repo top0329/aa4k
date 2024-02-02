@@ -60,7 +60,14 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     const contractStatus = getContractStatus(subscriptionData)
     response = {
       statusCode: 200,
-      body: JSON.stringify({ contractStatus: contractStatus, systemSettings: { retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount, retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold } }),
+      body: JSON.stringify({
+        contractStatus: contractStatus,
+        systemSettings: {
+          retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount,
+          retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold,
+          historyUseCount: aa4kConstParameterValue.historyUseCount,
+        }
+      }),
     };
 
   } catch (err) {
