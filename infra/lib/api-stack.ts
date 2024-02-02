@@ -105,7 +105,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // ******************************
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
-      entry: __dirname + "/lambda/codeTemplate/index.ts",
+      entry: __dirname + "/lambda/api/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
@@ -132,7 +132,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // conversationHistory Lambda
     const conversationHistoryLambda = new nodelambda.NodejsFunction(this, "ConversationHistoryLambda", {
-      entry: __dirname + "/lambda/conversationHistory/index.ts",
+      entry: __dirname + "/lambda/api/conversationHistory/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
@@ -159,7 +159,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // generatedCode Lambda
     const generatedCodeLambda = new nodelambda.NodejsFunction(this, "GeneratedCodeLambda", {
-      entry: __dirname + "/lambda/generatedCode/index.ts",
+      entry: __dirname + "/lambda/api/generatedCode/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
@@ -186,7 +186,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // pre-check Lambda
     const preCheck = new nodelambda.NodejsFunction(this, "preCheck", {
-      entry: __dirname + "/lambda/preCheck/index.ts",
+      entry: __dirname + "/lambda/api/preCheck/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -211,7 +211,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // LangchainLog Lambda
     const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
-      entry: __dirname + "/lambda/langchainLog/index.ts",
+      entry: __dirname + "/lambda/api/langchainLog/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG],

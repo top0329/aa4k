@@ -1,9 +1,6 @@
 import { APIGatewayRequestAuthorizerEvent, PolicyDocument } from 'aws-lambda';
 import ipCidr from 'ip-cidr';
-import { getParameterValues, getSecretValues } from "../utils";
-import { getContractStatus } from "../utils/getContractStatus";
-import { RequestHeaderName, ContractStatus } from "../utils/type";
-import { getSubscriptionData } from "../utils/getSubscriptionData"
+import { getParameterValues, getSecretValues, getContractStatus, getSubscriptionData, RequestHeaderName, ContractStatus } from "../utils";
 
 interface AllowPolicy {
   principalId: string;
