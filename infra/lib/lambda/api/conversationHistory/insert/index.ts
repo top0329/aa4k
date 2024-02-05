@@ -3,13 +3,7 @@ import { Client } from "pg";
 import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./schema";
 import { insertConversationHistory, updateAiConversationHistory, updateSystemConversationHistory } from "./dao";
-<<<<<<< HEAD:infra/lib/lambda/conversationHistory/insertHandler.ts
-import { getSecretValues, getDbConfig, ValidationError } from "../utils";
-import { changeSchemaSearchPath } from "../utils/dao";
-import { MessageType, RequestHeaderName } from "../utils/type";
-=======
-import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, MessageDiv, changeSchemaSearchPath } from "../../../utils";
->>>>>>> 633b3e2 (ディレクトリ構成をリファクタリングした):infra/lib/lambda/api/conversationHistory/insert/index.ts
+import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, MessageType, changeSchemaSearchPath } from "../../../utils";
 
 export const insertHandler = async (req: Request, res: Response) => {
   let subscriptionId;

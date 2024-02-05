@@ -11,12 +11,13 @@ export const DeviceDiv = {
   mobile: "mobile",
 } as const;
 
-// 発言区分
+// メッセージ種別
 export const MessageType = {
-  user: "user",
+  human: "human",
   ai: "ai",
   system: "system",
 } as const;
+export type MessageType = keyof typeof MessageType
 
 // 契約ステータス
 export const ContractStatus = {
