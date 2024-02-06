@@ -51,6 +51,15 @@ export class Aa4kApiStack extends cdk.Stack {
       }
     })
 
+    // Gateway Response
+    restapi.addGatewayResponse('GatewayResponse',  {
+      type: apigateway.ResponseType.ACCESS_DENIED,
+      statusCode: '403',
+      templates: {
+        'application/json': '{"message":$context.error.messageString, "errorCode":"$context.authorizer.errorCode"}'
+      }
+    })
+
     // ******************************
     // WAF Web ACL
     // ******************************

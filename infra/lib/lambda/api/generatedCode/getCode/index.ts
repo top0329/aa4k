@@ -3,6 +3,7 @@ import { Client } from "pg";
 import { z } from "zod";
 import { GetCodeRequestBody, GetCodeRequestBodySchema } from "./schema";
 import { selectLatestJavascriptCode } from "./dao";
+import { ErrorCode } from "../constants";
 import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, changeSchemaSearchPath } from "../../../utils";
 
 export const getCodeHandler = async (req: Request, res: Response) => {
@@ -12,6 +13,7 @@ export const getCodeHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
+  let retErrorCode: ErrorCode = ErrorCode.A04002;
 
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
@@ -58,8 +60,9 @@ export const getCodeHandler = async (req: Request, res: Response) => {
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
+      retErrorCode = ErrorCode.A04001;
     }
-    res.status(retErrorStatus).json({ message: retErrorMessage });
+    res.status(retErrorStatus).json({ message: retErrorMessage, errorCode: retErrorCode });
   } finally {
     if (dbClient) {
       // データベース接続を閉じる

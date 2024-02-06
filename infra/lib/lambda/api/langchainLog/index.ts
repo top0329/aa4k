@@ -4,6 +4,7 @@ import { format, utcToZonedTime } from 'date-fns-tz';
 import { z } from "zod";
 import { LogLangchainRequestBodySchema, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./schema";
 import { insertLangchainProcessLog } from "./dao";
+import { ErrorCode } from "./constants";
 import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName } from "../../utils";
 
 /**
@@ -20,6 +21,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
   let dbClient;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
+  let retErrorCode: ErrorCode = ErrorCode.A06002;
   try {
     subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId] as string;
     pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;
@@ -68,10 +70,11 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
+      retErrorCode = ErrorCode.A06001;
     }
     response = {
       statusCode: retErrorStatus,
-      body: JSON.stringify({ message: retErrorMessage })
+      body: JSON.stringify({ message: retErrorMessage, errorCode: retErrorCode })
     };
   } finally {
     if (dbClient) {

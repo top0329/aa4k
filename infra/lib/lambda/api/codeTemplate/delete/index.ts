@@ -4,6 +4,7 @@ import { z } from "zod";
 import { DeleteRequestBody, DeleteRequestBodySchema } from "./schema"
 import { deleteTemplateCode } from "./dao";
 import { pgVectorInitialize } from "../common";
+import { ErrorCode } from "../constants";
 import { getDbConfig, getSecretValues, ValidationError, RequestHeaderName } from "../../../utils";
 
 export const deleteHandler = async (req: Request, res: Response) => {
@@ -12,6 +13,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
+  let retErrorCode: ErrorCode = ErrorCode.A05302;
 
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
@@ -63,8 +65,9 @@ export const deleteHandler = async (req: Request, res: Response) => {
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
+      retErrorCode = ErrorCode.A05301;
     }
-    res.status(retErrorStatus).json({ message: retErrorMessage });
+    res.status(retErrorStatus).json({ message: retErrorMessage, errorCode: retErrorCode });
   } finally {
     if (dbClient) {
       // データベース接続を閉じる

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./schema"
 import { insertTemplateCode } from "./dao";
 import { pgVectorInitialize } from "../common";
+import { ErrorCode } from "../constants";
 import { getDbConfig, getSecretValues, ValidationError, RequestHeaderName } from "../../../utils";
 import { Document } from "langchain/document";
 
@@ -14,6 +15,7 @@ export const insertHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
+  let retErrorCode: ErrorCode = ErrorCode.A05102;
 
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
@@ -70,8 +72,9 @@ export const insertHandler = async (req: Request, res: Response) => {
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
+      retErrorCode = ErrorCode.A05101;
     }
-    res.status(retErrorStatus).json({ message: retErrorMessage });
+    res.status(retErrorStatus).json({ message: retErrorMessage, errorCode: retErrorCode });
   } finally {
     if (dbClient) {
       // データベース接続を閉じる

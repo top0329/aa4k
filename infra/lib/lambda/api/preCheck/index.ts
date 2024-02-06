@@ -1,5 +1,6 @@
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from "zod";
+import { ErrorCode } from "./constants";
 import { getParameterValues, getSecretValues, ValidationError, getContractStatus, checkPluginVersion, getSubscriptionData, RequestHeaderName } from "../../utils";
 
 /**
@@ -14,6 +15,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   let pluginVersion;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
+  let retErrorCode: ErrorCode = ErrorCode.A02003;
   try {
     subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId] as string;
     pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;
@@ -41,7 +43,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (!isVersionOk) {
       response = {
         statusCode: 422,
-        body: JSON.stringify({ message: "Unsupported Version", }),
+        body: JSON.stringify({ message: "Unsupported Version", errorCode: ErrorCode.A02002 }),
       };
       return response;
     }
@@ -80,10 +82,11 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
+      retErrorCode = ErrorCode.A02001;
     }
     response = {
       statusCode: retErrorStatus,
-      body: JSON.stringify({ message: retErrorMessage })
+      body: JSON.stringify({ message: retErrorMessage, errorCode: retErrorCode })
     };
   }
   return response;
