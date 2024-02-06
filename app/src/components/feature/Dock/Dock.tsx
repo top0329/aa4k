@@ -2,15 +2,15 @@
 import { faClose, faCode, faHistory, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Box } from "@radix-ui/themes";
-import { useAtom } from "jotai";
 import { DockGroup, DockIcon, DockInner, DockItem } from "./Dock.css";
-import { DockItemVisibleState } from "./DockState";
+import { useDockLogic } from "./useDockLogic";
 
 const Dock = () => {
-  const [dockState, setDockState] = useAtom(DockItemVisibleState);
-  const toggleItemVisibility = (itemKey: keyof typeof dockState) => {
-    setDockState({ ...dockState, [itemKey]: !dockState[itemKey] });
-  };
+  const {
+    toggleItemVisibility,
+    deleteHistory,
+    initDockState
+  } = useDockLogic();
 
   return (
     <Box className={DockGroup}>
@@ -21,10 +21,10 @@ const Dock = () => {
         <Box className={DockItem} onClick={() => toggleItemVisibility('chatVisible')}>
           <FontAwesomeIcon icon={faMessageLines} size="lg" className={DockIcon} />
         </Box>
-        <Box className={DockItem} onClick={() => toggleItemVisibility('chatVisible')}>
+        <Box className={DockItem} onClick={deleteHistory}>
           <FontAwesomeIcon icon={faHistory} size="lg" className={DockIcon} />
         </Box>
-        <Box className={DockItem} onClick={() => toggleItemVisibility('chatVisible')}>
+        <Box className={DockItem} onClick={initDockState}>
           <FontAwesomeIcon icon={faClose} size="lg" className={DockIcon} />
         </Box>
 

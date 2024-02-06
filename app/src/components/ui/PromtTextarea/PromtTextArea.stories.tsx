@@ -1,4 +1,4 @@
-// src/components/forms/InputField/InputField.stories.tsx
+// src/components/ui/PromtTextarea/PromtTextArea.stories.tsx
 import { Meta } from '@storybook/react';
 import React, { useState } from 'react';
 import { PromtTextArea } from './PromtTextArea';

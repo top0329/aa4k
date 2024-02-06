@@ -1,6 +1,5 @@
 // src/components/ui/CodeEditor/CodeEditor.tsx
-import { faCheck, faClipboard, faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
 import { Box, Button } from '@radix-ui/themes';
 import 'ace-builds/src-min-noconflict/ace';
 import "ace-builds/src-min-noconflict/ext-language_tools";
@@ -12,13 +11,15 @@ import "ace-builds/src-min-noconflict/theme-monokai";
 import 'ace-builds/src-min-noconflict/theme-tomorrow';
 import clsx from 'clsx';
 import AceEditor from "react-ace-builds";
+import CopyButton from '~/components/ui/Copy/Copy';
+import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { sCodeEditor, sCodeEditorFullScreen } from './CodeEditor.css';
 import { useCodeEditorLogic } from './useCodeEditorLogic';
 
 const CodeEditor = () => {
   const { code, copySuccess, handleCodeChange,
     toggleFullScreen,
-    copyCodeToClipboard,
+    copyToClipboard,
     isFullScreen,
     handleRunCode
   } = useCodeEditorLogic();
@@ -45,24 +46,22 @@ const CodeEditor = () => {
             gap: '16px',
           }}
         >
-          <Button variant={copySuccess ? 'solid' : 'soft'} onClick={copyCodeToClipboard}
-            style={{
-              transition: 'all 0.1s ease-in-out',
-            }}
-          >
-            {copySuccess ? <FontAwesomeIcon icon={faCheck} /> : <FontAwesomeIcon icon={faClipboard} />}
-          </Button>
-          <Button
-            variant={
-              isFullScreen ? 'solid' : 'soft'
-            }
+          <CopyButton isCopied={copySuccess} onCopy={() => copyToClipboard(code)} />
+          <IconTooltipButton
+            icon={faExpandAlt}
+            tooltip={'FullScreen'}
             onClick={toggleFullScreen}
             style={{
-              transition: 'all 0.1s ease-in-out',
-            }}
-          >
-            <FontAwesomeIcon icon={faExpandAlt} />
-          </Button>
+              width: 40,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 8,
+              borderRadius: 8,
+              transition: 'all 0.2s ease-in-out',
+              cursor: 'pointer',
+            }} />
         </Box>
 
         <AceEditor

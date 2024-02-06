@@ -1,3 +1,4 @@
+// src/components/ui/PromtTextarea/PromtTextArea.tsx
 import { TextArea } from '@radix-ui/themes';
 import React from 'react';
 import { StyledItem } from './PromtTextArea.css';

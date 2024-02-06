@@ -1,34 +1,25 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
-import { Conversation } from "~/types/agents";
 import { useCodeEditorLogic } from "../CodeEditor/useCodeEditorLogic";
 import { DockItemVisibleState } from "../Dock/DockState";
+import { ConversationsState } from "./CornerDialogState";
 
 export const useCornerDialogLogic = () => {
+  // ConversationsState
+  const [conversations] = useAtom(ConversationsState);
   const [dockItemVisible, setDockItemVisible] = useAtom(DockItemVisibleState);
+
   // code editor logic
-  const { code, executeCode,
+  const { code,
     handleCodeChange,
     toggleFullScreen,
-    copyCodeToClipboard,
   } = useCodeEditorLogic();
-
-
-  const onSubmit = (data: { example: string }) => {
-    console.log(data);
-    executeCode();
-  };
-
-  // dummy data
-  const conversations: Conversation[] = [
-  ];
 
   return {
     dockItemVisible,
     setDockItemVisible,
-    onSubmit, conversations,
+    conversations,
     code, handleCodeChange,
     toggleFullScreen,
-    copyCodeToClipboard,
   };
 };

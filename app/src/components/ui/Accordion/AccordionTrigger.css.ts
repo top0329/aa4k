@@ -42,9 +42,13 @@ export const sAccordionTrigger = style({
 export const sAccordionTriggerInner = style({
   padding: 20,
   width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
   color: vars.color.grayDark.gray4,
   backgroundColor: vars.color.grayA.grayA2,
-  borderRadius: 8,
+  borderRadius: `2px 16px 16px 16px`,
   ":hover": {
     backgroundColor: vars.color.mauve.mauve2,
   },

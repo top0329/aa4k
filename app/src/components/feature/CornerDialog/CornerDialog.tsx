@@ -3,11 +3,11 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Box } from "@radix-ui/themes";
 import ScrollToBottom from "react-scroll-to-bottom";
 import Dock from "~/components/feature/Dock/Dock.tsx";
-import { Form } from "~/components/forms/Form/Form.tsx";
 import "~/styles/scrollbar.css";
 import { vars } from "~/styles/theme.css.ts";
 import AccordionHistory from "../AccordionHistory/AccordionHistory.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
+import PromptForm from "../PromptForm/PromptForm.tsx";
 import { DialogChat, DialogOverlay } from "./CornerDialog.css";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
@@ -15,7 +15,7 @@ const CornerDialog = () => {
   const {
     dockItemVisible,
     setDockItemVisible,
-    onSubmit, conversations } = useCornerDialogLogic();
+  } = useCornerDialogLogic();
 
   return (
     <Dialog.Root open={dockItemVisible.dialogVisible} onOpenChange={
@@ -39,7 +39,7 @@ const CornerDialog = () => {
               <Box style={{
                 background: 'white'
               }}>
-                <AccordionHistory conversations={conversations} />
+                <AccordionHistory />
               </Box>
 
               <Box p={'5'}
@@ -47,7 +47,7 @@ const CornerDialog = () => {
                 style={{
                   background: vars.color.indigoA.indigoA2
                 }}>
-                <Form onSubmit={onSubmit} />
+                <PromptForm />
               </Box>
             </ScrollToBottom>
           </Box>
