@@ -67,12 +67,25 @@ export interface AiResponse {
   callbacks?: Function[];
 }
 
+export interface CodeCheckResponse {
+  method: CodeCheckMethod;
+  message: string;
+}
+
+
 export const CodeCreateMethod = {
   create: "CREATE",
   add: "ADD",
   update: "UPDATE",
   delete: "DELETE",
 } as const;
+
+export const CodeCheckMethod = {
+  caution: "CAUTION",
+  none: "NONE",
+} as const;
+export type CodeCheckMethod = (typeof CodeCheckMethod)[keyof typeof CodeCheckMethod];
+
 
 export interface kintoneFormFields {
   properties: Record<string, any>;
