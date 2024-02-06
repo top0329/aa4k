@@ -6,13 +6,13 @@ CREATE TABLE IF NOT EXISTS conversation_history (
     device_div CHARACTER VARYING (20) NOT NULL,
     user_message TEXT,
     ai_message TEXT,
-    ai_message_additional TEXT,
-    system_message TEXT,
+    ai_message_comment TEXT,
+    error_message TEXT,
     javascript_code TEXT,
     user_rating CHARACTER (1),
     user_message_at TIMESTAMP(6) WITHOUT TIME zone,
     ai_message_at TIMESTAMP(6) WITHOUT TIME zone,
-    system_message_at TIMESTAMP(6) WITHOUT TIME zone,
+    error_message_at TIMESTAMP(6) WITHOUT TIME zone,
     created_on DATE DEFAULT CURRENT_DATE NOT NULL,
     PRIMARY KEY (id, created_on)
 ) PARTITION BY RANGE (created_on);

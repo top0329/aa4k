@@ -15,7 +15,7 @@ export const DeviceDiv = {
 export const MessageType = {
   human: "human",
   ai: "ai",
-  system: "system",
+  error: "error",
 } as const;
 export type MessageType = keyof typeof MessageType
 

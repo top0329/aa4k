@@ -9,8 +9,8 @@ interface ConversationHistoryResultRow {
   id: string,
   user_message: string,
   ai_message: string,
-  ai_message_additional: string,
-  system_message: string,
+  ai_message_comment: string,
+  error_message: string,
   user_rating: string,
 }
 
@@ -31,8 +31,8 @@ export const selectConversationHistory = async (dbClient: Client, reqBody: ListR
   sql += ` id`;
   sql += ` , user_message`;
   sql += ` , ai_message`;
-  sql += ` , ai_message_additional`;
-  sql += ` , system_message`;
+  sql += ` , ai_message_comment`;
+  sql += ` , error_message`;
   sql += ` , user_rating`;
   sql += ` from`;
   sql += ` conversation_history`;
