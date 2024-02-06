@@ -6,13 +6,12 @@ import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "langchain/s
 
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import * as cheerio from "cheerio"
 
 import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { langchainCallbacks } from "../langchainCallbacks";
-import { openAIModel, ContractExpiredError } from "../common"
+import { openAIModel, ContractExpiredError, getCodingGuideLineList } from "../common"
 import { DeviceDiv } from "../../types"
 import { AiResponse, Conversation, MessageType, CodeCreateMethod, AppCreateJsContext, GeneratedCodeGetResponse, kintoneFormFields } from "../../types/ai";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
@@ -140,15 +139,7 @@ async function preGetResource(conversation: Conversation) {
   // --------------------
   // ガイドライン取得
   // --------------------
-  const urls = [
-    "https://cybozu.dev/ja/kintone/docs/guideline/coding-guideline/",
-    "https://cybozu.dev/ja/kintone/docs/guideline/secure-coding-guideline/"
-  ]
-  const [codingGuideLineHtml, secureCodingGuidelineHtml] = await Promise.all(urls.map(url => kintone.proxy(url, "GET", {}, {})));
-  const $1 = cheerio.load(codingGuideLineHtml[0]);
-  const $2 = cheerio.load(secureCodingGuidelineHtml[0]);
-  const codingGuideLine = $1("article.main--content--article").text();
-  const secureCodingGuideline = $2("article.main--content--article").text();
+  const { codingGuideLine, secureCodingGuideline } = await getCodingGuideLineList();
 
   // --------------------
   // 最新JSの取得（from kintone）

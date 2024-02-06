@@ -1,8 +1,9 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ContractDiv } from "../types"
+import * as cheerio from "cheerio"
 
 // カスタムエラーオブジェクト
-export class ContractExpiredError extends Error {}
+export class ContractExpiredError extends Error { }
 
 /**
  * openAIモデルのインスタンス生成
@@ -48,3 +49,21 @@ export function openAIModel(contractDiv: ContractDiv) {
     throw new Error(`契約区分が正しくありません (${unexpected})`)
   }
 };
+
+/**
+ * kintoneコーディングガイドラインの取得
+ * @param contractDiv 
+ * @returns codingGuideLine, secureCodingGuideline
+ */
+export async function getCodingGuideLineList() {
+  const urls = [
+    "https://cybozu.dev/ja/kintone/docs/guideline/coding-guideline/",
+    "https://cybozu.dev/ja/kintone/docs/guideline/secure-coding-guideline/"
+  ]
+  const [codingGuideLineHtml, secureCodingGuidelineHtml] = await Promise.all(urls.map(url => kintone.proxy(url, "GET", {}, {})));
+  const $1 = cheerio.load(codingGuideLineHtml[0]);
+  const $2 = cheerio.load(secureCodingGuidelineHtml[0]);
+  const codingGuideLine = $1("article.main--content--article").text();
+  const secureCodingGuideline = $2("article.main--content--article").text();
+  return { codingGuideLine, secureCodingGuideline }
+}
