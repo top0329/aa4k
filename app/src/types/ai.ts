@@ -1,4 +1,4 @@
-import { DeviceDiv, ContractStatus } from "~/constants";
+import { DeviceDiv, ContractStatus, CodeCheckResult } from "~/constants";
 
 // src/types/agents.ts
 // メッセージ種別
@@ -67,12 +67,10 @@ export interface AiResponse {
   callbacks?: Function[];
 }
 
-export const CodeCreateMethod = {
-  create: "CREATE",
-  add: "ADD",
-  update: "UPDATE",
-  delete: "DELETE",
-} as const;
+export interface CodeCheckResponse {
+  result: CodeCheckResult;
+  message: string;
+}
 
 export interface kintoneFormFields {
   properties: Record<string, any>;

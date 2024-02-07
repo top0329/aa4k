@@ -13,6 +13,21 @@ export const ContractStatus = {
 } as const;
 export type ContractStatus = keyof typeof ContractStatus
 
+// コード生成メソッド
+export const CodeCreateMethod = {
+  create: "CREATE",
+  add: "ADD",
+  update: "UPDATE",
+  delete: "DELETE",
+} as const;
+
+// コードチェック結果
+export const CodeCheckResult = {
+  caution: "CAUTION",
+  safe: "SAFE",
+} as const;
+export type CodeCheckResult = (typeof CodeCheckResult)[keyof typeof CodeCheckResult];
+
 // エラーコード
 export const ErrorCode = {
   // 認証チェック(A01)
