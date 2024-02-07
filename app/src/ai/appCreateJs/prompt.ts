@@ -45,7 +45,7 @@ export const APP_CREATE_JS_SYSTEM_PROMPT = `あなたは優秀なプログラマ
 
 # kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン
 \`\`\`
-{codingGuideLine}
+{codingGuideline}
 {secureCodingGuideline}
 \`\`\`
 

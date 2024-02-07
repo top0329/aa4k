@@ -11,7 +11,7 @@ import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { langchainCallbacks } from "../langchainCallbacks";
-import { openAIModel, ContractExpiredError, getCodingGuideLineList } from "../common"
+import { openAIModel, ContractExpiredError, getCodingGuidelines } from "../common"
 import { DeviceDiv } from "../../types"
 import { AiResponse, Conversation, MessageType, CodeCreateMethod, AppCreateJsContext, GeneratedCodeGetResponse, kintoneFormFields } from "../../types/ai";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
@@ -38,7 +38,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     const { isLatestCode,
       fieldInfo,
-      codingGuideLineList,
+      codingGuidelineList,
       codeTemplate,
       kintoneCustomizeFiles,
       targetFileKey,
@@ -48,7 +48,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     // コード生成
     // --------------------
-    const { llmResponse, formattedCode } = await createJs(conversation, fieldInfo, isLatestCode, codingGuideLineList, codeTemplate, originalCode);
+    const { llmResponse, formattedCode } = await createJs(conversation, fieldInfo, isLatestCode, codingGuidelineList, codeTemplate, originalCode);
 
     // --------------------
     // kintoneカスタマイズへの反映
@@ -114,7 +114,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
 /**
  * コード生成に必要なリソースの取得
  * @param conversation 
- * @returns isLatestCode, fieldInfo, codingGuideLineList[], codeTemplate, kintoneCustomizeFiles, targetFileKey, originalCode
+ * @returns isLatestCode, fieldInfo, codingGuidelineList[], codeTemplate, kintoneCustomizeFiles, targetFileKey, originalCode
  */
 async function preGetResource(conversation: Conversation) {
   const { message } = conversation;
@@ -139,7 +139,7 @@ async function preGetResource(conversation: Conversation) {
   // --------------------
   // ガイドライン取得
   // --------------------
-  const { codingGuideLine, secureCodingGuideline } = await getCodingGuideLineList();
+  const { codingGuideline, secureCodingGuideline } = await getCodingGuidelines();
 
   // --------------------
   // 最新JSの取得（from kintone）
@@ -167,7 +167,7 @@ async function preGetResource(conversation: Conversation) {
   return {
     isLatestCode,
     fieldInfo,
-    codingGuideLineList: [codingGuideLine, secureCodingGuideline],
+    codingGuidelineList: [codingGuideline, secureCodingGuideline],
     codeTemplate,
     kintoneCustomizeFiles,
     targetFileKey,
@@ -181,7 +181,7 @@ async function preGetResource(conversation: Conversation) {
  * @param conversation 
  * @param fieldInfo 
  * @param isLatestCode 
- * @param codingGuideLineList 
+ * @param codingGuidelineList 
  * @param codeTemplate 
  * @param originalCode 
  * @returns llmResponse, formattedCode
@@ -190,15 +190,15 @@ async function createJs(
   conversation: Conversation,
   fieldInfo: Record<string, any>,
   isLatestCode: boolean,
-  codingGuideLineList: string[],
+  codingGuidelineList: string[],
   codeTemplate: Document[],
   originalCode: string,
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
   const { contractDiv, systemSettings } = appCreateJsContext;
-  const codingGuideLine = codingGuideLineList[0];
-  const secureCodingGuideline = codingGuideLineList[1];
+  const codingGuideline = codingGuidelineList[0];
+  const secureCodingGuideline = codingGuidelineList[1];
 
   // 会話履歴の設定（DBから取得したコードが最新でなければ履歴なし扱い）
   const histories: BaseMessage[] = [];
@@ -255,7 +255,7 @@ async function createJs(
   const outputParser = new JsonOutputFunctionsParser();
   const chain = prompt.pipe(functionCallingModel).pipe(outputParser);
   const llmResponse = (await chain.invoke({
-    codingGuideLine: codingGuideLine,
+    codingGuideline: codingGuideline,
     secureCodingGuideline: secureCodingGuideline,
     fieldInfo: JSON.stringify(fieldInfo),
     originalCode: addLineNumbersToCode(originalCode),
