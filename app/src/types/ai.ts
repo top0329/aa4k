@@ -1,4 +1,4 @@
-import { DeviceDiv, ContractStatus } from "~/constants";
+import { DeviceDiv, ContractStatus, CodeCheckResult } from "~/constants";
 
 // src/types/agents.ts
 // メッセージ種別
@@ -71,21 +71,6 @@ export interface CodeCheckResponse {
   result: CodeCheckResult;
   message: string;
 }
-
-
-export const CodeCreateMethod = {
-  create: "CREATE",
-  add: "ADD",
-  update: "UPDATE",
-  delete: "DELETE",
-} as const;
-
-export const CodeCheckResult = {
-  caution: "CAUTION",
-  safe: "SAFE",
-} as const;
-export type CodeCheckResult = (typeof CodeCheckResult)[keyof typeof CodeCheckResult];
-
 
 export interface kintoneFormFields {
   properties: Record<string, any>;

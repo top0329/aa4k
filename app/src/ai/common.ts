@@ -1,5 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ContractStatus } from "~/constants";
+import * as cheerio from "cheerio"
 
 // カスタムエラーオブジェクト
 export class ContractExpiredError extends Error { }

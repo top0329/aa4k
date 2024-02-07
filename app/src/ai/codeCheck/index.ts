@@ -7,8 +7,8 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { CODE_CHECK_SYSTEM_PROMPT } from "./prompt"
 import { langchainCallbacks } from "../langchainCallbacks";
 import { openAIModel, getCodingGuidelines } from "../common"
-import { ContractDiv } from "../../types"
-import { CodeCheckResponse, CodeCheckResult } from "../../types/ai";
+import { ContractStatus, CodeCheckResult } from "../../constants"
+import { CodeCheckResponse } from "../../types/ai";
 
 // カスタムエラーオブジェクト
 export class LlmError extends Error { }
@@ -17,10 +17,10 @@ export class LlmError extends Error { }
  * コードチェック
  *     kintoneガイドラインに違反していないかのチェックをLLMで行う
  * @param code 
- * @param contractDiv 
+ * @param contractStatus 
  * @returns AiResponse
  */
-export const codeCheck = async (code: string, contractDiv: ContractDiv): Promise<CodeCheckResponse> => {
+export const codeCheck = async (code: string, contractStatus: ContractStatus): Promise<CodeCheckResponse> => {
 
   try {
     // --------------------
@@ -32,7 +32,7 @@ export const codeCheck = async (code: string, contractDiv: ContractDiv): Promise
     // コードチェック
     // --------------------
     const handler = BaseCallbackHandler.fromMethods({ ...langchainCallbacks });
-    const model = openAIModel(contractDiv);
+    const model = openAIModel(contractStatus);
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", CODE_CHECK_SYSTEM_PROMPT],
       ["human", "kintoneガイドラインに違反していないかチェックしてください"],

@@ -11,9 +11,9 @@ import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { langchainCallbacks } from "../langchainCallbacks";
-import { openAIModel, ContractExpiredError } from "../common"
-import { DeviceDiv } from "~/constants"
-import { AiResponse, Conversation, MessageType, CodeCreateMethod, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
+import { openAIModel, ContractExpiredError, getCodingGuidelines } from "../common"
+import { DeviceDiv, CodeCreateMethod } from "~/constants"
+import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
 import { GeneratedCodeGetResponseBody } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
 
@@ -197,8 +197,8 @@ async function createJs(
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
   const { contractStatus, systemSettings } = appCreateJsContext;
-  const codingGuideLine = codingGuideLineList[0];
-  const secureCodingGuideline = codingGuideLineList[1];
+  const codingGuideline = codingGuidelineList[0];
+  const secureCodingGuideline = codingGuidelineList[1];
 
   // 会話履歴の設定（DBから取得したコードが最新でなければ履歴なし扱い）
   const histories: BaseMessage[] = [];
@@ -290,7 +290,7 @@ async function createJs(
  * @param conversationId 
  * @param code 
  */
-function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, messageComment?: string,javascriptCode?: string) {
+function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, messageComment?: string, javascriptCode?: string) {
   const body = messageType == MessageType.ai ?
     { appId, userId, deviceDiv, messageType, message, conversationId, messageComment, javascriptCode } :
     { appId, userId, deviceDiv, messageType, message, conversationId }
