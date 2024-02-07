@@ -6,9 +6,9 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { CODE_CHECK_SYSTEM_PROMPT } from "./prompt"
 import { langchainCallbacks } from "../langchainCallbacks";
-import { openAIModel, getCodingGuideLineList } from "../common"
+import { openAIModel, getCodingGuidelines } from "../common"
 import { ContractDiv } from "../../types"
-import { CodeCheckResponse, CodeCheckMethod } from "../../types/ai";
+import { CodeCheckResponse, CodeCheckResult } from "../../types/ai";
 
 // カスタムエラーオブジェクト
 export class LlmError extends Error { }
@@ -26,7 +26,7 @@ export const codeCheck = async (code: string, contractDiv: ContractDiv): Promise
     // --------------------
     // ガイドライン取得
     // --------------------
-    const { codingGuideLine, secureCodingGuideline } = await getCodingGuideLineList();
+    const { codingGuideline, secureCodingGuideline } = await getCodingGuidelines();
 
     // --------------------
     // コードチェック
@@ -35,12 +35,12 @@ export const codeCheck = async (code: string, contractDiv: ContractDiv): Promise
     const model = openAIModel(contractDiv);
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", CODE_CHECK_SYSTEM_PROMPT],
-      ["human", "kintoneガイドラインに違反していないチェックしてください"],
+      ["human", "kintoneガイドラインに違反していないかチェックしてください"],
     ]);
 
     // LLMの出力形式を設定
     const zodSchema = z.object({
-      method: z.nativeEnum(CodeCheckMethod).describe("メソッド"),
+      result: z.nativeEnum(CodeCheckResult).describe("結果"),
       message: z.string().describe("メッセージ"),
     }).describe("LLM問い合わせ結果"); type LLMResponse = z.infer<typeof zodSchema>;
     const functionCallingModel = model.bind({
@@ -57,18 +57,18 @@ export const codeCheck = async (code: string, contractDiv: ContractDiv): Promise
     const chain = prompt.pipe(functionCallingModel).pipe(outputParser);
     const llmResponse = (await chain.invoke({
       targetCode: code,
-      codingGuideLine: codingGuideLine,
+      codingGuideline: codingGuideline,
       secureCodingGuideline: secureCodingGuideline,
     }, { callbacks: [handler] })) as LLMResponse;
 
     // 終了
     return {
-      method: llmResponse.method,
+      result: llmResponse.result,
       message: llmResponse.message
     };
 
   } catch (err) {
     // エラーの場合は、ガイドライン違反なしとして扱う
-    return { method: CodeCheckMethod.none, message: "" };
+    return { result: CodeCheckResult.safe, message: "" };
   }
 }

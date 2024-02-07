@@ -68,7 +68,7 @@ export interface AiResponse {
 }
 
 export interface CodeCheckResponse {
-  method: CodeCheckMethod;
+  result: CodeCheckResult;
   message: string;
 }
 
@@ -80,11 +80,11 @@ export const CodeCreateMethod = {
   delete: "DELETE",
 } as const;
 
-export const CodeCheckMethod = {
+export const CodeCheckResult = {
   caution: "CAUTION",
-  none: "NONE",
+  safe: "SAFE",
 } as const;
-export type CodeCheckMethod = (typeof CodeCheckMethod)[keyof typeof CodeCheckMethod];
+export type CodeCheckResult = (typeof CodeCheckResult)[keyof typeof CodeCheckResult];
 
 
 export interface kintoneFormFields {

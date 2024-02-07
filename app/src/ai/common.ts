@@ -52,17 +52,17 @@ export function openAIModel(contractStatus: ContractStatus) {
 /**
  * kintoneコーディングガイドラインの取得
  * @param contractDiv 
- * @returns codingGuideLine, secureCodingGuideline
+ * @returns codingGuideline, secureCodingGuideline
  */
-export async function getCodingGuideLineList() {
+export async function getCodingGuidelines() {
   const urls = [
     "https://cybozu.dev/ja/kintone/docs/guideline/coding-guideline/",
     "https://cybozu.dev/ja/kintone/docs/guideline/secure-coding-guideline/"
   ]
-  const [codingGuideLineHtml, secureCodingGuidelineHtml] = await Promise.all(urls.map(url => kintone.proxy(url, "GET", {}, {})));
-  const $1 = cheerio.load(codingGuideLineHtml[0]);
+  const [codingGuidelineHtml, secureCodingGuidelineHtml] = await Promise.all(urls.map(url => kintone.proxy(url, "GET", {}, {})));
+  const $1 = cheerio.load(codingGuidelineHtml[0]);
   const $2 = cheerio.load(secureCodingGuidelineHtml[0]);
-  const codingGuideLine = $1("article.main--content--article").text();
+  const codingGuideline = $1("article.main--content--article").text();
   const secureCodingGuideline = $2("article.main--content--article").text();
-  return { codingGuideLine, secureCodingGuideline }
+  return { codingGuideline, secureCodingGuideline }
 }
