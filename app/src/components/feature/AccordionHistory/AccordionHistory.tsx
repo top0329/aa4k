@@ -3,25 +3,42 @@ import * as Accordion from '@radix-ui/react-accordion';
 import { Box } from '@radix-ui/themes';
 import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
-import RatingToolbar from '~/components/feature/RatingToolbar/RatingToolbar';
 import AccordionContent from '~/components/ui/Accordion/AccordionContent';
 import AccordionTrigger from '~/components/ui/Accordion/AccordionTrigger';
-import { ConversationsState } from '../CornerDialog/CornerDialogState';
+import { ChatContent } from "~/components/ui/ChatContent/ChatContent";
+import { TypewriterEffect } from "~/components/ui/TypewriterEffect/TypewriterEffect";
+import { ChatHistoryState, InTypeWriteState, LatestAiResponseIndexState } from '../CornerDialog/CornerDialogState';
 import { sChatHistory, sChatHistoryItem } from './AccordionHistory.css';
+import { ChatHistoryItem, AiMessage, ErrorMessage } from '~/types/ai';
 
 export const AccordionHistory = () => {
-  const [conversations] = useAtom(ConversationsState);
+  const [chatHistoryItems] = useAtom(ChatHistoryState);
+  const [latestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
+  const [inTypeWrite] = useAtom(InTypeWriteState);
   const [activeItem, setActiveItem] = useState('');
 
   useEffect(() => {
-    if (conversations.length > 0) {
-      setActiveItem(`item-${conversations.length - 1}`);
+    if (chatHistoryItems.length > 0) {
+      setActiveItem(`item-${chatHistoryItems.length - 1}`);
     }
-  }, [conversations]);
+  }, [chatHistoryItems]);
 
   // 空の状態
-  if (conversations.length === 0) {
+  if (chatHistoryItems.length === 0) {
     return <Box></Box>;
+  }
+
+  // AI回答またはエラーメッセージの表示
+  const showAiOrErrorMessage = (item: ChatHistoryItem, index: number) => {
+    let aiMessage: AiMessage | ErrorMessage
+    if (item.ai) {
+      aiMessage = item.ai
+    } else if (item.error) {
+      aiMessage = item.error
+    } else {
+      return;
+    }
+    return (index + 1 === latestAiResponseIndex && inTypeWrite ? <TypewriterEffect aiMessage={aiMessage} /> : <ChatContent aiMessage={aiMessage} />)
   }
 
   return (
@@ -32,42 +49,16 @@ export const AccordionHistory = () => {
       onValueChange={setActiveItem}
       collapsible
     >
-      {conversations.map((conversation, index) => (
+      {chatHistoryItems.map((item, index) => (
         <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
-          <AccordionTrigger>{conversation.message.content}</AccordionTrigger>
-          {conversation.chatHistory?.map(aiMessage => (
-            <AccordionContent
-              style={{
-                padding: '0 16px'
-              }}
-              key={aiMessage.content}
-            >
-              <Box
-                style={{
-                  whiteSpace: "pre-wrap"
-                }}
-              >
-                固定文言
-              </Box>
-              <Box
-                style={{
-                  whiteSpace: "pre-wrap"
-                }}
-              >
-                {aiMessage.content}
-              </Box>
-              <Box
-                mt={'5'}
-                width={'100%'}
-              >
-                <RatingToolbar content={aiMessage.content} />
-              </Box>
-            </AccordionContent>
-          ))}
+          <AccordionTrigger>{item.human.content}</AccordionTrigger>
+          <AccordionContent>
+            {showAiOrErrorMessage(item, index)}
+          </AccordionContent>
         </Accordion.Item>
       ))}
     </Accordion.Root>
   )
-};
+}
 
 export default AccordionHistory;

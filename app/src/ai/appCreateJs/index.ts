@@ -2,7 +2,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts"
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { Document } from "@langchain/core/documents";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "langchain/schema"
+import { AIMessage, BaseMessage, HumanMessage } from "langchain/schema"
 
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
@@ -13,8 +13,9 @@ import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { langchainCallbacks } from "../langchainCallbacks";
 import { openAIModel, ContractExpiredError } from "../common"
-import { DeviceDiv } from "../../types"
-import { AiResponse, Conversation, MessageType, CodeCreateMethod, AppCreateJsContext, GeneratedCodeGetResponse, kintoneFormFields } from "../../types/ai";
+import { DeviceDiv } from "~/constants"
+import { AiResponse, Conversation, MessageType, CodeCreateMethod, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
+import { GeneratedCodeGetResponseBody } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
 
 import * as prettier from "prettier/standalone"
@@ -59,15 +60,15 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     // レスポンス設定
     // --------------------
-    let response = `${llmResponse.resultMessage}`
-    response += `${llmResponse.autoComplete ? `\n\n■自動補完説明\n${llmResponse.autoComplete}` : ""}`
-    response += `${llmResponse.correctionInstructions ? `\n■修正指示例\n${llmResponse.correctionInstructions}` : ""}`
-    response += `${llmResponse.guideMessage ? `\n■ガイドライン違反\n${llmResponse.guideMessage}` : ""}`
+    let message = `${llmResponse.resultMessage}`;
+    let messageComment = `${llmResponse.autoComplete ? `■自動補完説明\n${llmResponse.autoComplete}` : ""}`;
+    messageComment += `${llmResponse.correctionInstructions ? `\n■修正指示例\n${llmResponse.correctionInstructions}` : ""}`;
+    messageComment += `${llmResponse.guideMessage ? `\n■ガイドライン違反\n${llmResponse.guideMessage}` : ""}`;
 
     // --------------------
     // 回答メッセージと生成したコードの登録 (会話履歴TBL)
     // --------------------
-    insertConversation(appId, userId, deviceDiv, MessageType.ai, response, conversationId, formattedCode)
+    insertConversation(appId, userId, deviceDiv, MessageType.ai, message, conversationId, messageComment, formattedCode)
 
     // --------------------
     // コールバック関数設定(コード生成後の動作)
@@ -90,22 +91,21 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     return {
       message: {
         role: "ai",
-        content: response,
+        content: message,
+        comment: messageComment
       },
       callbacks: callbackFuncs,
     };
 
   } catch (err) {
-    console.log("AI機能-kintoneカスタマイズJavascript生成に失敗しました。")
-    console.log(err)
     if (err instanceof LlmError || err instanceof ContractExpiredError) {
       const message = err.message;
-      insertConversation(appId, userId, deviceDiv, MessageType.system, message, conversationId)
-      return { message: { role: MessageType.system, content: message, } }
+      insertConversation(appId, userId, deviceDiv, MessageType.error, message, conversationId)
+      return { message: { role: MessageType.error, content: message, } }
     } else {
       const message = "システムエラーが発生しました";
-      insertConversation(appId, userId, deviceDiv, MessageType.system, message, conversationId)
-      return { message: { role: MessageType.system, content: message } }
+      insertConversation(appId, userId, deviceDiv, MessageType.error, message, conversationId)
+      return { message: { role: MessageType.error, content: message } }
     }
   }
 }
@@ -166,7 +166,7 @@ async function preGetResource(conversation: Conversation) {
     { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
     { appId: appId, userId: userId, deviceDiv: deviceDiv, },
   );
-  const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]) as GeneratedCodeGetResponse;
+  const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]) as GeneratedCodeGetResponseBody;
   const jsCodeForDb = resJson_jsCodeForDb.javascriptCode;
 
   // 最新コード比較
@@ -205,7 +205,7 @@ async function createJs(
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { contractDiv, systemSettings } = appCreateJsContext;
+  const { contractStatus, systemSettings } = appCreateJsContext;
   const codingGuideLine = codingGuideLineList[0];
   const secureCodingGuideline = codingGuideLineList[1];
 
@@ -215,18 +215,16 @@ async function createJs(
     // 直近 N個の 会話履歴を使用する
     const historyUseCount = systemSettings.historyUseCount;
     chatHistory.slice((-1) * historyUseCount).forEach(history => {
-      if (history.role === "human") {
-        histories.push(new HumanMessage(history.content));
-      } else if (history.role === "ai") {
-        histories.push(new AIMessage(history.content));
-      } else if (history.role === "system") {
-        histories.push(new SystemMessage(history.content));
+      // AI回答がある場合、会話履歴に追加
+      if (history.human.role === "human" && (history.ai && history.ai.role === "ai")) {
+        histories.push(new HumanMessage(history.human.content));
+        histories.push(new AIMessage(history.ai.content));
       }
     });
   }
   // 生成（LLM実行）
   const handler = BaseCallbackHandler.fromMethods({ ...langchainCallbacks });
-  const model = openAIModel(contractDiv);
+  const model = openAIModel(contractStatus);
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", APP_CREATE_JS_SYSTEM_PROMPT],
     ...histories,
@@ -301,9 +299,9 @@ async function createJs(
  * @param conversationId 
  * @param code 
  */
-function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, javascriptCode?: string) {
+function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, messageComment?: string,javascriptCode?: string) {
   const body = messageType == MessageType.ai ?
-    { appId, userId, deviceDiv, messageType, message, conversationId, javascriptCode } :
+    { appId, userId, deviceDiv, messageType, message, conversationId, messageComment, javascriptCode } :
     { appId, userId, deviceDiv, messageType, message, conversationId }
   // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
   kintone.proxy(

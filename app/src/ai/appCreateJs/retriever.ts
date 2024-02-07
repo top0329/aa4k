@@ -1,6 +1,6 @@
 import { Document } from "@langchain/core/documents";
 import { BaseRetriever, BaseRetrieverInput } from "langchain/schema/retriever";
-import { CodeTemplateRetrieverResponse } from "../../types/ai"
+import { CodeTemplateRetrieverResponseBody } from "~/types/apiResponse"
 
 export class CodeTemplateRetriever extends BaseRetriever {
   k: number;
@@ -26,7 +26,7 @@ export class CodeTemplateRetriever extends BaseRetriever {
         k: this.k,
       },
     );
-    const resJson = JSON.parse(response[0]) as CodeTemplateRetrieverResponse;
+    const resJson = JSON.parse(response[0]) as CodeTemplateRetrieverResponseBody;
 
     const documents = resJson.documents;
     const resultDocuments = documents

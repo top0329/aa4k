@@ -12,26 +12,21 @@ import { DialogChat, DialogOverlay } from "./CornerDialog.css";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
 const CornerDialog = () => {
-  const {
-    dockItemVisible,
-    setDockItemVisible,
-  } = useCornerDialogLogic();
+  const { dockState, handleBannerClick, isBannerClicked } = useCornerDialogLogic();
 
   return (
-    <Dialog.Root open={dockItemVisible.dialogVisible} onOpenChange={
-      (open) => setDockItemVisible({ ...dockItemVisible, dialogVisible: open })
-    }>
-      <Dialog.Trigger>
+    <Dialog.Root open={dockState.dialogVisible}>
+      <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
         Open
       </Dialog.Trigger>
       <Dialog.Overlay className={DialogOverlay} />
       <Dialog.Content onPointerDownOutside={(e) => e.preventDefault()}>
 
-        {dockItemVisible.codeEditorVisible && (
+        {dockState.codeEditorVisible && (
           <CodeEditor />
         )}
 
-        {dockItemVisible.chatVisible && (
+        {dockState.chatVisible && (
           <Box className={DialogChat} >
             <ScrollToBottom
               className="w-100"

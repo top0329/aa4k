@@ -1,4 +1,4 @@
-import { DeviceDiv } from "../types"
+import { DeviceDiv } from "~/constants";
 
 // 下記の型は以下(kintone/js-sdk)を参考に設定
 // https://github.com/kintone/js-sdk/blob/master/packages/rest-api-client/src/client/types/app/customize.ts

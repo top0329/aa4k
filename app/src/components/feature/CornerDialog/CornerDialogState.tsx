@@ -1,17 +1,13 @@
 // src/components/feature/CornerDialog/state.tsx
-import { atom } from "jotai";
-import { Conversation } from "~/types/agents";
+import { atom } from 'jotai';
+import { atomWithStorage } from "jotai/utils";
+import { ChatHistory } from "~/types/ai";
 
-export const ConversationsState = atom<Conversation[]>([
-  {
-    message: {
-      role: 'human',
-      content: 'Hello, how can I help you?'
-    },
-    chatHistory: [
-      {
-        role: 'ai',
-        content: 'Hello, I have a problem with my account'
-      },
-    ],
-  }]);
+export const ChatHistoryState = atomWithStorage<ChatHistory>(
+  `ChatHistory_App_${kintone.app.getId()}`,
+  [],
+);
+
+export const LatestAiResponseIndexState = atom<number | null>(null);
+
+export const InTypeWriteState = atom<boolean>(false);

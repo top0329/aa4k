@@ -1,10 +1,10 @@
 import { useAtom } from "jotai";
-import { ConversationsState } from "../CornerDialog/CornerDialogState";
+import { ChatHistoryState } from "../CornerDialog/CornerDialogState";
 import { DockItemVisibleState } from "./DockState";
 
 export const useDockLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
-  const [, setConversations] = useAtom(ConversationsState)
+  const [, setChatHistory] = useAtom(ChatHistoryState)
   const toggleItemVisibility = (itemKey: keyof typeof dockState) => {
     setDockState({ ...dockState, [itemKey]: !dockState[itemKey] });
   };
@@ -18,7 +18,7 @@ export const useDockLogic = () => {
   }
 
   const deleteHistory = () => {
-    setConversations([]);
+    setChatHistory([]);
   }
 
   return {

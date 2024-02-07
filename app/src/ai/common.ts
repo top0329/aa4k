@@ -1,16 +1,16 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { ContractDiv } from "../types"
+import { ContractStatus } from "~/constants";
 
 // カスタムエラーオブジェクト
 export class ContractExpiredError extends Error {}
 
 /**
  * openAIモデルのインスタンス生成
- * @param contractDiv 
+ * @param contractStatus 
  * @returns new ChatOpenAI
  */
-export function openAIModel(contractDiv: ContractDiv) {
-  if (contractDiv === ContractDiv.trial) {
+export function openAIModel(contractStatus: ContractStatus) {
+  if (contractStatus === ContractStatus.trial) {
     // プラグイン設定情報からAPIキーを取得
     // const openAiApiKey = kintone.plugin.app.getConfig(pluginId) // TODO: プラグイン開発としての準備が整っていないためコメントアウト
     const openAiApiKey = process.env.OPENAI_API_KEY;
@@ -23,7 +23,7 @@ export function openAIModel(contractDiv: ContractDiv) {
       modelName: "gpt-4-1106-preview",
     });
 
-  } else if (contractDiv === ContractDiv.active) {
+  } else if (contractStatus === ContractStatus.active) {
     // 本契約
     return new ChatOpenAI({
       temperature: 0,
@@ -41,10 +41,10 @@ export function openAIModel(contractDiv: ContractDiv) {
       // }, {
       //   baseURL: `${import.meta.env.VITE_API_ENDPOINT}/xxxxxxx`  TODO: Azure OpenAIアクセス用プロキシのURLを設定
     });
-  } else if (contractDiv === ContractDiv.expired) {
+  } else if (contractStatus === ContractStatus.expired) {
     throw new ContractExpiredError(`契約期間が終了しているためご利用できません`)
   } else {
-    const unexpected: never = contractDiv;
+    const unexpected: never = contractStatus;
     throw new Error(`契約区分が正しくありません (${unexpected})`)
   }
 };

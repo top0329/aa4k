@@ -1,5 +1,4 @@
-import { DeviceDiv, ContractDiv } from "./index"
-import { DocumentInterface } from "@langchain/core/documents";
+import { DeviceDiv, ContractStatus } from "~/constants";
 
 // src/types/agents.ts
 // メッセージ種別
@@ -7,6 +6,7 @@ export const MessageType = {
   human: "human",
   ai: "ai",
   system: "system",
+  error: "error",
 } as const;
 export type MessageType = (typeof MessageType)[keyof typeof MessageType];
 export type MessageContent = string;
@@ -22,14 +22,26 @@ export interface HumanMessage extends ChatMessage {
 
 export interface AiMessage extends ChatMessage {
   role: "ai";
+  comment: MessageContent;
 }
 
 export interface SystemMessage extends ChatMessage {
   role: "system";
 }
 
+export interface ErrorMessage extends ChatMessage {
+  role: "error";
+}
+
+export interface ChatHistoryItem {
+  human: HumanMessage;
+  ai?: AiMessage;
+  error?: ErrorMessage;
+  conversationId?: string;
+}
+
 export type Context = Record<string, any>;
-export type ChatHistory = Array<ChatMessage>;
+export type ChatHistory = Array<ChatHistoryItem>;
 export interface SystemSettings {
   retrieveMaxCount: number;
   retrieveScoreThreshold: number;
@@ -40,7 +52,7 @@ export interface AppCreateJsContext {
   userId: string;
   conversationId: string;
   deviceDiv: DeviceDiv;
-  contractDiv: ContractDiv;
+  contractStatus: ContractStatus;
   isGuestSpace: boolean;
   systemSettings: SystemSettings;
 }
@@ -51,7 +63,7 @@ export interface Conversation {
 }
 
 export interface AiResponse {
-  message: AiMessage | SystemMessage;
+  message: AiMessage | ErrorMessage;
   callbacks?: Function[];
 }
 
@@ -65,12 +77,4 @@ export const CodeCreateMethod = {
 export interface kintoneFormFields {
   properties: Record<string, any>;
   revision: string;
-}
-export interface GeneratedCodeGetResponse {
-  javascriptCode: string
-}
-
-
-export interface CodeTemplateRetrieverResponse {
-  documents: [DocumentInterface, number][]
 }
