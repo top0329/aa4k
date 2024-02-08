@@ -30,17 +30,9 @@ export function openAIModel(contractStatus: ContractStatus) {
       temperature: 0,
       modelKwargs: { "seed": 0 },
       modelName: "gpt-4-1106-preview",
-      azureOpenAIApiKey: import.meta.env.VITE_AZURE_OPENAI_API_KEY,
-      azureOpenAIApiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION,
-      azureOpenAIApiInstanceName: import.meta.env.VITE_AZURE_OPENAI_INSTANCE_NAME,
-      azureOpenAIApiDeploymentName: import.meta.env.VITE_AZURE_OPENAI_GPT4_DEPLOYMENT_NAME,
-      // modelName: "gpt-35-turbo-1106",
-      // azureOpenAIApiKey: import.meta.env.VITE_AZURE_OPENAI_API_KEY,
-      // azureOpenAIApiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION,
-      // azureOpenAIApiInstanceName: import.meta.env.VITE_AZURE_OPENAI_INSTANCE_NAME,
-      // azureOpenAIApiDeploymentName: import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT_NAME,
-      // }, {
-      //   baseURL: `${import.meta.env.VITE_API_ENDPOINT}/xxxxxxx`  TODO: Azure OpenAIアクセス用プロキシのURLを設定
+      openAIApiKey: "dummy",
+    }, {
+      baseURL: `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/openai_proxy`,
     });
   } else if (contractStatus === ContractStatus.expired) {
     throw new ContractExpiredError(`契約期間が終了しているためご利用できません`)
