@@ -1,30 +1,20 @@
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import serverlessExpress from '@vendia/serverless-express';
-import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
 import express = require('express');
 import cors = require('cors');
+import { getSecretValue, AzureSecretValue } from '../utils'
 
 const app = express();
 
 app.use(cors());
 app.use(
   async (_, res, next) => {
-    const azure_secret_name = process.env.AZURE_SECRET_NAME;
-    const client = new SecretsManagerClient({});
-    const azureSecret = await client.send(
-      new GetSecretValueCommand({
-        SecretId: azure_secret_name,
-      })
-    )
-    if (!azureSecret.SecretString) return next()
-    const { azureOpenAIApiKey, azureOpenAIApiInstanceName, azureOpenAIApiDeploymentName, azureOpenAIApiVersion } = JSON.parse(azureSecret.SecretString)
-    res.locals.apiKey = azureOpenAIApiKey
-    res.locals.apiInstanceName = azureOpenAIApiInstanceName
-    res.locals.apiDeploymentName = azureOpenAIApiDeploymentName
-    res.locals.apiVersion = azureOpenAIApiVersion
+    const azureSecretName = process.env.AZURE_SECRET_NAME ? process.env.AZURE_SECRET_NAME : "";
+    const azureSecret = await getSecretValue<AzureSecretValue>(azureSecretName)
+    res.locals.apiKey = azureSecret.azureOpenAIApiKey
+    res.locals.apiInstanceName = azureSecret.azureOpenAIApiInstanceName
+    res.locals.apiDeploymentName = azureSecret.azureOpenAIApiDeploymentName
+    res.locals.apiVersion = azureSecret.azureOpenAIApiVersion
     next()
   }
 );
