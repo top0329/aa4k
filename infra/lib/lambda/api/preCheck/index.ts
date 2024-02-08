@@ -15,7 +15,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   let pluginVersion;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A02003;
+  let retErrorCode: ErrorCode = ErrorCode.A02099;
   try {
     subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId] as string;
     pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;
@@ -53,7 +53,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (!subscriptionData) {
       response = {
         statusCode: 404,
-        body: JSON.stringify({ message: "SubscriptionData is Not Found", }),
+        body: JSON.stringify({ message: "SubscriptionData is Not Found", errorCode: ErrorCode.A02003 }),
       };
       return response;
     }

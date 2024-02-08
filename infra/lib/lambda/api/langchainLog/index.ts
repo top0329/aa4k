@@ -21,7 +21,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
   let dbClient;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A06002;
+  let retErrorCode: ErrorCode = ErrorCode.A06099;
   try {
     subscriptionId = event.headers[RequestHeaderName.aa4kSubscriptionId] as string;
     pluginVersion = event.headers[RequestHeaderName.aa4kPluginVersion] as string;

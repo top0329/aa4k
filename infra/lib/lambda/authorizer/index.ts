@@ -63,7 +63,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
     });
     console.error(errorMessage);
 
-    return generateDenyPolicy(event.methodArn, ErrorCode.A01005);
+    return generateDenyPolicy(event.methodArn, ErrorCode.A01099);
   }
 };
 

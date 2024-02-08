@@ -14,7 +14,7 @@ export const updateHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A05202;
+  let retErrorCode: ErrorCode = ErrorCode.A05299;
 
   try {
     subscriptionId = req.header("aa4k-subscription-id") as string;

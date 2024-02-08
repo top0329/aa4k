@@ -13,7 +13,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A05002;
+  let retErrorCode: ErrorCode = ErrorCode.A05099;
 
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
@@ -38,6 +38,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     if (!subscriptionData) {
       retErrorStatus = 404;
       retErrorMessage = "SubscriptionData is Not Found";
+      retErrorCode = ErrorCode.A05002;
       throw new Error("SubscriptionData is Not Found")
     }
     // 契約ステータスの取得
