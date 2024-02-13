@@ -13,11 +13,11 @@ export default defineConfig({
     target: "ES2022",
     rollupOptions: {
       input: {
-        copilot_desktop: "src/main.tsx",
+        desktop: "src/main.tsx",
       },
       output: {
         format: "iife", // 即時関数で囲む
-        dir: "dist", // 「dist」ディレクトリーの下にビルド後のファイルを生成する
+        dir: "dist/dev", // 「dist」ディレクトリーの下にビルド後のファイルを生成する
         entryFileNames: "[name].js", // 生成物のファイル名は input のキー名とする
       },
     },

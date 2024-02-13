@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+
+# plugin
+plugin/manifest.json
+plugin/desktop.js
