@@ -17,7 +17,17 @@
     "prepare": "cd ../ && husky install app/.husky",
     "langchain-update": "npx npm-check-updates langchain -u && npm i",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "init": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs prod",
+    "init-dev": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs dev",
+    "package": "node scripts/marge-json.mjs prod && concurrently \"npm:package:*\" && kintone-plugin-packer --out dist/plugin.zip --ppk plugin/ppk/private.ppk plugin",
+    "package:js": "cp -p dist/dev/desktop.js plugin/desktop.js",
+    "package-dev": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip --ppk plugin/ppk/private-dev.ppk plugin && concurrently \"npm:package-dev:*\"",
+    "package-dev:js-desktop": "cp -p dist/dev/desktop.js plugin/desktop.js",
+    "package-dev:js-config": "cp -p plugin/config.js dist/dev/config.js",
+    "package-dev:css-desktop": "cp -p plugin/desktop.css dist/dev/desktop.css",
+    "package-dev:css-config": "cp -p plugin/config.css dist/dev/config.css",
+    "package-dev:upload": "node scripts/upload.mjs"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
@@ -52,6 +62,8 @@
   },
   "devDependencies": {
     "@kintone/dts-gen": "^8.0.3",
+    "@kintone/plugin-packer": "^8.0.4",
+    "@kintone/plugin-uploader": "^9.0.3",
     "@storybook/addon-essentials": "^7.6.7",
     "@storybook/addon-interactions": "^7.6.7",
     "@storybook/addon-links": "^7.6.7",
@@ -71,6 +83,8 @@
     "@vitejs/plugin-react": "^4.2.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "babel-plugin-macros": "^3.1.0",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.4.3",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.0",
