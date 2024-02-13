@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { appCreateJs } from '~/ai/appCreateJs';
 import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from '~/constants';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
-import { KintoneProxyResponse, InsertConversationResponseBody } from '~/types/apiResponse';
+import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
-import { ChatHistoryState, InTypeWriteState } from '../CornerDialog/CornerDialogState';
+import { InTypeWriteState, PcChatHistoryState, SpChatHistoryState, ViewModeState } from '../CornerDialog/CornerDialogState';
 
 export const usePromptFormLogic = () => {
-  const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
+  const [isPcViewMode] = useAtom(ViewModeState);
+  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? PcChatHistoryState : SpChatHistoryState);
   const [humanMessage, setHumanMessage] = useState('');
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
 

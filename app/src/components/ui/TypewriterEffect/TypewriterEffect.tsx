@@ -1,11 +1,10 @@
 import { Box } from "@radix-ui/themes";
-import React from 'react';
-import { useState, useEffect, useRef } from "react";
-import { useAtom } from "jotai";
 import clsx from "clsx";
-import { AiMessage, ErrorMessage } from "~/types/ai";
+import { useAtom } from "jotai";
+import React, { useEffect, useRef, useState } from 'react';
 import { InTypeWriteState } from "~/components/feature/CornerDialog/CornerDialogState";
 import { AnimatedBlinking } from "~/styles/animation.css.ts";
+import { AiMessage, ErrorMessage } from "~/types/ai";
 import { TypewriterCursor } from "./TypewriterEffect.css.ts";
 
 type TypewriterEffectProps = {

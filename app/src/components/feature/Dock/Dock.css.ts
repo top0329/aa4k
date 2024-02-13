@@ -22,14 +22,15 @@ export const DockInner = style({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  gap: 16,
 });
 
 export const DockItem = style({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  width: 48,
-  height: 48,
+  width: 36,
+  height: 36,
   cursor: "pointer",
 });
 
