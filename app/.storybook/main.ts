@@ -14,6 +14,7 @@ const config: StorybookConfig = {
     "@storybook/addon-essentials",
     "@storybook/addon-onboarding",
     "@storybook/addon-interactions",
+    "msw-storybook-addon",
   ],
   framework: {
     name: "@storybook/react-vite",
@@ -22,5 +23,6 @@ const config: StorybookConfig = {
   docs: {
     autodocs: "tag",
   },
+  staticDirs: ["../public"],
 };
 export default config;

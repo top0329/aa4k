@@ -10,7 +10,8 @@
   },
   "author": "showcase",
   "scripts": {
-    "dev": "vite",
+    "dev": "run-s msw && vite",
+    "msw": "msw init ./public --no-save",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
@@ -83,6 +84,8 @@
     "eslint-plugin-storybook": "^0.6.15",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
+    "msw": "^2.2.0",
+    "msw-storybook-addon": "beta",
     "npm-check-updates": "^16.14.12",
     "prettier": "^3.1.1",
     "storybook": "^7.6.7",
