@@ -1,6 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ContractStatus } from "~/constants";
 import * as cheerio from "cheerio"
+import { KintoneProxyResponse } from "~/types/apiResponse"
 
 // カスタムエラーオブジェクト
 export class ContractExpiredError extends Error { }
@@ -30,9 +31,9 @@ export function openAIModel(contractStatus: ContractStatus) {
       temperature: 0,
       modelKwargs: { "seed": 0 },
       modelName: "gpt-4-1106-preview",
-      openAIApiKey: "dummy",
+      openAIApiKey: "dummy",  // proxyに任せるのでこの値は不要だが、LangChainの仕様上必須のためセットしている
     }, {
-      baseURL: `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/openai_proxy`,
+      fetch: fetcher,
     });
   } else if (contractStatus === ContractStatus.expired) {
     throw new ContractExpiredError(`契約期間が終了しているためご利用できません`)
@@ -58,4 +59,52 @@ export async function getCodingGuidelines() {
   const codingGuideline = $1("article.main--content--article").text();
   const secureCodingGuideline = $2("article.main--content--article").text();
   return { codingGuideline, secureCodingGuideline }
+}
+
+
+/**
+ * Langchainで使用されるfetchのカスタム
+ *     kintone.proxyを使用してLambda-openai-proxyにアクセス
+ * @param input 
+ * @param init 
+ * @returns 
+ */
+const fetcher = async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+
+  // URL設定
+  const originalUrl = input.toString();
+  const baseUrl = 'https://api.openai.com/v1/';
+  const newBaseUrl = `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/openai_proxy/`;
+  const url = originalUrl.replace(baseUrl, newBaseUrl);
+
+  // body設定
+  const reqBody = init?.body ? init.body.toString() : "{}";
+  // headers設定
+  const reqHeaders: Record<string, string> = {};
+  // 既存のヘッダーを新しいheadersオブジェクトにコピー（content-lengthを除外）
+  for (const [key, value] of Object.entries(init?.headers || {})) {
+    if (key.toLowerCase() !== 'content-length') {
+      reqHeaders[key] = value;
+    }
+  }
+  // 新しいヘッダーを追加 TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+  reqHeaders['aa4k-plugin-version'] = '1.0.0';
+  reqHeaders['aa4k-subscription-id'] = '2c2a93dc-4418-ba88-0f89-6249767be821';
+
+  // API連携
+  const resProxy = await kintone.proxy(
+    url,
+    "POST",
+    reqHeaders, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+    JSON.parse(reqBody),
+  ) as KintoneProxyResponse;
+  const [resBody, resStatus, resHeaders] = resProxy;
+
+  // Responseオブジェクトを作成
+  const response = new Response(resBody, {
+    status: resStatus,
+    headers: resHeaders
+  });
+
+  return response;
 }

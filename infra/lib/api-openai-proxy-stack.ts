@@ -7,9 +7,12 @@ import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { ContextProps } from './type';
 import { Aa4kSecretsStack } from './secret-stack'
+import { AuroraStack } from './aurora-stack'
+import { Aa4kElastiCacheStack } from './elasticache-stack'
+import { Aa4kParameterStack } from './parameter-stack'
 
-export class Aa4kApiOpeAiProxyStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, props?: cdk.StackProps) {
+export class Aa4kApiAiProxyStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, contextProps: ContextProps, secretsStack: Aa4kSecretsStack, auroraStack: AuroraStack, elastiCacheStack: Aa4kElastiCacheStack, parameterStack: Aa4kParameterStack, props?: cdk.StackProps) {
     super(scope, id, props);
     const stageName = contextProps.stageName;
 
@@ -59,6 +62,37 @@ export class Aa4kApiOpeAiProxyStack extends cdk.Stack {
     // ******************************
     // Lambda関数
     // ******************************
+    // const lambdaAuthorizer = new apigateway.RequestAuthorizer(this, 'Authorizer', {
+    //   handler: apiStack.authorizerFunction,
+    //   identitySources: [apigateway.IdentitySource.header('aa4k-subscription-id')]
+    // });
+    // Lambda 関数を定義
+    const authorizerFunction = new nodelambda.NodejsFunction(this, "AuthorizerFunction", {
+      entry: __dirname + "/lambda/authorizer/index.ts",
+      handler: 'index.handler',
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    const lambdaAuthorizer = new apigateway.RequestAuthorizer(this, 'Authorizer', {
+      handler: authorizerFunction,
+      identitySources: [apigateway.IdentitySource.header('aa4k-subscription-id')]
+    });
+    secretsStack.azureSecret.grantRead(authorizerFunction);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction);
+    parameterStack.aa4kConstParameter.grantRead(authorizerFunction);
+
+
+
     // // Proxy Lambda
     const openaiProxyLambda = new nodelambda.NodejsFunction(this, "OpenAIProxyLambda", {
       entry: __dirname + "/lambda/openaiProxy/index.ts",
@@ -73,6 +107,10 @@ export class Aa4kApiOpeAiProxyStack extends cdk.Stack {
     restapi.root.addResource("openai_proxy").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(openaiProxyLambda),
       anyMethod: true,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
+        authorizer: lambdaAuthorizer,
+      }
     })
   }
 }
