@@ -9,7 +9,7 @@ import { useDockLogic } from "./useDockLogic";
 const Dock = () => {
   const {
     isPcViewMode,
-    activeItem,
+    activeChatMode,
     toggleChatVisibility,
     toggleItemVisibility,
     deleteHistory,
@@ -28,7 +28,7 @@ const Dock = () => {
           icon={faMessageLines}
           tooltip={'チャットを表示'}
           onClick={toggleChatVisibility}
-          pressed={activeItem === 'chatVisible'}
+          pressed={activeChatMode === 'pcChat'}
           pressedColor={
             isPcViewMode
               ? vars.color.indigoA.indigoA9
