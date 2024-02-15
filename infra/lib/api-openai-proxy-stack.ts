@@ -62,10 +62,6 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     // ******************************
     // Lambda関数
     // ******************************
-    // const lambdaAuthorizer = new apigateway.RequestAuthorizer(this, 'Authorizer', {
-    //   handler: apiStack.authorizerFunction,
-    //   identitySources: [apigateway.IdentitySource.header('aa4k-subscription-id')]
-    // });
     // Lambda 関数を定義
     const authorizerFunction = new nodelambda.NodejsFunction(this, "AuthorizerFunction", {
       entry: __dirname + "/lambda/authorizer/index.ts",
