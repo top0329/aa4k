@@ -11,7 +11,7 @@ export const ContractStatus = {
   active: "active",
   expired: "expired",
 } as const;
-export type ContractStatus = keyof typeof ContractStatus
+export type ContractStatus = keyof typeof ContractStatus;
 
 // コード生成メソッド
 export const CodeCreateMethod = {
@@ -26,7 +26,8 @@ export const CodeCheckResult = {
   caution: "CAUTION",
   safe: "SAFE",
 } as const;
-export type CodeCheckResult = (typeof CodeCheckResult)[keyof typeof CodeCheckResult];
+export type CodeCheckResult =
+  (typeof CodeCheckResult)[keyof typeof CodeCheckResult];
 
 // エラーコード
 export const ErrorCode = {
@@ -67,6 +68,7 @@ export type ErrorCode = keyof typeof ErrorCode;
 
 export const ErrorMessage = {
   currentlyUnavailable: "現在利用できません。管理者にお問い合わせください。",
-  unsupportedVersion: "現在のバージョンでは利用できません。管理者にお問い合わせください。",
+  unsupportedVersion:
+    "現在のバージョンでは利用できません。管理者にお問い合わせください。",
   UnavailableScreen: "この画面では利用できません。",
 } as const;

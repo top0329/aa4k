@@ -1,15 +1,16 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
-import { ChatHistoryState, LatestAiResponseIndexState } from "~/components/feature/CornerDialog/CornerDialogState";
+import { LatestAiResponseIndexState, PcChatHistoryState, SpChatHistoryState, ViewModeState } from "~/components/feature/CornerDialog/CornerDialogState";
+import { useDockLogic } from "~/components/feature/Dock/useDockLogic";
+import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse } from "~/types/apiResponse";
 import { preCheck } from "~/util/preCheck";
-import { useDockLogic } from "~/components/feature/Dock/useDockLogic";
-import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 
 export const useCornerDialogLogic = () => {
-  const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
+  const [isPcViewMode] = useAtom(ViewModeState);
+  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? PcChatHistoryState : SpChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
 

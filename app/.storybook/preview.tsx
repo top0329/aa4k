@@ -1,15 +1,14 @@
-// storybook v7 preview.tsx
+// .storybook/preview.js
 import '@radix-ui/themes/styles.css';
 import type { Preview } from '@storybook/react';
+import { initialize, mswLoader } from 'msw-storybook-addon';
 import React from 'react';
 import ThemeProvider from '../src/ThemeProvider';
+import './mocks/kintoneMocks';
 
-global.kintone = {
-  app: {
-    getId: () => 'mockId',  // Return a mock ID or relevant value
-  },
-  // Add other necessary properties or methods
-};
+initialize({
+  onUnhandledRequest: 'bypass'
+})
 
 const preview: Preview = {
   parameters: {
@@ -21,6 +20,7 @@ const preview: Preview = {
       },
     },
   },
+  loaders: [mswLoader],
   decorators: [
     Story => (
       <ThemeProvider>

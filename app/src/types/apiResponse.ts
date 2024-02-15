@@ -1,6 +1,6 @@
 import { DocumentInterface } from "@langchain/core/documents";
-import { SystemSettings } from "./ai";
 import { ContractStatus, ErrorCode } from "~/constants";
+import { SystemSettings } from "./ai";
 
 export type ResponseHeaders = Record<string, any>;
 export type KintoneProxyResponse = [string, number, ResponseHeaders];
@@ -8,7 +8,7 @@ export type KintoneProxyResponse = [string, number, ResponseHeaders];
 export interface KintoneProxyResponseBody {
   message: string;
   errorCode: ErrorCode;
-};
+}
 
 export interface ConversationHistoryRow {
   id: string;
@@ -20,9 +20,10 @@ export interface ConversationHistoryRow {
 }
 
 export type ConversationHistory = Array<ConversationHistoryRow>;
-export interface ConversationHistoryListResponseBody extends KintoneProxyResponseBody {
-  conversationHistoryList: ConversationHistory
-};
+export interface ConversationHistoryListResponseBody
+  extends KintoneProxyResponseBody {
+  conversationHistoryList: ConversationHistory;
+}
 
 export interface PreCheckResponseBody extends KintoneProxyResponseBody {
   contractStatus: ContractStatus;
@@ -30,13 +31,15 @@ export interface PreCheckResponseBody extends KintoneProxyResponseBody {
 }
 
 export interface GeneratedCodeGetResponseBody extends KintoneProxyResponseBody {
-  javascriptCode: string
+  javascriptCode: string;
 }
 
-export interface CodeTemplateRetrieverResponseBody extends KintoneProxyResponseBody {
-  documents: [DocumentInterface, number][]
+export interface CodeTemplateRetrieverResponseBody
+  extends KintoneProxyResponseBody {
+  documents: [DocumentInterface, number][];
 }
 
-export interface InsertConversationResponseBody extends KintoneProxyResponseBody {
+export interface InsertConversationResponseBody
+  extends KintoneProxyResponseBody {
   conversationId: string;
 }

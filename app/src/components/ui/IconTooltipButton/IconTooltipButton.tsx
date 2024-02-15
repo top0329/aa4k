@@ -13,6 +13,7 @@ type IconTooltipButtonProps = {
   style?: React.CSSProperties;
   pressedColor?: string;
   defaultColor?: string;
+  className?: string;
 };
 
 const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
@@ -23,10 +24,11 @@ const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
   style,
   pressedColor = vars.color.grayA.grayA12,
   defaultColor = vars.color.gray.gray9,
+  className
 }, ref) => {
   return (
-    <Box ref={ref} onClick={onClick} style={style}>
-      <Tooltip content={tooltip}>
+    <Box ref={ref} onClick={onClick} style={style} className={className}>
+      <Tooltip delayDuration={400} content={tooltip}>
         <FontAwesomeIcon icon={icon} size="lg" color={pressed ? pressedColor : defaultColor} />
       </Tooltip>
     </Box>
