@@ -1,13 +1,17 @@
-// src/components/feature/CodeEditor/CodeEditor.tsx
+// src/components/feature/CodeEditor/useCodeEditorLogic.tsx
 import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
+import { CodeActionDialogType } from '~/types/codeActionTypes';
+import { codeActionDialogTypeState, isCodeActionDialogState } from '../CodeActionDialog/CodeActionDialogState';
 
 export const useCodeEditorLogic = () => {
   const [code, setCode] = useState('');
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [, setDockState] = useAtom(DockItemVisibleState);
+  const [, setIsCodeActionDialog] = useAtom(isCodeActionDialogState);
+  const [, setDialogType,] = useAtom(codeActionDialogTypeState);
 
   const { copyToClipboard, copySuccess } = useCopyToClipboard();
 
@@ -15,9 +19,10 @@ export const useCodeEditorLogic = () => {
     setCode(newCode);
   };
 
-  const handleRunCode = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    console.log(e);
-  }
+  const handleRunCodeAction = (type: CodeActionDialogType) => {
+    setDialogType(type);
+    setIsCodeActionDialog(true);
+  };
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
@@ -33,9 +38,10 @@ export const useCodeEditorLogic = () => {
     copySuccess,
     isFullScreen,
     setCode,
-    handleRunCode,
+    handleRunCodeAction,
     handleCodeChange,
     toggleFullScreen,
     copyToClipboard,
   };
 };
+

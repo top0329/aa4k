@@ -1,6 +1,6 @@
 // src/components/ui/CodeEditor/CodeEditor.tsx
 import { faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
-import { Box, Button } from '@radix-ui/themes';
+import { Box, Button, Flex } from '@radix-ui/themes';
 import 'ace-builds/src-min-noconflict/ace';
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/ext-searchbox";
@@ -13,6 +13,7 @@ import clsx from 'clsx';
 import AceEditor from "react-ace-builds";
 import CopyButton from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
+import { CodeActionDialogType } from '~/types/codeActionTypes';
 import { sCodeEditor, sCodeEditorFullScreen } from './CodeEditor.css';
 import { useCodeEditorLogic } from './useCodeEditorLogic';
 
@@ -21,7 +22,7 @@ const CodeEditor = () => {
     toggleFullScreen,
     copyToClipboard,
     isFullScreen,
-    handleRunCode
+    handleRunCodeAction
   } = useCodeEditorLogic();
 
   return (
@@ -91,16 +92,29 @@ const CodeEditor = () => {
             tabSize: 2,
             useWorker: false
           }} />
-        <Box
+        <Flex
           width={'100%'}
           p={'4'}
+          justify={'end'}
           style={{
-            display: 'flex',
-            justifyContent: 'flex-end'
+            gap: 16,
           }}
         >
-          <Button variant='soft' size={'3'} onClick={() => handleRunCode}>コード実行</Button>
-        </Box>
+          <Button variant='soft' color='crimson' size={'3'}
+            onClick={() => handleRunCodeAction(CodeActionDialogType.CodeCheck)}
+            style={{
+              cursor: 'pointer',
+            }}>
+            チェック
+          </Button>
+          <Button variant='soft' size={'3'}
+            onClick={() => handleRunCodeAction(CodeActionDialogType.CodeFix)}
+            style={{
+              cursor: 'pointer',
+            }}>
+            反映
+          </Button>
+        </Flex>
       </Box>
     </Box>
   )
