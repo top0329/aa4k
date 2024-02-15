@@ -5,6 +5,6 @@ export const ErrorCode = {
   A01002: "A01002",   // 許可IPアドレス以外のアクセス
   A01003: "A01003",   // サブスクリプション情報が存在しない
   A01004: "A01004",   // 契約期間外
-  A01005: "A01005",   // その他例外エラー
+  A01099: "A01099",   // その他例外エラー
 } as const;
 export type ErrorCode = keyof typeof ErrorCode;

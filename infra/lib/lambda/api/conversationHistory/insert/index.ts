@@ -13,7 +13,7 @@ export const insertHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A03102;
+  let retErrorCode: ErrorCode = ErrorCode.A03199;
 
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;

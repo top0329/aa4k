@@ -2,7 +2,7 @@
 export { getContractStatus } from "./getContractStatus";
 export { getSubscriptionData } from "./getSubscriptionData";
 export { checkPluginVersion } from "./checkPluginVersion";
-export { getSecretValues } from "./getSecretValues";
+export { getSecretValues, getSecretValue } from "./getSecretValues";
 export { getParameterValues } from "./getParameterValues";
 export { getDbConfig } from "./getDbConfig";
 export { getRedisConfig } from "./getRedisConfig";
