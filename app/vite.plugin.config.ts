@@ -13,11 +13,11 @@ export default defineConfig({
     target: "ES2022",
     rollupOptions: {
       input: {
-        desktop: "src/main.tsx",
+        config: "src/plugin/config.ts"
       },
       output: {
         format: "iife", // 即時関数で囲む
-        dir: "dist/src/desktop", // 「dist」ディレクトリーの下にビルド後のファイルを生成する
+        dir: "dist/src/config", // 「dist」ディレクトリーの下にビルド後のファイルを生成する
         entryFileNames: "[name].js", // 生成物のファイル名は input のキー名とする
       },
     },
@@ -30,4 +30,7 @@ export default defineConfig({
     // https: true,
   },
   plugins: [mkcert(), svgr(), vanillaExtractPlugin()],
+  define: {
+    '__NPM_PACKAGE_VERSION__': JSON.stringify(process.env.npm_package_version),
+  },
 });
