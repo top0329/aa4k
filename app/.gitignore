@@ -28,3 +28,4 @@ dist-ssr
 # plugin
 plugin/manifest.json
 plugin/desktop.js
+plugin/config.js

@@ -1,11 +1,15 @@
 //@ts-check
+import { config } from 'dotenv';
+config();
+
 const localhost = 'https://localhost:4173';
+const NPM_PACKAGE_VERSION = process.env.npm_package_version;
 
 export default {
   manifest: {
     base: {
       manifest_version: 1,
-      version: '1.0.0',
+      version: NPM_PACKAGE_VERSION,
       type: 'APP',
       name: { en: '', ja: '', zh: '' },
       description: {
@@ -30,13 +34,13 @@ export default {
         zh: '[dev用] Associate AIHub for kintone ( AA4K )',
       },
       desktop: {
-        js: [`${localhost}/dev/desktop.js`],
+        js: [`${localhost}/desktop/desktop.js`],
         css: [],
       },
       mobile: { js: [], css: [], },
       config: {
-        js: [`${localhost}/dev/config.js`],
-        css: [`${localhost}/dev/config.css`]
+        js: [`${localhost}/config/config.js`],
+        css: [`${localhost}/config/config.css`]
       },
     },
     prod: {
