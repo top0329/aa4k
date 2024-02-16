@@ -7,12 +7,16 @@ import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/const
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse } from "~/types/apiResponse";
 import { preCheck } from "~/util/preCheck";
+import { isCodeActionDialogState } from "../CodeActionDialog/CodeActionDialogState";
+import { DockItemVisibleState } from "../Dock/DockState";
 
 export const useCornerDialogLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? PcChatHistoryState : SpChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
+  const [dockItemVisible, setDockItemVisible] = useAtom(DockItemVisibleState);
+  const [isCodeActionDialog] = useAtom(isCodeActionDialogState);
 
   // doc logic
   const { dockState, toggleItemVisibility, initDockState } = useDockLogic();
@@ -103,5 +107,8 @@ export const useCornerDialogLogic = () => {
     dockState,
     handleBannerClick,
     isBannerClicked,
+    isCodeActionDialog,
+    dockItemVisible,
+    setDockItemVisible,
   };
 };

@@ -1,6 +1,8 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ContractStatus } from "~/constants";
 import * as cheerio from "cheerio"
+import { KintoneProxyResponse } from "~/types/apiResponse"
+import { Fetch } from "openai/core"
 
 // カスタムエラーオブジェクト
 export class ContractExpiredError extends Error { }
@@ -30,17 +32,10 @@ export function openAIModel(contractStatus: ContractStatus) {
       temperature: 0,
       modelKwargs: { "seed": 0 },
       modelName: "gpt-4-1106-preview",
-      azureOpenAIApiKey: import.meta.env.VITE_AZURE_OPENAI_API_KEY,
-      azureOpenAIApiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION,
-      azureOpenAIApiInstanceName: import.meta.env.VITE_AZURE_OPENAI_INSTANCE_NAME,
-      azureOpenAIApiDeploymentName: import.meta.env.VITE_AZURE_OPENAI_GPT4_DEPLOYMENT_NAME,
-      // modelName: "gpt-35-turbo-1106",
-      // azureOpenAIApiKey: import.meta.env.VITE_AZURE_OPENAI_API_KEY,
-      // azureOpenAIApiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION,
-      // azureOpenAIApiInstanceName: import.meta.env.VITE_AZURE_OPENAI_INSTANCE_NAME,
-      // azureOpenAIApiDeploymentName: import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT_NAME,
-      // }, {
-      //   baseURL: `${import.meta.env.VITE_API_ENDPOINT}/xxxxxxx`  TODO: Azure OpenAIアクセス用プロキシのURLを設定
+      openAIApiKey: "dummy",  // proxyに任せるのでこの値は不要だが、LangChainの仕様上必須のためセットしている
+    }, {
+      baseURL: `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/openai_proxy/`,
+      fetch: kintoneProxyFetcher,
     });
   } else if (contractStatus === ContractStatus.expired) {
     throw new ContractExpiredError(`契約期間が終了しているためご利用できません`)
@@ -66,4 +61,51 @@ export async function getCodingGuidelines() {
   const codingGuideline = $1("article.main--content--article").text();
   const secureCodingGuideline = $2("article.main--content--article").text();
   return { codingGuideline, secureCodingGuideline }
+}
+
+
+/**
+ * Langchainで使用されるfetchのカスタム
+ *     kintone.proxyを使用してLambda-openai-proxyにアクセス
+ * @param url 
+ * @param init 
+ * @returns response
+ */
+const kintoneProxyFetcher: Fetch = async (url, init?) => {
+
+  if (!init?.method) throw new Error(`OpenAIリクエストのmethodが指定されていません`)
+
+  // headers設定
+  const reqHeaders: Record<string, string> = {};
+  // 既存のヘッダーを新しいheadersオブジェクトにコピー（content-lengthを除外）
+  for (const [key, value] of Object.entries(init?.headers || {})) {
+    // 下記のkintoneドキュメントより、「Content-Length」と「Transfer-Encoding」の除外が必要
+    // https://cybozu.dev/ja/kintone/docs/js-api/proxy/kintone-proxy/
+    if (key.toLowerCase() !== 'content-length') {
+      reqHeaders[key] = value;
+    }
+  }
+  // 新しいヘッダーを追加 TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+  reqHeaders['aa4k-plugin-version'] = '1.0.0';
+  reqHeaders['aa4k-subscription-id'] = '2c2a93dc-4418-ba88-0f89-6249767be821';
+
+  // kintone.proxyにオブジェクトで渡すため、init.bodyをオブジェクト型に変換
+  const reqBody = JSON.parse(init?.body ? init.body.toString() : "{}");
+
+  // API連携
+  const resProxy = await kintone.proxy(
+    url.toString(),
+    init.method,
+    reqHeaders,
+    reqBody,
+  ) as KintoneProxyResponse;
+  const [resBody, resStatus, resHeaders] = resProxy;
+
+  // Fetchに合わせるため、Responseオブジェクトを設定
+  const response = new Response(resBody, {
+    status: resStatus,
+    headers: resHeaders
+  });
+
+  return response;
 }

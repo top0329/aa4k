@@ -16,7 +16,7 @@ export interface DbAccessSecretValue {
  * @param secretName 
  * @returns Secret Manager情報
  */
-const getSecretValue = async <T>(secretName: string): Promise<T> => {
+export const getSecretValue = async <T>(secretName: string): Promise<T> => {
   // Secret Managerから情報取得
   const secretsManagerClient = new SecretsManagerClient();
   const result = await secretsManagerClient.send(

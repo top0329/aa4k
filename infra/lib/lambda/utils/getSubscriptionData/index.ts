@@ -8,8 +8,8 @@ import { addDays, differenceInSeconds } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 
 /**
- * プラグインバージョンチェック
- * @param pluginVersion 
+ * サブスクリプション情報の取得
+ * @param subscriptionId 
  * @param dbAccessSecretValue 
  * @returns チェック結果
  */
@@ -42,7 +42,7 @@ export const getSubscriptionData = async (subscriptionId: string, dbAccessSecret
         return null;
       } else if (latestSubscriptionData.rowCount >= 2) {
         // 重複したサブスクリプション情報が存在する場合
-        throw new Error("Duplicated subsbscription data exists in database");
+        throw new Error("Duplicated subscription data exists in database");
       }
 
       // DBから取得したサブスクリプション情報をRedisに登録

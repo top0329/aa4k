@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ContextProps } from '../lib/type';
 import { Aa4kApiStack } from '../lib/api-stack';
+import { Aa4kApiAiProxyStack } from '../lib/api-openai-proxy-stack';
 import { Aa4kSecretsStack } from '../lib/secret-stack';
 import { AuroraStack } from '../lib/aurora-stack';
 import { Aa4kElastiCacheStack } from '../lib/elasticache-stack';
@@ -33,6 +34,7 @@ const elastiCacheStack = new Aa4kElastiCacheStack(app, `Aa4k-ElastiCacheStack-${
 const parameterStack = new Aa4kParameterStack(app, `Aa4k-ParameterStack-${stageName}`, contextProps, auroraStack, stackProps)
 
 new Aa4kApiStack(app, `Aa4k-ApiStack-${stageName}`, contextProps, secretsStack, auroraStack, elastiCacheStack, parameterStack, stackProps);
+new Aa4kApiAiProxyStack(app, `Aa4k-ApiAiProxyStack-${stageName}`, contextProps, secretsStack, auroraStack, elastiCacheStack, parameterStack, stackProps);
 cdk.Tags.of(app).add("Department", "CS");
 cdk.Tags.of(app).add("Production", "AA4K");
 

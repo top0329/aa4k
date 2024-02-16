@@ -41,13 +41,13 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
       return generateDenyPolicy(event.methodArn, ErrorCode.A01002);
     }
 
-    // サブスクリプション存在チェック
+    // サブスクリプション有効性チェック(存在チェック)
     const subscriptionData = await getSubscriptionData(subscriptionId, secret.dbAccessSecretValue)
     if (!subscriptionData) {
       return generateDenyPolicy(event.methodArn, ErrorCode.A01003);
     }
 
-    // 契約ステータスチェック
+    // サブスクリプション有効性チェック(契約ステータスチェック)
     const contractStatus = getContractStatus(subscriptionData);
     if (contractStatus === ContractStatus.expired) {
       return generateDenyPolicy(event.methodArn, ErrorCode.A01004);
@@ -63,7 +63,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
     });
     console.error(errorMessage);
 
-    return generateDenyPolicy(event.methodArn, ErrorCode.A01005);
+    return generateDenyPolicy(event.methodArn, ErrorCode.A01099);
   }
 };
 
