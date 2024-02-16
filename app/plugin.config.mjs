@@ -34,13 +34,13 @@ export default {
         zh: '[dev用] Associate AIHub for kintone ( AA4K )',
       },
       desktop: {
-        js: [`${localhost}/desktop/desktop.js`],
+        js: [`${localhost}/src/desktop/desktop.js`],
         css: [],
       },
       mobile: { js: [], css: [], },
       config: {
-        js: [`${localhost}/config/config.js`],
-        css: [`${localhost}/config/config.css`]
+        js: [`${localhost}/src/config/config.js`],
+        css: [`${localhost}/src/config/config.css`]
       },
     },
     prod: {
