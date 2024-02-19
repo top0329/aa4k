@@ -24,14 +24,14 @@ export default {
         html: 'config.html',
         js: [],
         css: [],
-        required_params: [],
+        required_params: ["subscriptionId"],
       },
     },
     dev: {
       name: {
-        en: '[dev用] Associate AIHub for kintone ( AA4K )',
-        ja: '[dev用] Associate AIHub for kintone ( AA4K )',
-        zh: '[dev用] Associate AIHub for kintone ( AA4K )',
+        en: '[dev用] Associate AIHub for kintone ( AA4k )',
+        ja: '[dev用] Associate AIHub for kintone ( AA4k )',
+        zh: '[dev用] Associate AIHub for kintone ( AA4k )',
       },
       desktop: {
         js: [`${localhost}/src/desktop/desktop.js`],
@@ -40,14 +40,17 @@ export default {
       mobile: { js: [], css: [], },
       config: {
         js: [`${localhost}/src/config/config.js`],
-        css: [`${localhost}/src/config/config.css`]
+        css: [
+          `config.css`,
+          `51-modern-default.css`,
+        ]
       },
     },
     prod: {
       name: {
-        en: 'Associate AIHub for kintone ( AA4K )',
-        ja: 'Associate AIHub for kintone ( AA4K )',
-        zh: 'Associate AIHub for kintone ( AA4K )',
+        en: 'Associate AIHub for kintone ( AA4k )',
+        ja: 'Associate AIHub for kintone ( AA4k )',
+        zh: 'Associate AIHub for kintone ( AA4k )',
       },
       desktop: {
         js: ['desktop.js'],
@@ -56,7 +59,10 @@ export default {
       mobile: { js: [], css: [], },
       config: {
         js: ['config.js'],
-        css: ['config.css']
+        css: [
+          'config.css',
+          '51-modern-default.css',
+        ]
       },
     },
   },
