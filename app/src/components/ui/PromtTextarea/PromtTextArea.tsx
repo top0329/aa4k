@@ -9,9 +9,10 @@ type PromtTextAreaProps = {
   required?: boolean;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
-export const PromtTextArea: React.FC<PromtTextAreaProps> = ({ name, label, required, value, onChange, ...rest }) => {
+export const PromtTextArea: React.FC<PromtTextAreaProps> = ({ name, label, required, value, onChange, onKeyDown, ...rest }) => {
   return (
     <TextArea
       className={StyledItem}
@@ -21,6 +22,7 @@ export const PromtTextArea: React.FC<PromtTextAreaProps> = ({ name, label, requi
       required={required}
       value={value}
       onChange={onChange}
+      onKeyDown={onKeyDown}
       {...rest}
     />
   );

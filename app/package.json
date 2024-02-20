@@ -48,7 +48,7 @@
     "@vanilla-extract/css": "^1.14.0",
     "cheerio": "^1.0.0-rc.12",
     "clsx": "^2.1.0",
-    "framer-motion": "^10.18.0",
+    "framer-motion": "^11.0.5",
     "html-react-parser": "^5.1.0",
     "jotai": "^2.6.1",
     "langchain": "^0.1.12",

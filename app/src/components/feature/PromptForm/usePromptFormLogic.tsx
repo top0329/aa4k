@@ -1,18 +1,29 @@
-// src/components/forms/Form/FormLogic.tsx
+// src/components/feature/PromptForm/usePromptFormLogic.tsx
 import { useAtom } from 'jotai';
-import { useState } from 'react';
 import { appCreateJs } from '~/ai/appCreateJs';
 import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from '~/constants';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
 import { InTypeWriteState, PcChatHistoryState, SpChatHistoryState, ViewModeState } from '../CornerDialog/CornerDialogState';
+import { humanMessageState, voiceInputState } from './PromptFormState';
 
 export const usePromptFormLogic = () => {
-  const [isPcViewMode] = useAtom(ViewModeState);
+  const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? PcChatHistoryState : SpChatHistoryState);
-  const [humanMessage, setHumanMessage] = useState('');
+  const [humanMessage, setHumanMessage] = useAtom(humanMessageState);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
+  const [isVoiceInput,
+    setVoiceInput] = useAtom(voiceInputState);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const pressShiftEnter = e.key === 'Enter' && e.shiftKey
+    if (pressShiftEnter) {
+      e.preventDefault(); // Prevent the default action to avoid newline insertion
+      handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>); // Cast the event type to match the form event type
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -142,8 +153,13 @@ export const usePromptFormLogic = () => {
   };
 
   return {
+    handleSubmit,
     humanMessage,
     setHumanMessage,
-    handleSubmit
+    isPcViewMode,
+    setIsPcViewMode,
+    isVoiceInput,
+    setVoiceInput,
+    handleKeyDown
   };
 };
