@@ -3,20 +3,18 @@ import { z } from "zod";
 
 type ResponseHeaders = Record<string, any>;
 type KintoneProxyResponse = [string, number, ResponseHeaders];
-interface KintoneProxyConfig {
-  headers: Record<string, any>;
-  data: Record<string, any>;
-}
+interface KintoneConfig {
+  subscriptionId: string;
+  openaiApiKey: string;
+  targetModel: string;
+};
 
 ((PLUGIN_ID: string) => {
   const apiEndpoint: string = import.meta.env.VITE_API_ENDPOINT;
   const openaiProxyApiEndpoint: string = import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT;
 
   // プラグインの設定情報を取得する
-  const config = kintone.plugin.app.getConfig(PLUGIN_ID);
-  // 外部 API の実行に必要な情報を取得する
-  const proxyConfig = kintone.plugin.app.getProxyConfig(apiEndpoint, "POST") as KintoneProxyConfig
-  const proxyConfigHeaders = proxyConfig ? proxyConfig.headers : {};
+  const config = kintone.plugin.app.getConfig(PLUGIN_ID) as KintoneConfig;
 
   // 入力elementを取得
   const elmSubmitBtn = document.getElementById('submit') as HTMLInputElement;
@@ -38,14 +36,13 @@ interface KintoneProxyConfig {
   // [キャンセル]ボタン押下イベントの登録
   elmCancelBtn.addEventListener("click", cancel);
 
-  // 設定値（getConfig or getProxyConfig）にすでに値が入ってたら、config.htmlの設定値入力欄にその値を入れる
-  if (proxyConfigHeaders["aa4k-subscription-id"]) {
-    elmSubscriptionId.value = proxyConfigHeaders["aa4k-subscription-id"]
-
+  // 設定値（getConfig）にすでに値が入ってたら、config.htmlの設定値入力欄にその値を入れる
+  if (config.subscriptionId) {
+    elmSubscriptionId.value = config.subscriptionId
   }
 
-  if (proxyConfigHeaders["aa4k-api-key"]) {
-    elmOpenaiApiKey.value = proxyConfigHeaders["aa4k-api-key"]
+  if (config.openaiApiKey) {
+    elmOpenaiApiKey.value = config.openaiApiKey
     // [モデル設定]を表示
     toggleElementDisplay(true, elmModelSelect);
   }
@@ -53,8 +50,6 @@ interface KintoneProxyConfig {
     // モデルが選択済みの場合、再表示のため[モデル取得]ボタンイベントを発火させリスト表示させる
     elmGetModelBnt.click();
   }
-
-
 
 
   /**
@@ -68,15 +63,17 @@ interface KintoneProxyConfig {
     if (!validate()) return;
 
     const config = {
+      subscriptionId: subscriptionId,
+      openaiApiKey: openaiApiKey,
       targetModel: openaiApiKey ? targetModel : "",
-    }
+    } as KintoneConfig;
     // AA4k本体での外部API連携時に、[プラグインバージョン][サブスクリプションID][OpenAI APIキー]を秘匿して連携するためsetProxyConfigに設定
     const header = {
       // @ts-ignore __NPM_PACKAGE_VERSION__はvite.plugin.config.tsで定義
       "aa4k-plugin-version": __NPM_PACKAGE_VERSION__,
       "aa4k-subscription-id": subscriptionId,
       "aa4k-api-key": openaiApiKey,
-    };
+    } ;
     kintone.plugin.app.setProxyConfig(apiEndpoint, 'POST', header, {}, () => {
       kintone.plugin.app.setProxyConfig(openaiProxyApiEndpoint, 'POST', header, {}, () => {
         // 設定画面で入力された情報の保存
