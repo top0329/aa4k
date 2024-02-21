@@ -12,7 +12,7 @@ type KintoneProxyResponse = [string, number, ResponseHeaders];
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
   // 外部 API の実行に必要な情報を取得する
   const proxyConfig = kintone.plugin.app.getProxyConfig(apiEndpoint, "POST")
-  const proxyConfigHeaders = proxyConfig.headers;
+  const proxyConfigHeaders = proxyConfig.headers ? proxyConfig.headers : {};
 
   // 入力elementを取得
   const elmSubmitBtn = document.getElementById('submit') as HTMLInputElement;
