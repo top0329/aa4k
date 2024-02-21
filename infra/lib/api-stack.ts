@@ -218,6 +218,32 @@ export class Aa4kApiStack extends cdk.Stack {
       authorizer: lambdaAuthorizer,
     })
 
+    // speech Lambda
+    const speech = new nodelambda.NodejsFunction(this, "SpeechLambda", {
+      entry: __dirname + "/lambda/api/speech/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(speech);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(speech);
+    const policyStatement = new iam.PolicyStatement({
+      actions: ['polly:SynthesizeSpeech'],
+      resources: ['*']
+    });
+    speech.addToRolePolicy(policyStatement);
+    restapi.root.addResource("speech").addMethod("POST", new apigateway.LambdaIntegration(speech), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
+    });
+
     // LangchainLog Lambda
     const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
       entry: __dirname + "/lambda/api/langchainLog/index.ts",
