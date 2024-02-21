@@ -35,7 +35,7 @@ export const usePromptFormLogic = () => {
     if (appId === null) {
       const errorMessage: ErrorMessage = {
         role: MessageType.error,
-        content: `${ErrorMessageConst.UnavailableScreen}`
+        content: `${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`
       };
       const chatHistoryItem: ChatHistoryItem = {
         human: {
@@ -43,6 +43,7 @@ export const usePromptFormLogic = () => {
           content: humanMessage,
         },
         error: errorMessage,
+        conversationId: "",
       };
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
@@ -55,8 +56,8 @@ export const usePromptFormLogic = () => {
     if (resPreCheckStatus !== 200) {
       const errorMessage: ErrorMessage = {
         role: MessageType.error,
-        content: preCheckResult.errorCode === ErrorCode.A02002 ? `${ErrorMessageConst.unsupportedVersion}（${preCheckResult.errorCode}）`
-          : `${ErrorMessageConst.currentlyUnavailable}（${preCheckResult.errorCode}）`
+        content: preCheckResult.errorCode === ErrorCode.A02002 ? `${ErrorMessageConst.E_MSG002}（${preCheckResult.errorCode}）`
+          : `${ErrorMessageConst.E_MSG001}（${preCheckResult.errorCode}）`
       };
       const chatHistoryItem: ChatHistoryItem = {
         human: {
@@ -64,6 +65,7 @@ export const usePromptFormLogic = () => {
           content: humanMessage,
         },
         error: errorMessage,
+        conversationId: "",
       };
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
@@ -83,6 +85,7 @@ export const usePromptFormLogic = () => {
         content: "",
         comment: "",
       },
+      conversationId: "",
     };
     setChatHistory([...chatHistoryItems, chatHistoryItem]);
     setHumanMessage("");
@@ -110,7 +113,7 @@ export const usePromptFormLogic = () => {
       delete chatHistoryItem.ai;
       chatHistoryItem.error = {
         role: MessageType.error,
-        content: `${ErrorMessageConst.currentlyUnavailable}（${resJsonInsertConversation.errorCode}）`,
+        content: `${ErrorMessageConst.E_MSG001}（${resJsonInsertConversation.errorCode}）`,
       };
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setInTypeWrite(true);

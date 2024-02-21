@@ -2,8 +2,7 @@ import Redis from 'ioredis';
 import { Client } from "pg";
 import { selectSubscription } from "./dao";
 import { SubscriptionResultRow } from "./type";
-import { getDbConfig, getRedisConfig, isRedisEmptyRecord, RedisEmptyRecord } from "../../utils";
-import { DbAccessSecretValue } from "../getSecretValues"
+import { getDbConfig, getRedisConfig, isRedisEmptyRecord, RedisEmptyRecord, DbAccessSecretValue } from "../../utils";
 import { addDays, differenceInSeconds } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 

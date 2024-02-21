@@ -9,6 +9,7 @@ import { useAccordionHistoryLogic } from './useAccordionHistoryLogic';
 export const AccordionHistory = () => {
   const { chatHistoryItems, activeItem, setActiveItem, showAiOrErrorMessage } = useAccordionHistoryLogic();
 
+  // 空の状態
   if (chatHistoryItems.length === 0) {
     return <Box></Box>;
   }
@@ -24,7 +25,11 @@ export const AccordionHistory = () => {
       {chatHistoryItems.map((item, index) => (
         <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
           <AccordionTrigger>{item.human.content}</AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent
+            style={{
+              padding: '0 16px'
+            }}
+          >
             {showAiOrErrorMessage(item, index)}
           </AccordionContent>
         </Accordion.Item>

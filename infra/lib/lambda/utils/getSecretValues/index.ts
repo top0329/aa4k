@@ -1,15 +1,5 @@
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
-import { AzureSecretValue } from "../types";
-
-// Secret Manager情報(DB_ACCESS_SECRET_NAME)
-export interface DbAccessSecretValue {
-  engine: string,
-  env: string,
-  dbname: string,
-  username: string,
-  password: string,
-  port: number,
-}
+import { AzureSecretValue, DbAccessSecretValue } from "../types";
 
 /**
  * Secret Manager情報の取得

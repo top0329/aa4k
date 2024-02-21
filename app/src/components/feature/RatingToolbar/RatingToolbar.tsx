@@ -2,29 +2,34 @@
 import { faClose, faThumbsDown, faThumbsUp } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Button, Flex, TextArea } from '@radix-ui/themes';
+import { Button, Flex, TextArea, Text } from '@radix-ui/themes';
 import Copy from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 import { vars } from '~/styles/theme.css';
 import { useRatingToolbarLogic } from './useRatingtoolbarLogic';
+import { ChatHistoryItem } from "~/types/ai";
 
 type RatingToolbarProps = {
   content: string;
+  chatHistoryItem: ChatHistoryItem;
 };
 
-
-
-const RatingToolbar = ({ content }: RatingToolbarProps) => {
+const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
   const { copySuccess, copyToClipboard } = useCopyToClipboard();
+
   const {
     thumbsUpPressed,
     thumbsDownPressed,
     handleThumbsUpClick,
     handleThumbsDownClick,
     showDetailedFeedback,
-    setShowDetailedFeedback
-  } = useRatingToolbarLogic();
+    setShowDetailedFeedback,
+    feedback,
+    setFeedback,
+    handleFeedbackSendClick,
+    updateErrorMessage,
+  } = useRatingToolbarLogic(chatHistoryItem);
 
   const buttonStyle = {
     width: 40,
@@ -70,6 +75,12 @@ const RatingToolbar = ({ content }: RatingToolbarProps) => {
               onCopy={() => copyToClipboard(content)}
             />
           }
+          {/* TODO: トーストでエラーメッセージ表示に差し替え予定 */}
+          {updateErrorMessage !== "" &&
+            <Text size={'1'} color='tomato'>
+              {updateErrorMessage}
+            </Text>
+          }
 
         </Toolbar.ToggleGroup>
         <Toolbar.Separator />
@@ -90,9 +101,16 @@ const RatingToolbar = ({ content }: RatingToolbarProps) => {
           <Flex justify={'end'}>
             <FontAwesomeIcon icon={faClose} onClick={() => setShowDetailedFeedback(false)} />
           </Flex>
-          <TextArea placeholder="Write a comment…" style={{ height: 80 }} />
+          <TextArea
+            placeholder="Write a comment…"
+            style={{ height: 80 }}
+            value={feedback}
+            onChange={
+              (e) => setFeedback(e.target.value)
+            }
+          />
           <Flex>
-            <Button size="2" variant='ghost'>
+            <Button size="2" variant='ghost' onClick={handleFeedbackSendClick} disabled={!feedback}>
               フィードバック送信
             </Button>
           </Flex>

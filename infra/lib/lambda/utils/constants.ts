@@ -26,3 +26,10 @@ export const ContractStatus = {
   expired: "expired",
 } as const;
 export type ContractStatus = keyof typeof ContractStatus
+
+// ユーザー評価
+export const UserRating = {
+  good: "good",
+  bad: "bad",
+} as const;
+export type UserRating = keyof typeof UserRating

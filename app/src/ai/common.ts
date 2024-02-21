@@ -1,11 +1,12 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { ContractStatus } from "~/constants";
+import { ContractStatus, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import * as cheerio from "cheerio"
 import { KintoneProxyResponse } from "~/types/apiResponse"
 import { Fetch } from "openai/core"
 
 // カスタムエラーオブジェクト
 export class ContractExpiredError extends Error { }
+export class ContractStatusError extends Error { }
 
 /**
  * openAIモデルのインスタンス生成
@@ -38,10 +39,12 @@ export function openAIModel(contractStatus: ContractStatus) {
       fetch: kintoneProxyFetcher,
     });
   } else if (contractStatus === ContractStatus.expired) {
-    throw new ContractExpiredError(`契約期間が終了しているためご利用できません`)
+    throw new ContractExpiredError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00002}）`)
   } else {
+    // @ts-expect-error
+    // 変数:unexpectedは使用しないので、エラーを無視する
     const unexpected: never = contractStatus;
-    throw new Error(`契約区分が正しくありません (${unexpected})`)
+    throw new ContractStatusError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00003}）`)
   }
 };
 
@@ -95,7 +98,7 @@ const kintoneProxyFetcher: Fetch = async (url, init?) => {
   // API連携
   const resProxy = await kintone.proxy(
     url.toString(),
-    init.method.toUpperCase(),
+    init.method,
     reqHeaders,
     reqBody,
   ) as KintoneProxyResponse;

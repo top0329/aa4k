@@ -1,5 +1,5 @@
 import { DocumentInterface } from "@langchain/core/documents";
-import { ContractStatus, ErrorCode } from "~/constants";
+import { ContractStatus, UserRating, ErrorCode } from "~/constants";
 import { SystemSettings } from "./ai";
 
 export type ResponseHeaders = Record<string, any>;
@@ -16,13 +16,13 @@ export interface ConversationHistoryRow {
   ai_message: string;
   ai_message_comment: string;
   error_message: string;
-  user_rating: string;
+  user_rating: UserRating;
 }
 
 export type ConversationHistory = Array<ConversationHistoryRow>;
 export interface ConversationHistoryListResponseBody
   extends KintoneProxyResponseBody {
-  conversationHistoryList: ConversationHistory;
+  desktopConversationHistoryList: ConversationHistory;
 }
 
 export interface PreCheckResponseBody extends KintoneProxyResponseBody {

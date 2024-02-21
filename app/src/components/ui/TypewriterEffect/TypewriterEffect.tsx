@@ -1,17 +1,16 @@
+// src/components/ui/TypewriterEffect/TypewriterEffect.tsx
 import { Box } from "@radix-ui/themes";
 import clsx from "clsx";
 import { useAtom } from "jotai";
 import React, { useEffect, useRef, useState } from 'react';
 import { InTypeWriteState } from "~/components/feature/CornerDialog/CornerDialogState";
+import RatingToolbar from '~/components/feature/RatingToolbar/RatingToolbar';
 import { AnimatedBlinking } from "~/styles/animation.css.ts";
-import { AiMessage, ErrorMessage } from "~/types/ai";
+import { ChatContentProps } from "~/types/chatContentTypes.ts";
+import { createClipboardContent } from "~/util/clipboardContent";
 import { TypewriterCursor } from "./TypewriterEffect.css.ts";
 
-type TypewriterEffectProps = {
-  aiMessage: AiMessage | ErrorMessage;
-}
-
-export const TypewriterEffect: React.FC<TypewriterEffectProps> = ({ aiMessage }) => {
+export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem }) => {
   const [displayedText, setDisplayedText] = useState<string>("");
   const [isCursorDisplay, setIsCursorDisplay] = useState<boolean>(false);
   const indexRef = useRef<number>(0);
@@ -37,7 +36,7 @@ export const TypewriterEffect: React.FC<TypewriterEffectProps> = ({ aiMessage })
   }, [displayedText, aiMessage.content]);
 
   return (
-    <div>
+    <>
       <Box
         style={{
           whiteSpace: "pre-wrap"
@@ -55,6 +54,12 @@ export const TypewriterEffect: React.FC<TypewriterEffectProps> = ({ aiMessage })
       >
         {!inTypeWrite && aiMessage.role === "ai" ? aiMessage.comment : ""}
       </Box>
-    </div>
+      <Box
+        mt={'5'}
+        width={'100%'}
+      >
+        {!inTypeWrite && (<RatingToolbar content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />)}
+      </Box>
+    </>
   );
 }

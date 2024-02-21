@@ -23,13 +23,20 @@ export const useAccordionHistoryLogic = () => {
   const showAiOrErrorMessage = (item: ChatHistoryItem, index: number) => {
     let aiMessage: AiMessage | ErrorMessage
     if (item.ai) {
+      // AI回答の場合
       aiMessage = item.ai
     } else if (item.error) {
+      // エラーメッセージの場合
       aiMessage = item.error
     } else {
+      // それ以外の場合
       return;
     }
-    return (index + 1 === latestAiResponseIndex && inTypeWrite ? <TypewriterEffect aiMessage={aiMessage} /> : <ChatContent aiMessage={aiMessage} />)
+    return (
+      index + 1 === latestAiResponseIndex && inTypeWrite
+        ? <TypewriterEffect aiMessage={aiMessage} chatHistoryItem={item} />
+        : <ChatContent aiMessage={aiMessage} chatHistoryItem={item} />
+    )
   }
 
   return {

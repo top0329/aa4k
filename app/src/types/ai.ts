@@ -1,4 +1,4 @@
-import { CodeCheckStatus, ContractStatus, DeviceDiv } from "~/constants";
+import { CodeCheckResult, ContractStatus, DeviceDiv, UserRating } from "~/constants";
 
 // src/types/agents.ts
 // メッセージ種別
@@ -37,7 +37,8 @@ export interface ChatHistoryItem {
   human: HumanMessage;
   ai?: AiMessage;
   error?: ErrorMessage;
-  conversationId?: string;
+  conversationId: string;
+  userRating?: UserRating;
 }
 
 export type Context = Record<string, any>;

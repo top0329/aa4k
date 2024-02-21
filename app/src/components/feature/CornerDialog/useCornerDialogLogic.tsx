@@ -28,7 +28,7 @@ export const useCornerDialogLogic = () => {
     // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
     if (appId === null) {
       initDockState();
-      alert(`${ErrorMessageConst.UnavailableScreen}`);
+      alert(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
       return;
     }
 
@@ -42,9 +42,9 @@ export const useCornerDialogLogic = () => {
       setIsBannerClicked(false);
       // APIエラーの場合、エラーメッセージ表示
       if (preCheckResult.errorCode === ErrorCode.A02002) {
-        alert(`${ErrorMessageConst.unsupportedVersion}（${preCheckResult.errorCode}）`);
+        alert(`${ErrorMessageConst.E_MSG002}（${preCheckResult.errorCode}）`);
       } else {
-        alert(`${ErrorMessageConst.currentlyUnavailable}（${preCheckResult.errorCode}）`);
+        alert(`${ErrorMessageConst.E_MSG001}（${preCheckResult.errorCode}）`);
       }
       return;
     }
@@ -61,11 +61,11 @@ export const useCornerDialogLogic = () => {
     if (resStatus !== 200) {
       initDockState();
       setIsBannerClicked(false);
-      alert(`${ErrorMessageConst.currentlyUnavailable}（${resBodyConversationHistoryList.errorCode}）`);
+      alert(`${ErrorMessageConst.E_MSG001}（${resBodyConversationHistoryList.errorCode}）`);
       return;
     }
 
-    const conversationHistoryList = resBodyConversationHistoryList.conversationHistoryList || [];
+    const conversationHistoryList = resBodyConversationHistoryList.desktopConversationHistoryList || [];
     let chatHistoryItemList: ChatHistory = [];
     conversationHistoryList.forEach((conversationHistory: ConversationHistoryRow) => {
       const chatHistoryItem: ChatHistoryItem = {
@@ -73,12 +73,13 @@ export const useCornerDialogLogic = () => {
           role: MessageType.human,
           content: conversationHistory.user_message
         },
-        conversationId: conversationHistory.id
+        conversationId: conversationHistory.id,
+        userRating: conversationHistory.user_rating,
       };
       if (conversationHistory.error_message) {
         const errorMessage: ErrorMessage = {
           role: MessageType.error,
-          content: conversationHistory.error_message
+          content: conversationHistory.error_message,
         };
         chatHistoryItem["error"] = errorMessage;
       } else {
@@ -107,6 +108,8 @@ export const useCornerDialogLogic = () => {
     dockState,
     handleBannerClick,
     isBannerClicked,
+    chatHistoryItems,
+    setChatHistory,
     isCodeActionDialog,
     dockItemVisible,
     setDockItemVisible,

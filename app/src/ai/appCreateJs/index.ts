@@ -11,8 +11,8 @@ import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { langchainCallbacks } from "../langchainCallbacks";
-import { openAIModel, ContractExpiredError, getCodingGuidelines } from "../common"
-import { DeviceDiv, CodeCreateMethod } from "~/constants"
+import { openAIModel, ContractExpiredError, ContractStatusError, getCodingGuidelines } from "../common"
+import { DeviceDiv, CodeCreateMethod, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
 import { GeneratedCodeGetResponseBody } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
@@ -80,7 +80,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     } else {
       // 本番画面の場合
       callbackFuncs.push(() => {
-        if (window.confirm("テスト環境で動作確認を行いますか？「OK」を選択するとテスト環境へ画面遷移します。")) {
+        if (window.confirm(`${InfoMessage.I_MSG001}`)) {
           (location.href = redirectPath)
         }
       });
@@ -97,12 +97,12 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     };
 
   } catch (err) {
-    if (err instanceof LlmError || err instanceof ContractExpiredError) {
+    if (err instanceof LlmError || err instanceof ContractExpiredError || err instanceof ContractStatusError) {
       const message = err.message;
       insertConversation(appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message, } }
     } else {
-      const message = "システムエラーが発生しました";
+      const message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
       insertConversation(appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message } }
     }
@@ -258,7 +258,7 @@ async function createJs(
     fieldInfo: JSON.stringify(fieldInfo),
     originalCode: addLineNumbersToCode(originalCode),
     codeTemplate: codeTemplate,
-  }, { callbacks: [handler] }).catch(() => { throw new LlmError("kintoneカスタマイズJavascriptの生成に失敗しました") })) as LLMResponse;
+  }, { callbacks: [handler] }).catch(() => { throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`) })) as LLMResponse;
 
   // 出力コード編集
   const resProperties = llmResponse.properties;

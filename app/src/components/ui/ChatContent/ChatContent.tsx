@@ -1,14 +1,14 @@
+// src/components/ui/ChatContent/ChatContent.tsx
 import { Box } from "@radix-ui/themes";
 import React from 'react';
-import { AiMessage, ErrorMessage } from "~/types/ai";
+import RatingToolbar from '~/components/feature/RatingToolbar/RatingToolbar';
+import { ChatContentProps } from "~/types/chatContentTypes";
+import { createClipboardContent } from "~/util/clipboardContent";
 
-type ChatContentProps = {
-  aiMessage: AiMessage | ErrorMessage;
-}
+export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem }) => {
 
-export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage }) => {
   return (
-    <div>
+    <>
       <Box
         style={{
           whiteSpace: "pre-wrap"
@@ -23,6 +23,12 @@ export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage }) => {
       >
         {aiMessage.role === "ai" ? aiMessage.comment : ""}
       </Box>
-    </div>
+      <Box
+        mt={'5'}
+        width={'100%'}
+      >
+        <RatingToolbar content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />
+      </Box>
+    </>
   )
 };

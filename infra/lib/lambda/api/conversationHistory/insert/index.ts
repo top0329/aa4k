@@ -4,7 +4,7 @@ import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./schema";
 import { insertConversationHistory, updateAiConversationHistory, updateErrorConversationHistory } from "./dao";
 import { ErrorCode } from "../constants";
-import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, MessageType, changeSchemaSearchPath } from "../../../utils";
+import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, MessageType, getSubscriptionData, changeSchemaSearchPath } from "../../../utils";
 
 export const insertHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -33,6 +33,17 @@ export const insertHandler = async (req: Request, res: Response) => {
     // Secret Manager情報の取得(DB_ACCESS_SECRET)
     const { dbAccessSecretValue } = await getSecretValues();
 
+    // サブスクリプション情報の取得
+    const subscriptionData = await getSubscriptionData(subscriptionId, dbAccessSecretValue);
+    if (!subscriptionData) {
+      retErrorStatus = 404;
+      retErrorMessage = "SubscriptionData is Not Found";
+      retErrorCode = ErrorCode.A03102;
+      throw new Error("SubscriptionData is Not Found")
+    }
+    // スキーマ名
+    const schema = subscriptionData.schema_name;
+
     // データベース接続情報
     const dbConfig = getDbConfig(dbAccessSecretValue)
     // データベース接続
@@ -40,8 +51,7 @@ export const insertHandler = async (req: Request, res: Response) => {
     await dbClient.connect();
 
     // スキーマ検索パスを変更
-    // TODO: スキーマ名は契約管理TBLから取得予定（契約管理TBLは現在未作成）
-    await changeSchemaSearchPath(dbClient, "service");
+    await changeSchemaSearchPath(dbClient, schema);
 
     switch (body.messageType) {
       case MessageType.human:
