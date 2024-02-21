@@ -3,16 +3,20 @@ import { z } from "zod";
 
 type ResponseHeaders = Record<string, any>;
 type KintoneProxyResponse = [string, number, ResponseHeaders];
+interface KintoneProxyConfig {
+  headers: Record<string, any>;
+  data: Record<string, any>;
+}
 
 ((PLUGIN_ID: string) => {
-  const apiEndpoint = import.meta.env.VITE_API_ENDPOINT
-  const openaiProxyApiEndpoint = import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT
+  const apiEndpoint: string = import.meta.env.VITE_API_ENDPOINT;
+  const openaiProxyApiEndpoint: string = import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT;
 
   // プラグインの設定情報を取得する
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
   // 外部 API の実行に必要な情報を取得する
-  const proxyConfig = kintone.plugin.app.getProxyConfig(apiEndpoint, "POST")
-  const proxyConfigHeaders = proxyConfig.headers ? proxyConfig.headers : {};
+  const proxyConfig = kintone.plugin.app.getProxyConfig(apiEndpoint, "POST") as KintoneProxyConfig
+  const proxyConfigHeaders = proxyConfig ? proxyConfig.headers : {};
 
   // 入力elementを取得
   const elmSubmitBtn = document.getElementById('submit') as HTMLInputElement;
