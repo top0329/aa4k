@@ -5,16 +5,17 @@ import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButt
 import { vars } from "~/styles/theme.css";
 import { DockGroup, DockInner, DockItem } from "./Dock.css";
 import { useDockLogic } from "./useDockLogic";
+import { useCodeEditorLogic } from "~/components/feature/CodeEditor/useCodeEditorLogic";
 
 const Dock = () => {
   const {
     isPcViewMode,
     activeChatMode,
     toggleChatVisibility,
-    toggleItemVisibility,
     deleteHistory,
     initDockState,
   } = useDockLogic();
+  const { handleCodeEditorClick } = useCodeEditorLogic();
 
   return (
     <Box className={DockGroup}>
@@ -22,7 +23,7 @@ const Dock = () => {
         <IconTooltipButton
           icon={faCode}
           tooltip={'コードエディター'}
-          onClick={() => toggleItemVisibility('codeEditorVisible')}
+          onClick={handleCodeEditorClick}
           className={DockItem} />
         <IconTooltipButton
           icon={faMessageLines}

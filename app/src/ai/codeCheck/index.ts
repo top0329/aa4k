@@ -7,7 +7,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { CODE_CHECK_SYSTEM_PROMPT } from "./prompt"
 import { langchainCallbacks } from "../langchainCallbacks";
 import { openAIModel, getCodingGuidelines } from "../common"
-import { ContractStatus, CodeCheckResult } from "../../constants"
+import { ContractStatus, CodeCheckStatus } from "../../constants"
 import { CodeCheckResponse } from "../../types/ai";
 
 // カスタムエラーオブジェクト
@@ -40,7 +40,7 @@ export const codeCheck = async (code: string, contractStatus: ContractStatus): P
 
     // LLMの出力形式を設定
     const zodSchema = z.object({
-      result: z.nativeEnum(CodeCheckResult).describe("結果"),
+      result: z.nativeEnum(CodeCheckStatus).describe("結果"),
       message: z.string().describe("メッセージ"),
     }).describe("LLM問い合わせ結果"); type LLMResponse = z.infer<typeof zodSchema>;
     const functionCallingModel = model.bind({
@@ -69,6 +69,6 @@ export const codeCheck = async (code: string, contractStatus: ContractStatus): P
 
   } catch (err) {
     // エラーの場合は、ガイドライン違反なしとして扱う
-    return { result: CodeCheckResult.safe, message: "" };
+    return { result: CodeCheckStatus.safe, message: "" };
   }
 }

@@ -3,7 +3,7 @@ import { Button, Flex, Text } from "@radix-ui/themes";
 import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 
 const CodeFix = () => {
-  const { setIsCodeActionDialog } = useCodeActionDialogLogic();
+  const { setIsCodeActionDialog, handleReflectClick } = useCodeActionDialogLogic();
 
   return (<>
     <Flex
@@ -48,6 +48,7 @@ const CodeFix = () => {
       <Button color='indigo'
         variant="soft"
         size={'3'}
+        onClick={handleReflectClick}
       >
         <Text weight={'bold'}>
           反映

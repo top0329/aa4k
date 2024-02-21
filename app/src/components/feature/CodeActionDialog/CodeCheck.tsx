@@ -4,7 +4,7 @@ import { Box, Button, Flex, ScrollArea, Text } from "@radix-ui/themes";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import Spinner from "~/components/ui/Spinner/Spinner";
 import { vars } from "~/styles/theme.css";
-import { CodeCheckStatus } from "~/types/codeActionTypes";
+import { CodeCheckStatus } from "~/constants";
 import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 
 const CodeCheck = () => {
@@ -50,7 +50,7 @@ const CodeCheck = () => {
 
     </Flex></>
 
-  const SuccessStatus = () => <>
+  const SafeStatus = () => <>
     <Flex
       align={'center'}
       justify={'center'}
@@ -87,7 +87,7 @@ const CodeCheck = () => {
     </Flex>
   </>
 
-  const ErrorStatus = () => <>
+  const CautionStatus = () => <>
     <Flex
       py={'4'}
       align={'center'}
@@ -111,7 +111,7 @@ const CodeCheck = () => {
           {codeViolations.map((violation, index) => (
             <Box key={index}>
               <Text size={'2'} color={'gray'}>
-                {index + 1}. {violation}
+                {violation}
               </Text>
             </Box>
           ))}
@@ -139,12 +139,12 @@ const CodeCheck = () => {
   </>
 
   switch (codeCheckStatus) {
-    case CodeCheckStatus.Success:
-      return <SuccessStatus />;
-    case CodeCheckStatus.Loading:
+    case CodeCheckStatus.safe:
+      return <SafeStatus />;
+    case CodeCheckStatus.loading:
       return <LoadingStatus />;
-    case CodeCheckStatus.Error:
-      return <ErrorStatus />;
+    case CodeCheckStatus.caution:
+      return <CautionStatus />;
     default:
       const unexpected: never = codeCheckStatus
       throw Error("想定されていないcodeCheckStatusです. codeCheckStatus=", unexpected)

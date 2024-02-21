@@ -21,13 +21,22 @@ export const CodeCreateMethod = {
   delete: "DELETE",
 } as const;
 
-// コードチェック結果
-export const CodeCheckResult = {
+// コードチェックステータス
+export const CodeCheckStatus = {
   caution: "CAUTION",
   safe: "SAFE",
+  loading: "LOADING"
 } as const;
-export type CodeCheckResult =
-  (typeof CodeCheckResult)[keyof typeof CodeCheckResult];
+export type CodeCheckStatus =
+  (typeof CodeCheckStatus)[keyof typeof CodeCheckStatus];
+
+// コードアクションダイアログタイプ
+export const CodeActionDialogType = {
+  CodeCheck: "codeCheck",
+  CodeFix: "codeFix",
+} as const;
+export type CodeActionDialogType =
+  (typeof CodeActionDialogType)[keyof typeof CodeActionDialogType];
 
 // エラーコード
 export const ErrorCode = {

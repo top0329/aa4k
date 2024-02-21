@@ -1,7 +1,10 @@
 // src/components/feature/CodeActionDialog/useCodeActionDialogLogic.tsx
 import { useAtom } from 'jotai';
-import { CodeActionDialogType } from '~/types/codeActionTypes';
 import { codeActionDialogTypeState, codeCheckStatusState, codeViolationsState, isCodeActionDialogState } from './CodeActionDialogState';
+import { CodeState, CodeLatestState, IsChangeCodeState } from '~/components/feature/CodeEditor/CodeEditorState';
+import { ViewModeState } from '~/components/feature/CornerDialog/CornerDialogState';
+import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
+import { DeviceDiv, CodeActionDialogType, ErrorCode, ErrorMessage } from "~/constants";
 import CodeCheck from './CodeCheck';
 import CodeFix from './CodeFix';
 
@@ -16,6 +19,10 @@ export const useCodeActionDialogLogic = () => {
     setCodeCheckStatus,
   ] = useAtom(codeCheckStatusState);
   const [codeViolations] = useAtom(codeViolationsState);
+  const [isPcViewMode] = useAtom(ViewModeState);
+  const [code] = useAtom(CodeState);
+  const [, setCodeLatest] = useAtom(CodeLatestState);
+  const [, setIsChangeCode] = useAtom(IsChangeCodeState);
 
   const content = <CodeActionDialogContent dialogType={dialogType} />
 
@@ -25,6 +32,43 @@ export const useCodeActionDialogLogic = () => {
       event.stopPropagation();
     }
   };
+
+  const handleReflectClick = async () => {
+    try {
+      const appId = kintone.app.getId();
+      const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
+      const isGuestSpace = kintone.getLoginUser().isGuest;
+  
+      // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
+      if (appId === null) {
+        setIsCodeActionDialog(false);
+        // TODO: トーストでエラーメッセージ表示に差し替え予定
+        alert(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`);
+        return;
+      }
+
+      // --------------------
+      // 最新JSの取得（from kintone）
+      // --------------------
+      const { kintoneCustomizeFiles, targetFileKey } = await getKintoneCustomizeJs(appId, deviceDiv, isGuestSpace);
+
+      // --------------------
+      // kintoneカスタマイズへの反映
+      // --------------------
+      await updateKintoneCustomizeJs(code, targetFileKey, kintoneCustomizeFiles, appId, deviceDiv, isGuestSpace);
+
+      setIsCodeActionDialog(false);
+      setCodeLatest(code);
+      setIsChangeCode(false);
+
+      // テスト環境へ遷移
+      location.href = `/k/admin/preview/${appId}/`;
+    } catch (err) {
+      setIsCodeActionDialog(false);
+      // TODO: トーストでエラーメッセージ表示に差し替え予定
+      alert(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`);
+    }
+  }
 
   return {
     codeViolations,
@@ -36,6 +80,7 @@ export const useCodeActionDialogLogic = () => {
     setIsCodeActionDialog,
     content,
     preventCloseOnEsc,
+    handleReflectClick,
   };
 };
 

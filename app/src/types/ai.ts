@@ -1,4 +1,4 @@
-import { CodeCheckResult, ContractStatus, DeviceDiv } from "~/constants";
+import { CodeCheckStatus, ContractStatus, DeviceDiv } from "~/constants";
 
 // src/types/agents.ts
 // メッセージ種別
@@ -68,7 +68,7 @@ export interface AiResponse {
 }
 
 export interface CodeCheckResponse {
-  result: CodeCheckResult;
+  result: CodeCheckStatus;
   message: string;
 }
 

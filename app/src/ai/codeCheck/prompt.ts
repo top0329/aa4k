@@ -16,7 +16,7 @@ result: SAFE
 - 違反がある場合
 \`\`\`
 result: CAUTION
-message: 次のガイドライン違反の可能性がありますのでご注意ください。\n\n1. xxxx\n2. xxxx\n3. xxxx\n\n
+message: 1. xxxx\n2. xxxx\n3. xxxx\n\n
 \`\`\`
 
 # チェック対象

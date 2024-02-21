@@ -1,5 +1,5 @@
 // src/components/ui/CodeEditor/CodeEditor.tsx
-import { faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
+import { faExpandAlt, faRotateRight } from '@fortawesome/pro-duotone-svg-icons';
 import { Box, Button, Flex } from '@radix-ui/themes';
 import 'ace-builds/src-min-noconflict/ace';
 import "ace-builds/src-min-noconflict/ext-language_tools";
@@ -13,7 +13,7 @@ import clsx from 'clsx';
 import AceEditor from "react-ace-builds";
 import CopyButton from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
-import { CodeActionDialogType } from '~/types/codeActionTypes';
+import { CodeActionDialogType } from '~/constants';
 import { sCodeEditor, sCodeEditorFullScreen } from './CodeEditor.css';
 import { useCodeEditorLogic } from './useCodeEditorLogic';
 
@@ -22,7 +22,8 @@ const CodeEditor = () => {
     toggleFullScreen,
     copyToClipboard,
     isFullScreen,
-    handleRunCodeAction
+    handleRunCodeAction,
+    handleRefreshClick
   } = useCodeEditorLogic();
 
   return (
@@ -47,6 +48,22 @@ const CodeEditor = () => {
             gap: '16px',
           }}
         >
+          {/* TODO: リフレッシュボタン仮置き 後で正式版に差し替え予定 */}
+          <IconTooltipButton
+            icon={faRotateRight}
+            tooltip={'Refresh'}
+            onClick={handleRefreshClick}
+            style={{
+              width: 40,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 8,
+              borderRadius: 8,
+              transition: 'all 0.2s ease-in-out',
+              cursor: 'pointer',
+          }} />
           <CopyButton isCopied={copySuccess} onCopy={() => copyToClipboard(code)} />
           <IconTooltipButton
             icon={faExpandAlt}
