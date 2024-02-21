@@ -17,8 +17,8 @@
     npm i
     ```
 
-2. ビルド
-    dist/devにdesktop.jsが作成される
+2. desktop.jsのビルド
+    dist/src/desktop/desktop.jsが作成される
     ```
     npm run build
     ```
@@ -30,18 +30,24 @@
     ```
 
 4. プラグインの秘密キーを作成
-    kintone pluginのppkファイルが作成される
+    kintone pluginのppkファイルがplugin/ppkに作成される
     ```
     npm run init-dev
     ```
+
+5. config.jsのビルド
+    dist/src/config/config.jsが作成される
+    ```
+    npm run build-plugin
+    ```
   
-5. kintone環境へアップロード
+6. kintone環境へアップロード
     distにplugin-dev.zipが作成され、.envに設定されているkintone環境へアップロードされる
     ```
     npm run package-dev
     ```
 
-6. 各アプリでプラグインを導入
+7. 各アプリでプラグインを導入
     - Kintone の 各アプリの設定画面から アプリの設定 > 設定 > プラグイン の画面で、「Associate AIHub for kintone ( AA4K )」を選択して追加する
     - 一覧に追加されるので、設定から設定画面を開き、必要な項目を入力して保存
 
@@ -55,17 +61,22 @@
     ```
     npm i
     ```
-2. ビルド
-    dist/devにdesktop.jsが作成される
+2. desktop.jsのビルド
+    dist/src/desktop/desktop.jsが作成される
     ```
     npm run build
     ```
-4. プラグインの秘密キーを作成
+3. プラグインの秘密キーを作成
     kintone pluginのppkファイルが作成される
     ```
     npm run init
     ```
-4. Zipファイルの作成
+4. config.jsのビルド
+    dist/src/config/config.jsが作成される
+    ```
+    npm run build-plugin
+    ```
+5. Zipファイルの作成
     distにplugin.zipが作成される
     ```
     npm run package
