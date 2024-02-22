@@ -22,9 +22,9 @@
     "build-storybook": "storybook build",
     "init": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs prod",
     "init-dev": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs dev",
-    "package": "node scripts/marge-json.mjs prod && concurrently \"npm:build\" \"npm:build-plugin\" \"npm:package:*\" && kintone-plugin-packer --out dist/plugin.zip --ppk plugin/ppk/private.ppk plugin",
+    "package": "node scripts/marge-json.mjs prod && concurrently \"npm:build\" \"npm:build-plugin\" && concurrently \"npm:package:*\" && kintone-plugin-packer --out dist/plugin.zip --ppk plugin/ppk/private.ppk plugin",
     "package:js": "cp -p dist/src/desktop/desktop.js plugin/desktop.js && cp -p dist/src/config/config.js plugin/config.js",
-    "package-dev": "node scripts/marge-json.mjs dev && concurrently \"npm:build\" \"npm:build-plugin\" \"npm:package-dev:js\" && kintone-plugin-packer --out dist/plugin-dev.zip --ppk plugin/ppk/private-dev.ppk plugin && concurrently \"npm:package-dev:upload\"",
+    "package-dev": "node scripts/marge-json.mjs dev && concurrently \"npm:build\" \"npm:build-plugin\" && concurrently \"npm:package-dev:js\" && kintone-plugin-packer --out dist/plugin-dev.zip --ppk plugin/ppk/private-dev.ppk plugin && concurrently \"npm:package-dev:upload\"",
     "package-dev:js": "cp -p dist/src/desktop/desktop.js plugin/desktop.js && cp -p dist/src/config/config.js plugin/config.js",
     "package-dev:upload": "node scripts/upload.mjs"
   },
