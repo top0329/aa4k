@@ -16,40 +16,41 @@
     ```
     npm i
     ```
+2. ローカルサーバーの起動
+    https://localhost:4173/ でローカルサーバーが立ち上がる
+    ```
+    npm run preview
+    ```
+3. プラグインの秘密キーを作成
+    kintone pluginのppkファイルがplugin/ppkに作成される
+    ```
+    npm run init-dev
+    ```
+4. kintone環境へアップロード
+    dist/src/desktop/desktop.jsが作成される
+    dist/src/config/config.jsが作成される
+    distにplugin-dev.zipが作成される
+    .envに設定されているkintone環境へアップロードされる
+    ```
+    npm run package-dev
+    ```
+5. 各アプリでプラグインを導入
+    - Kintone の 各アプリの設定画面から アプリの設定 > 設定 > プラグイン の画面で、「Associate AIHub for kintone ( AA4K )」を選択して追加する
+    - 一覧に追加されるので、設定から設定画面を開き、必要な項目を入力して保存
 
-2. desktop.jsのビルド
+6. desktop.jsのビルド
+    アップロード後にdesktop.jsを変更する場合
     dist/src/desktop/desktop.jsが作成される
     ```
     npm run build
     ```
 
-3. ローカルサーバーの起動
-    https://localhost:4173/ でローカルサーバーが立ち上がる
-    ```
-    npm run preview
-    ```
-
-4. プラグインの秘密キーを作成
-    kintone pluginのppkファイルがplugin/ppkに作成される
-    ```
-    npm run init-dev
-    ```
-
-5. config.jsのビルド
+7. config.jsのビルド
+    アップロード後にconfig.jsを変更する場合
     dist/src/config/config.jsが作成される
     ```
     npm run build-plugin
     ```
-  
-6. kintone環境へアップロード
-    distにplugin-dev.zipが作成され、.envに設定されているkintone環境へアップロードされる
-    ```
-    npm run package-dev
-    ```
-
-7. 各アプリでプラグインを導入
-    - Kintone の 各アプリの設定画面から アプリの設定 > 設定 > プラグイン の画面で、「Associate AIHub for kintone ( AA4K )」を選択して追加する
-    - 一覧に追加されるので、設定から設定画面を開き、必要な項目を入力して保存
 
 これでKintone上でJSカスタマイズの動作確認ができる。pluginからはdist/dev/desktop.jsを参照しているため、`npm run build`を実行すれば、変更を反映できる
 
@@ -61,22 +62,14 @@
     ```
     npm i
     ```
-2. desktop.jsのビルド
-    dist/src/desktop/desktop.jsが作成される
-    ```
-    npm run build
-    ```
-3. プラグインの秘密キーを作成
+2. プラグインの秘密キーを作成
     kintone pluginのppkファイルが作成される
     ```
     npm run init
     ```
-4. config.jsのビルド
+3. Zipファイルの作成
+    dist/src/desktop/desktop.jsが作成される
     dist/src/config/config.jsが作成される
-    ```
-    npm run build-plugin
-    ```
-5. Zipファイルの作成
     distにplugin.zipが作成される
     ```
     npm run package
