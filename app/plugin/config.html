@@ -1,16 +1,50 @@
-<section class="settings">
-	<h2 class="settings-heading">設定画面</h2>
-	<p class="kintoneplugin-desc">設定値を入力してください。</p>
-	<form class="js-submit-settings">
-	  <p class="kintoneplugin-row">
-		<label for="set_text">
-		  設定値：
-		  <input type="text" id="set_text" class="js-text-message kintoneplugin-input-text">
-		</label>
-	  </p>
-	  <div class="block">
-		<button type="button" id="submit" class="kintoneplugin-button-dialog-ok">保存する</button>
-		<button type="button" id="cancel" class="kintoneplugin-button-dialog-cancel">キャンセル</button>
-	  </div>
-	</form>
-  </section>
+<div id="kintoneplugin-setting" class="loading">
+  <div class="form-submit gaia-argoui-app-edit-buttons-contents">
+    <button id="cancel" class="kintoneplugin-button-dialog-cancel plugin_cancel" type="button">キャンセル</button>
+    <button id="submit" class="kintoneplugin-button-dialog-ok plugin_submit" type="button">保存</button>
+  </div>
+  <div class="kintoneplugin-setting-form">
+
+    <!--サブスクリプションID-->
+    <div class="kintoneplugin-row">
+      <div id="subscription-id-label" class="kintoneplugin-label">
+        サブスクリプションID
+        <span class="kintoneplugin-require">*</span>
+      </div>
+      <div class="kintoneplugin-input-outer">
+        <input class="kintoneplugin-input-text" id="subscription-id" type="text" required size="55">
+        <p id="subscription-id-desc" class="kintoneplugin-desc">※契約時に連携されたサブスクリプションIDを設定してください</p>
+      </div>
+    </div>
+    <!--OpenAI APIキー-->
+    <div class="kintoneplugin-row">
+      <div id="openai-api-key-label" class="kintoneplugin-label">OpenAI APIキー</div>
+      <div class="kintoneplugin-input-outer">
+        <input class="kintoneplugin-input-text" id="openai-api-key" type="text" required size="55">
+        <p id="openai-api-key-desc" class="kintoneplugin-desc">※トライアル利用するには、お客様のOpenAI APIキーを設定してください</p>
+      </div>
+    </div>
+
+    <!--モデル設定-->
+    <div id="model-select" class="kintoneplugin-row" style="display:none">
+      <div id="openai-model-select-label" class="kintoneplugin-label">モデル設定</div>
+      <div class="kintoneplugin-input-outer">
+        <div class="gaia-argoui-app-edit-buttons-contents">
+          <button id="get-model" class="kintoneplugin-button-normal" type="button">モデル取得</button>
+        </div>
+      </div>
+      <div class="kintoneplugin-input-outer">
+        <div class="kintoneplugin-select-outer">
+          <div class="kintoneplugin-select">
+            <select id="model-list">
+              <option value="">-----</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</div>
