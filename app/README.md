@@ -22,7 +22,7 @@
     npm run preview
     ```
 3. プラグインの秘密キーを作成
-    kintone pluginのppkファイルがplugin/ppkに作成される
+    kintone pluginのppkファイルがplugin/ppkに作成される ※すでにppkファイルが存在する場合は不要
     ```
     npm run init-dev
     ```
@@ -63,7 +63,7 @@
     npm i
     ```
 2. プラグインの秘密キーを作成
-    kintone pluginのppkファイルが作成される
+    kintone pluginのppkファイルが作成される ※すでにppkファイルが存在する場合は不要
     ```
     npm run init
     ```
