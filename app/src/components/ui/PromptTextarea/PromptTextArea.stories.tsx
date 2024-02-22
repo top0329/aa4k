@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { PromptTextArea } from './PromptTextArea';
 
 export default {
-  title: 'Forms/PromtTextArea',
+  title: 'UI/PromtTextArea',
   component: PromptTextArea,
 } as Meta;
 

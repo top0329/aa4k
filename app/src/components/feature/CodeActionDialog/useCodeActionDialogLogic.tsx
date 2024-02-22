@@ -1,10 +1,11 @@
 // src/components/feature/CodeActionDialog/useCodeActionDialogLogic.tsx
 import { useAtom } from 'jotai';
-import { codeActionDialogTypeState, codeCheckStatusState, codeViolationsState, isCodeActionDialogState } from './CodeActionDialogState';
-import { CodeState, CodeLatestState, IsChangeCodeState } from '~/components/feature/CodeEditor/CodeEditorState';
+import { CodeLatestState, CodeState, IsChangeCodeState } from '~/components/feature/CodeEditor/CodeEditorState';
 import { ViewModeState } from '~/components/feature/CornerDialog/CornerDialogState';
+import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
+import { CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage } from "~/constants";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
-import { DeviceDiv, CodeActionDialogType, ErrorCode, ErrorMessage } from "~/constants";
+import { codeActionDialogTypeState, codeCheckStatusState, codeViolationsState, isCodeActionDialogState } from './CodeActionDialogState';
 import CodeCheck from './CodeCheck';
 import CodeFix from './CodeFix';
 
@@ -23,6 +24,10 @@ export const useCodeActionDialogLogic = () => {
   const [code] = useAtom(CodeState);
   const [, setCodeLatest] = useAtom(CodeLatestState);
   const [, setIsChangeCode] = useAtom(IsChangeCodeState);
+  const { isLoading,
+    startLoading,
+    stopLoading
+  } = useLoadingLogic(false);
 
   const content = <CodeActionDialogContent dialogType={dialogType} />
 
@@ -34,11 +39,12 @@ export const useCodeActionDialogLogic = () => {
   };
 
   const handleReflectClick = async () => {
+    await startLoading();
     try {
       const appId = kintone.app.getId();
       const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
       const isGuestSpace = kintone.getLoginUser().isGuest;
-  
+
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
         setIsCodeActionDialog(false);
@@ -68,9 +74,11 @@ export const useCodeActionDialogLogic = () => {
       // TODO: トーストでエラーメッセージ表示に差し替え予定
       alert(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`);
     }
+    await stopLoading();
   }
 
   return {
+    isLoading,
     codeViolations,
     codeCheckStatus,
     setCodeCheckStatus,

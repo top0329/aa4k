@@ -2,13 +2,13 @@
 import { faClose } from "@fortawesome/pro-duotone-svg-icons";
 import { Box, Button, Flex, ScrollArea, Text } from "@radix-ui/themes";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
-import Spinner from "~/components/ui/Spinner/Spinner";
-import { vars } from "~/styles/theme.css";
+import DonutLoading from "~/components/ui/Loading/DonutLoading/DonutLoading";
 import { CodeCheckStatus } from "~/constants";
+import { vars } from "~/styles/theme.css";
 import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 
 const CodeCheck = () => {
-  const { codeCheckStatus, setIsCodeActionDialog, codeViolations } = useCodeActionDialogLogic();
+  const { isLoading, codeCheckStatus, setIsCodeActionDialog, codeViolations } = useCodeActionDialogLogic();
 
   const LoadingStatus = () => <>
     <Flex
@@ -25,7 +25,10 @@ const CodeCheck = () => {
       </Box>
       <Box
         pt={'4'}>
-        <Spinner />
+        <DonutLoading
+          isLoading={isLoading}
+          borderColor={`${vars.color.crimson.crimson10} ${vars.color.crimson.crimson6} ${vars.color.crimson.crimson6}`}
+        />
       </Box>
     </Flex>
     <Flex
