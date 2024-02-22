@@ -65,8 +65,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
       body: JSON.stringify({
         contractStatus: contractStatus,
         systemSettings: {
-          retrieveMaxCount: aa4kConstParameterValue.retrieveMaxCount,
-          retrieveScoreThreshold: aa4kConstParameterValue.retrieveScoreThreshold,
           historyUseCount: aa4kConstParameterValue.historyUseCount,
         }
       }),

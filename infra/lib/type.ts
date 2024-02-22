@@ -3,4 +3,6 @@ export type ContextProps = {
   stageName: string,
   deletionProtection: boolean,
   cacheNodeType: string,
+  suguresEndpoint: string,
+  suguresClientId: string,
 }
