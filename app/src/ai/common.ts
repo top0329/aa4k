@@ -98,7 +98,7 @@ const kintoneProxyFetcher: Fetch = async (url, init?) => {
   // API連携
   const resProxy = await kintone.proxy(
     url.toString(),
-    init.method,
+    init.method.toUpperCase(),
     reqHeaders,
     reqBody,
   ) as KintoneProxyResponse;

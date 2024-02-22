@@ -1,4 +1,4 @@
-import { CodeCheckResult, ContractStatus, DeviceDiv, UserRating } from "~/constants";
+import { CodeCheckStatus, ContractStatus, DeviceDiv, UserRating } from "~/constants";
 
 // src/types/agents.ts
 // メッセージ種別

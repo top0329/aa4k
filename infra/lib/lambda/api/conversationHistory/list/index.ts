@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ListRequestBody, ListRequestBodySchema } from "./schema";
 import { selectConversationHistory } from "./dao";
 import { ErrorCode } from "../constants";
-import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubscriptionData, changeSchemaSearchPath } from "../../../utils";
+import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubscriptionData, changeSchemaSearchPath, DeviceDiv } from "../../../utils";
 
 export const listHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -54,11 +54,15 @@ export const listHandler = async (req: Request, res: Response) => {
     await changeSchemaSearchPath(dbClient, schema);
 
     // 会話履歴一覧の取得
-    const queryResult = await selectConversationHistory(dbClient, body);
-    const conversationHistoryList = queryResult.rows;
+    const [desktop, mobile] = await Promise.all([
+      selectConversationHistory(dbClient, body, DeviceDiv.desktop),
+      selectConversationHistory(dbClient, body, DeviceDiv.mobile),
+    ]);
+    const desktopConversationHistoryList = desktop.rows;
+    const mobileConversationHistoryList = mobile.rows;
 
     // 終了
-    res.status(200).json({ conversationHistoryList });
+    res.status(200).json({ desktopConversationHistoryList, mobileConversationHistoryList });
   } catch (err) {
     // エラーログの出力
     const errorMessage = ({

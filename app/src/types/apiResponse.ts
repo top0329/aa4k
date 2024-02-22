@@ -23,6 +23,7 @@ export type ConversationHistory = Array<ConversationHistoryRow>;
 export interface ConversationHistoryListResponseBody
   extends KintoneProxyResponseBody {
   desktopConversationHistoryList: ConversationHistory;
+  mobileConversationHistoryList: ConversationHistory;
 }
 
 export interface PreCheckResponseBody extends KintoneProxyResponseBody {

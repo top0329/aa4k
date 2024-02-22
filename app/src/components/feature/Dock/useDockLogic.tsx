@@ -2,6 +2,7 @@
 import { useAtom } from "jotai";
 import { ViewModeState } from "../CornerDialog/CornerDialogState";
 import { DockItemVisibleState, activeChatModeState } from "./DockState";
+import { ChatMode } from "~/constants";
 
 export const useDockLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
@@ -29,7 +30,7 @@ export const useDockLogic = () => {
       chatVisible: !dockState.chatVisible,
       spChatVisible: false,
     });
-    setActiveChatMode('pcChat');
+    setActiveChatMode(ChatMode.desktopChat);
   };
 
   const toggleSpChatVisibility = () => {
@@ -38,7 +39,7 @@ export const useDockLogic = () => {
       chatVisible: false,
       spChatVisible: !dockState.spChatVisible,
     });
-    setActiveChatMode('spChat');
+    setActiveChatMode(ChatMode.mobileChat);
   };
 
   const deleteHistory = () => { }

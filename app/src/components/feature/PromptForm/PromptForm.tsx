@@ -3,7 +3,7 @@ import { faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Badge, Box, Button, Flex, Switch, Text } from '@radix-ui/themes';
 import { motion } from "framer-motion";
-import { PromtTextArea } from "~/components/ui/PromtTextarea/PromtTextArea";
+import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
 import { vars } from '~/styles/theme.css';
 import { sVoiceInput, sVoiceInputActive } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
@@ -17,7 +17,8 @@ const PromptForm = () => {
     humanMessage,
     setHumanMessage,
     handleSubmit,
-    handleKeyDown
+    handleKeyDown,
+    isSubmitting,
   } = usePromptFormLogic();
 
   // Define animation variants for the submit button
@@ -59,7 +60,7 @@ const PromptForm = () => {
               </Text>
             </motion.div>
           </Flex>
-          <PromtTextArea
+          <PromptTextArea
             name="humanMessage"
             value={humanMessage}
             onChange={
@@ -67,6 +68,7 @@ const PromptForm = () => {
             }
             onKeyDown={(e) => handleKeyDown(e)}
             label=""
+            disabled={isSubmitting}
           />
         </Flex>
 
@@ -112,7 +114,7 @@ const PromptForm = () => {
               animate={humanMessage ? 'enabled' : 'disabled'}
             >
               <Button
-                type="submit" disabled={!humanMessage}
+                type="submit" disabled={!humanMessage || isSubmitting}
                 style={{
                   cursor: !humanMessage ? 'not-allowed' : 'pointer',
                   width: 32,

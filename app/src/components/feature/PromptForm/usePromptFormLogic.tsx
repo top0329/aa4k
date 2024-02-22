@@ -5,13 +5,14 @@ import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from '~/const
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
-import { InTypeWriteState, PcChatHistoryState, SpChatHistoryState, ViewModeState } from '../CornerDialog/CornerDialogState';
+import { InTypeWriteState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, IsSubmittingState } from '../CornerDialog/CornerDialogState';
 import { humanMessageState, voiceInputState } from './PromptFormState';
 
 export const usePromptFormLogic = () => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
-  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? PcChatHistoryState : SpChatHistoryState);
+  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
   const [humanMessage, setHumanMessage] = useAtom(humanMessageState);
+  const [isSubmitting, setIsSubmitting] = useAtom(IsSubmittingState);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [isVoiceInput,
     setVoiceInput] = useAtom(voiceInputState);
@@ -27,9 +28,11 @@ export const usePromptFormLogic = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const appId = kintone.app.getId();
     const userId = kintone.getLoginUser().id;
     const isGuest = kintone.getLoginUser().isGuest;
+    const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
 
     // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
     if (appId === null) {
@@ -70,6 +73,7 @@ export const usePromptFormLogic = () => {
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setInTypeWrite(true);
+      setIsSubmitting(false);
       return;
     }
     const contractStatus = preCheckResult.contractStatus;
@@ -104,7 +108,7 @@ export const usePromptFormLogic = () => {
       `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
       "POST",
       { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
-      { appId: appId, userId: userId, deviceDiv: DeviceDiv.desktop, messageType: MessageType.human, message: humanMessage },
+      { appId: appId, userId: userId, deviceDiv: deviceDiv, messageType: MessageType.human, message: humanMessage },
     ) as KintoneProxyResponse;
     const [resBody, resInsertConversationStatus] = resInsertConversation;
     const resJsonInsertConversation = JSON.parse(resBody) as InsertConversationResponseBody;
@@ -117,6 +121,7 @@ export const usePromptFormLogic = () => {
       };
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setInTypeWrite(true);
+      setIsSubmitting(false);
       return;
     }
     const conversationId = resJsonInsertConversation.conversationId;
@@ -134,7 +139,7 @@ export const usePromptFormLogic = () => {
           appId: appId,
           userId: userId,
           conversationId: conversationId,
-          deviceDiv: DeviceDiv.desktop,
+          deviceDiv: deviceDiv,
           contractStatus: contractStatus,
           isGuestSpace: isGuest,
           systemSettings: systemSettings,
@@ -150,6 +155,7 @@ export const usePromptFormLogic = () => {
       chatHistoryItem.error = message;
     }
     setChatHistory([...chatHistoryItems, chatHistoryItem]);
+    setIsSubmitting(false);
 
     await new Promise((resolve) => setTimeout(resolve, 5000));  // TODO: ストリーミング・音声出力が完了したらcallbacksを動かすようにしたいが、暫定的にtimeoutで代用
     callbacks?.forEach((fn) => fn());
@@ -163,6 +169,7 @@ export const usePromptFormLogic = () => {
     setIsPcViewMode,
     isVoiceInput,
     setVoiceInput,
-    handleKeyDown
+    handleKeyDown,
+    isSubmitting,
   };
 };

@@ -2,6 +2,7 @@ import { Client, QueryResult } from "pg";
 import {
   ListRequestBody,
 } from "./schema";
+import { DeviceDiv } from "../../../utils";
 
 // 型定義
 // 会話履歴取得クエリ結果行
@@ -18,13 +19,14 @@ interface ConversationHistoryResultRow {
  * 会話履歴TBL検索（会話履歴一覧）
  * @param dbClient 
  * @param reqBody
+ * @param deviceDiv
  * @returns クエリ実行結果
  */
-export const selectConversationHistory = async (dbClient: Client, reqBody: ListRequestBody): Promise<QueryResult<ConversationHistoryResultRow>> => {
+export const selectConversationHistory = async (dbClient: Client, reqBody: ListRequestBody, deviceDiv: DeviceDiv): Promise<QueryResult<ConversationHistoryResultRow>> => {
   const pram = [
     reqBody.appId,
     reqBody.userId,
-    reqBody.deviceDiv,
+    deviceDiv,
   ];
   let sql = "";
   sql += `select`;

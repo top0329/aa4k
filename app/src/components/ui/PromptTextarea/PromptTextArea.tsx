@@ -1,18 +1,19 @@
-// src/components/ui/PromtTextarea/PromtTextArea.tsx
+// src/components/ui/PromptTextarea/PromptTextArea.tsx
 import { TextArea } from '@radix-ui/themes';
 import React from 'react';
-import { StyledItem } from './PromtTextArea.css';
+import { StyledItem } from './PromptTextArea.css';
 
-type PromtTextAreaProps = {
+type PromptTextAreaProps = {
   name: string;
   label: string;
   required?: boolean;
   value: string;
+  disabled: boolean;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
-export const PromtTextArea: React.FC<PromtTextAreaProps> = ({ name, label, required, value, onChange, onKeyDown, ...rest }) => {
+export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, required, value, disabled, onChange, onKeyDown, ...rest }) => {
   return (
     <TextArea
       className={StyledItem}
@@ -21,6 +22,7 @@ export const PromtTextArea: React.FC<PromtTextAreaProps> = ({ name, label, requi
       name={name}
       required={required}
       value={value}
+      disabled={disabled}
       onChange={onChange}
       onKeyDown={onKeyDown}
       {...rest}

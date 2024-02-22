@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { ChatContent } from "~/components/ui/ChatContent/ChatContent";
 import { TypewriterEffect } from "~/components/ui/TypewriterEffect/TypewriterEffect";
 import { AiMessage, ChatHistoryItem, ErrorMessage } from '~/types/ai';
-import { InTypeWriteState, LatestAiResponseIndexState, PcChatHistoryState, SpChatHistoryState, ViewModeState } from '../CornerDialog/CornerDialogState';
+import { InTypeWriteState, LatestAiResponseIndexState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from '../CornerDialog/CornerDialogState';
 
 export const useAccordionHistoryLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
-  const [chatHistoryItems] = useAtom(isPcViewMode ? PcChatHistoryState : SpChatHistoryState);
+  const [chatHistoryItems] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
   const [latestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [inTypeWrite] = useAtom(InTypeWriteState);
   const [activeItem, setActiveItem] = useState('');

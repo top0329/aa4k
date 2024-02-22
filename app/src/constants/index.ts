@@ -45,6 +45,13 @@ export const UserRating = {
 } as const;
 export type UserRating = (typeof UserRating)[keyof typeof UserRating];
 
+// 会話モード
+export const ChatMode = {
+  desktopChat: "desktopChat",
+  mobileChat: "mobileChat",
+} as const;
+export type ChatMode = (typeof ChatMode)[keyof typeof ChatMode];
+
 // エラーコード
 export const ErrorCode = {
   // 認証チェック(A01)
@@ -98,6 +105,7 @@ export type ErrorCode = keyof typeof ErrorCode;
 export const InfoMessage = {
   I_MSG001: "動作確認のためテスト環境画面に移動します。よろしいですか？",
   I_MSG002: "編集中の画面を閉じようとしています。編集内容は破棄されてしまいますがよろしいですか？",
+  I_MSG003: "編集中のコードを最新に更新しようとしています。編集内容は破棄されてしまいますがよろしいですか？",
 } as const;
 
 // エラーメッセージ

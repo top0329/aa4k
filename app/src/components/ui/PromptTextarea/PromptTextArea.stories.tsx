@@ -1,11 +1,11 @@
-// src/components/ui/PromtTextarea/PromtTextArea.stories.tsx
+// src/components/ui/PromptTextarea/PromptTextArea.stories.tsx
 import { Meta } from '@storybook/react';
 import React, { useState } from 'react';
-import { PromtTextArea } from './PromtTextArea';
+import { PromptTextArea } from './PromptTextArea';
 
 export default {
   title: 'Forms/PromtTextArea',
-  component: PromtTextArea,
+  component: PromptTextArea,
 } as Meta;
 
 export const Default = () => {
@@ -16,10 +16,11 @@ export const Default = () => {
   };
 
   return (
-    <PromtTextArea
+    <PromptTextArea
       name="test"
       label="Test Label"
       value={value}
+      disabled={false}
       onChange={handleChange}
     />
   );

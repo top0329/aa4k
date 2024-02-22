@@ -1,4 +1,4 @@
-// src/components/ui/PromtTextarea/PromtTextArea.css.ts
+// src/components/ui/PromptTextarea/PromptTextArea.css.ts
 import { style } from "@vanilla-extract/css";
 import { vars } from "~/styles/theme.css";
 

@@ -10,6 +10,7 @@ export const DeviceDiv = {
   desktop: "desktop",
   mobile: "mobile",
 } as const;
+export type DeviceDiv = keyof typeof DeviceDiv;
 
 // メッセージ種別
 export const MessageType = {

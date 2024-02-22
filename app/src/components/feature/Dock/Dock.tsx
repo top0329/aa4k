@@ -6,6 +6,7 @@ import { vars } from "~/styles/theme.css";
 import { DockGroup, DockInner, DockItem } from "./Dock.css";
 import { useDockLogic } from "./useDockLogic";
 import { useCodeEditorLogic } from "~/components/feature/CodeEditor/useCodeEditorLogic";
+import { ChatMode } from "~/constants";
 
 const Dock = () => {
   const {
@@ -29,7 +30,7 @@ const Dock = () => {
           icon={faMessageLines}
           tooltip={'チャットを表示'}
           onClick={toggleChatVisibility}
-          pressed={activeChatMode === 'pcChat'}
+          pressed={activeChatMode === ChatMode.desktopChat}
           pressedColor={
             isPcViewMode
               ? vars.color.indigoA.indigoA9
