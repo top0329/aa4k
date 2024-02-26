@@ -7,13 +7,11 @@ import { ChatMode } from "~/constants";
 export const useDockLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [activeChatMode, setActiveChatMode] = useAtom(activeChatModeState);
+  const [isPcViewMode] = useAtom(ViewModeState);
+
   const toggleItemVisibility = (itemKey: keyof typeof dockState) => {
     setDockState({ ...dockState, [itemKey]: !dockState[itemKey] });
   };
-
-  const [
-    isPcViewMode
-  ] = useAtom(ViewModeState);
 
   const initDockState = () => {
     setDockState({

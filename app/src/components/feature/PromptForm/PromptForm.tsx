@@ -1,4 +1,5 @@
 // src/components/feature/PromptForm/PromptForm.tsx
+import { useUpdateEffect } from "react-use";
 import { faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Badge, Box, Button, Flex, Switch, Text } from '@radix-ui/themes';
@@ -7,19 +8,35 @@ import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
 import { vars } from '~/styles/theme.css';
 import { sVoiceInput, sVoiceInputActive } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
+import { useTextSpeech } from "~/hooks/useTextSpeech";
 
 const PromptForm = () => {
   const {
     isVoiceInput,
-    setVoiceInput,
     isPcViewMode,
     setIsPcViewMode,
     humanMessage,
-    setHumanMessage,
     handleSubmit,
     handleKeyDown,
+    handleVoiceInput,
+    handleHumanMessageChange,
     isSubmitting,
+    execCallbacks,
+    voiceInputVisible,
+    aiAnswerRef,
+    finishAiAnswerRef,
   } = usePromptFormLogic();
+  const { isSpeech } = useTextSpeech(
+    aiAnswerRef,
+    finishAiAnswerRef,
+  );
+
+  // JS生成AI機能の呼び出し後、音声出力が完了したのを確認したのちにJS生成AI機能からのcallbacksを実行する
+  useUpdateEffect(() => {
+    if (!isSpeech) {
+      execCallbacks();
+    }
+  }, [isSpeech]);
 
   // Define animation variants for the submit button
   const buttonVariants = {
@@ -64,7 +81,7 @@ const PromptForm = () => {
             name="humanMessage"
             value={humanMessage}
             onChange={
-              (e) => setHumanMessage(e.target.value)
+              (e) => handleHumanMessageChange(e)
             }
             onKeyDown={(e) => handleKeyDown(e)}
             label=""
@@ -96,17 +113,15 @@ const PromptForm = () => {
             align={'center'}
           >
 
-            <Button
+            {voiceInputVisible && (<Button
               variant={'ghost'}
               color={isVoiceInput ? 'crimson' : 'gray'}
               className={isVoiceInput ? sVoiceInputActive : sVoiceInput}
-              onClick={(e) => {
-                e.preventDefault();
-                setVoiceInput(!isVoiceInput)
-              }}
+              onClick={(e) => handleVoiceInput(e)}
             >
               <FontAwesomeIcon size='lg' icon={faMicrophone} />
             </Button>
+            )}
             {/* Wrap the submit button in a motion.div and control the animation */}
             <motion.div
               variants={buttonVariants}

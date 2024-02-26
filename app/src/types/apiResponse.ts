@@ -44,3 +44,8 @@ export interface InsertConversationResponseBody
   extends KintoneProxyResponseBody {
   conversationId: string;
 }
+
+export interface SpeechResponseBody
+  extends KintoneProxyResponseBody {
+  data: string;
+}

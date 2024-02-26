@@ -1,12 +1,16 @@
 // src/components/feature/PromptForm/usePromptFormLogic.tsx
 import { useAtom } from 'jotai';
+import { useEffect, useRef, useState } from 'react';
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import { appCreateJs } from '~/ai/appCreateJs';
-import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from '~/constants';
+import { DeviceDiv, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from '~/constants';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
 import { InTypeWriteState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, IsSubmittingState } from '../CornerDialog/CornerDialogState';
-import { humanMessageState, voiceInputState } from './PromptFormState';
+import { humanMessageState, voiceInputState, callbackFuncsState, voiceInputVisibleState } from './PromptFormState';
 
 export const usePromptFormLogic = () => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
@@ -16,6 +20,15 @@ export const usePromptFormLogic = () => {
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [isVoiceInput,
     setVoiceInput] = useAtom(voiceInputState);
+  const [callbackFuncs, setCallbackFuncs] = useAtom(callbackFuncsState);
+  const [voiceInputVisible, setVoiceInputVisible] = useAtom(voiceInputVisibleState);
+  const [currentHumanMessage, setCurrentHumanMessage] = useState("");
+  // Ref
+  const aiAnswerRef = useRef<string>('');
+  const finishAiAnswerRef = useRef<boolean>(false);
+  const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
+
+  const { transcript, finalTranscript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const pressShiftEnter = e.key === 'Enter' && e.shiftKey
@@ -28,7 +41,17 @@ export const usePromptFormLogic = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    if (isVoiceInput) {
+      // 音声入力中の場合は、音声識別を停止
+      SpeechRecognition.stopListening();
+      isVoiceInputRef.current = false;
+      setVoiceInput(false);
+    }
+
+    aiAnswerRef.current = '';
+    finishAiAnswerRef.current = false;
+
     const appId = kintone.app.getId();
     const userId = kintone.getLoginUser().id;
     const isGuest = kintone.getLoginUser().isGuest;
@@ -48,6 +71,8 @@ export const usePromptFormLogic = () => {
         error: errorMessage,
         conversationId: "",
       };
+      aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
+      finishAiAnswerRef.current = true;
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setInTypeWrite(true);
@@ -70,6 +95,8 @@ export const usePromptFormLogic = () => {
         error: errorMessage,
         conversationId: "",
       };
+      aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
+      finishAiAnswerRef.current = true;
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setInTypeWrite(true);
@@ -119,6 +146,8 @@ export const usePromptFormLogic = () => {
         role: MessageType.error,
         content: `${ErrorMessageConst.E_MSG001}（${resJsonInsertConversation.errorCode}）`,
       };
+      aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
+      finishAiAnswerRef.current = true;
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setInTypeWrite(true);
       setIsSubmitting(false);
@@ -145,21 +174,99 @@ export const usePromptFormLogic = () => {
           systemSettings: systemSettings,
         },
       }
-    )
+    );
+    setCallbackFuncs(callbacks);
+
     chatHistoryItem.conversationId = conversationId;
     if (message.role === MessageType.ai) {
       chatHistoryItem.ai = message;
+      aiAnswerRef.current = InfoMessage.I_MSG004;   // 成功時に音声出力するメッセージ
     } else {
       // AIメッセージオブジェクトの削除
       delete chatHistoryItem.ai;
       chatHistoryItem.error = message;
+      aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
     }
+    finishAiAnswerRef.current = true;
     setChatHistory([...chatHistoryItems, chatHistoryItem]);
-    setIsSubmitting(false);
-
-    await new Promise((resolve) => setTimeout(resolve, 5000));  // TODO: ストリーミング・音声出力が完了したらcallbacksを動かすようにしたいが、暫定的にtimeoutで代用
-    callbacks?.forEach((fn) => fn());
   };
+
+  const execCallbacks = () => {
+    callbackFuncs?.forEach((fn) => fn());
+  };
+
+  const handleVoiceInput = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    if (isVoiceInput) {
+      // 音声識別を停止
+      SpeechRecognition.stopListening();
+      resetTranscript();
+    } else {
+      // 常時音声識別状態で開始
+      SpeechRecognition.startListening({ continuous: true, language: "ja" });
+      // 現在のテキストエリアの文字列を保存
+      setCurrentHumanMessage(humanMessage);
+    }
+    isVoiceInputRef.current = !isVoiceInput;
+    setVoiceInput(!isVoiceInput);
+  }
+
+  const handleHumanMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setHumanMessage(e.target.value);
+    // 現在のテキストエリアの文字列を保存
+    setCurrentHumanMessage(e.target.value);
+  }
+
+  useEffect(() => {
+    const focusHandler = () => {
+      if (isVoiceInputRef.current) {
+        // ウィンドウ・タブがアクティブ かつ 音声入力中の場合、常時音声識別状態で開始
+        SpeechRecognition.startListening({ continuous: true, language: "ja" });
+      }
+    };
+    const blurHandler = () => {
+      if (isVoiceInputRef.current) {
+        // ウィンドウ・タブが非アクティブ  かつ 音声入力中の場合、音声識別を停止
+        SpeechRecognition.stopListening();
+      }
+    };
+    window.addEventListener("focus", focusHandler, false);
+    window.addEventListener("blur", blurHandler, false);
+
+    if (!browserSupportsSpeechRecognition) {
+      // Web Speech APIがサポートされていない場合は、音声マイクを非表示
+      setVoiceInputVisible(false);
+    }
+
+    return () => {
+      if (isVoiceInputRef.current) {
+        // 音声入力中の場合は、音声識別を停止
+        SpeechRecognition.stopListening();
+        isVoiceInputRef.current = false;
+        setVoiceInput(false);
+        resetTranscript();
+      }
+      window.removeEventListener("focus", focusHandler, false);
+      window.removeEventListener("blur", blurHandler, false);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isVoiceInput && transcript) {
+      // 音声入力中の内容をテキストエリアにリアルタイム反映
+      setHumanMessage(currentHumanMessage + transcript);
+    }
+  }, [transcript]);
+
+  useEffect(() => {
+    if (isVoiceInput && finalTranscript) {
+      // 現在のテキストエリアの文字列を保存
+      setCurrentHumanMessage(currentHumanMessage + finalTranscript);
+      // 音声入力確定後の内容をリセット
+      resetTranscript();
+    }
+  }, [finalTranscript]);
 
   return {
     handleSubmit,
@@ -170,6 +277,12 @@ export const usePromptFormLogic = () => {
     isVoiceInput,
     setVoiceInput,
     handleKeyDown,
+    handleVoiceInput,
+    handleHumanMessageChange,
     isSubmitting,
+    execCallbacks,
+    voiceInputVisible,
+    aiAnswerRef,
+    finishAiAnswerRef,
   };
 };

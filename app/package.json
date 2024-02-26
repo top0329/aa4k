@@ -59,7 +59,9 @@
     "react-ace-builds": "^7.4.1",
     "react-dom": "^18.2.0",
     "react-scroll-to-bottom": "^4.2.0",
-    "react-use": "^17.4.2"
+    "react-speech-recognition": "^3.10.0",
+    "react-use": "^17.4.2",
+    "sentence-splitter": "^5.0.0"
   },
   "devDependencies": {
     "@kintone/dts-gen": "^8.0.3",
