@@ -119,7 +119,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
 async function preGetResource(conversation: Conversation) {
   const { message } = conversation;
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { appId, userId, deviceDiv, isGuestSpace, systemSettings } = appCreateJsContext;
+  const { appId, userId, conversationId, deviceDiv, isGuestSpace } = appCreateJsContext;
 
   // --------------------
   // フィールド情報の取得
@@ -133,7 +133,7 @@ async function preGetResource(conversation: Conversation) {
   // --------------------
   // コードテンプレートの取得
   // --------------------
-  const codeTemplateRetriever = new CodeTemplateRetriever(systemSettings.retrieveMaxCount, systemSettings.retrieveScoreThreshold);
+  const codeTemplateRetriever = new CodeTemplateRetriever(conversationId);
   const codeTemplate = await codeTemplateRetriever.getRelevantDocuments(message.content);
 
   // --------------------

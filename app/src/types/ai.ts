@@ -44,8 +44,6 @@ export interface ChatHistoryItem {
 export type Context = Record<string, any>;
 export type ChatHistory = Array<ChatHistoryItem>;
 export interface SystemSettings {
-  retrieveMaxCount: number;
-  retrieveScoreThreshold: number;
   historyUseCount: number;
 }
 export interface AppCreateJsContext {
