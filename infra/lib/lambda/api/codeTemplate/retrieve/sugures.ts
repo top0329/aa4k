@@ -193,13 +193,13 @@ export const getSugures = async (query: string, subscriptionId: string, conversa
 
 
 /**
- * HelpfulのkyeをRedisに保存
+ * HelpfulのkeyをRedisに保存
  * @param wasHelpfulPostbackKeys 
  * @param wasNotHelpfulPostbackKeys 
  * @param subscriptionId 
  * @param conversationId 
  */
-function suguresWasHelpfulPostback(wasHelpfulPostbackKeys: string[], wasNotHelpfulPostbackKeys: string[], subscriptionId: string, conversationId: string, sessionId: string) {
+async function suguresWasHelpfulPostback(wasHelpfulPostbackKeys: string[], wasNotHelpfulPostbackKeys: string[], subscriptionId: string, conversationId: string, sessionId: string) {
   let redisClient: Redis | undefined;
   try {
     // redis接続情報
@@ -214,9 +214,9 @@ function suguresWasHelpfulPostback(wasHelpfulPostbackKeys: string[], wasNotHelpf
     } as SuguresPostbackResultRow;
     // Redisキー
     const redisKey = `${SuguresPostbackPrefix}_${subscriptionId}_${conversationId}`;
-    redisClient.hmset(redisKey, setValue);
+    await redisClient.hmset(redisKey, setValue);
     // 有効期限を1日(86400秒)で設定
-    redisClient.expire(redisKey, 86400);
+    await redisClient.expire(redisKey, 86400);
 
   } finally {
     if (redisClient) {

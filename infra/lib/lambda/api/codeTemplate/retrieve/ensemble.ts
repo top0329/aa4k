@@ -98,7 +98,7 @@ export class EnsembleRetriever extends BaseRetriever {
     // rerank based with rrf score
     const sortedDocuments = Array.from(allPageContent).sort((a, b) => rrfScoreRecord[b] - rrfScoreRecord[a]);
 
-    // Convert from page content to documnet
+    // Convert from page content to document
     const sortedDocs = sortedDocuments.map(pageContent => pageContentToDocMap[pageContent]);
     return sortedDocs;
   }
