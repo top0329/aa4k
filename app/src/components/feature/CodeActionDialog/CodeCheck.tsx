@@ -5,10 +5,20 @@ import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButt
 import DonutLoading from "~/components/ui/Loading/DonutLoading/DonutLoading";
 import { CodeCheckStatus } from "~/constants";
 import { vars } from "~/styles/theme.css";
-import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 
-const CodeCheck = () => {
-  const { isLoading, codeCheckStatus, setIsCodeActionDialog, codeViolations } = useCodeActionDialogLogic();
+type CodeCheckProps = {
+  isLoading: boolean;
+  codeCheckStatus: CodeCheckStatus;
+  setIsCodeActionDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  codeViolations: string[];
+}
+
+const CodeCheck: React.FC<CodeCheckProps> = ({
+  isLoading,
+  codeCheckStatus,
+  setIsCodeActionDialog,
+  codeViolations,
+}) => {
 
   const LoadingStatus = () => <>
     <Flex

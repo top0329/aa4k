@@ -2,11 +2,12 @@
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
 import { LatestAiResponseIndexState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from "~/components/feature/CornerDialog/CornerDialogState";
-import { useDockLogic } from "~/components/feature/Dock/useDockLogic";
+import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { ConversationHistoryListResponseBody, ConversationHistoryRow, ConversationHistory, KintoneProxyResponse } from "~/types/apiResponse";
 import { preCheck } from "~/util/preCheck";
+import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 
 export const useCornerDialogLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
@@ -15,27 +16,23 @@ export const useCornerDialogLogic = () => {
   const [mobileChatHistory, setMobileChatHistory] = useAtom(MobileChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
+  const [dockState, setDockState] = useAtom(DockItemVisibleState);
 
-  // doc logic
-  const { dockState, toggleItemVisibility, initDockState } = useDockLogic();
+  const { showToast } = useToast();
 
   const handleBannerClick = async () => {
-    if (!dockState.dialogVisible) {
-      // 会話履歴一覧の取得
-      await getChatHistoryItemList();
-    }
-    toggleItemVisibility('dialogVisible');
+    // 会話履歴一覧の取得
+    await getChatHistoryItemList();
   }
 
   const getChatHistoryItemList = async () => {
     try {
       const appId = kintone.app.getId();
       const userId = kintone.getLoginUser().id;
-  
+
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
-        initDockState();
-        alert(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
+        showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
         return;
       }
   
@@ -45,13 +42,12 @@ export const useCornerDialogLogic = () => {
       // 事前チェックの呼び出し
       const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck();
       if (resPreCheckStatus !== 200) {
-        initDockState();
         setIsBannerClicked(false);
         // APIエラーの場合、エラーメッセージ表示
         if (preCheckResult.errorCode === ErrorCode.A02002) {
-          alert(`${ErrorMessageConst.E_MSG002}（${preCheckResult.errorCode}）`);
+          showErrorToast(`${ErrorMessageConst.E_MSG002}（${preCheckResult.errorCode}）`);
         } else {
-          alert(`${ErrorMessageConst.E_MSG001}（${preCheckResult.errorCode}）`);
+          showErrorToast(`${ErrorMessageConst.E_MSG001}（${preCheckResult.errorCode}）`);
         }
         return;
       }
@@ -66,9 +62,8 @@ export const useCornerDialogLogic = () => {
       const [resBody, resStatus] = resConversationHistory;
       const resBodyConversationHistoryList = JSON.parse(resBody) as ConversationHistoryListResponseBody;
       if (resStatus !== 200) {
-        initDockState();
         setIsBannerClicked(false);
-        alert(`${ErrorMessageConst.E_MSG001}（${resBodyConversationHistoryList.errorCode}）`);
+        showErrorToast(`${ErrorMessageConst.E_MSG001}（${resBodyConversationHistoryList.errorCode}）`);
         return;
       }
 
@@ -77,9 +72,10 @@ export const useCornerDialogLogic = () => {
       setDesktopChatHistory(desktopChatHistoryItemList);
       setMobileChatHistory(mobileChatHistoryItemList);
       setIsBannerClicked(false);
+      setDockState(dockState => ({ ...dockState, dialogVisible: true, chatVisible: true }));
     } catch (err) {
       setIsBannerClicked(false);
-      alert(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）`);
+      showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）`);
     }
   }
 
@@ -113,6 +109,11 @@ export const useCornerDialogLogic = () => {
     });
 
     return chatHistoryItemList;
+  }
+
+  // エラートーストを表示
+  const showErrorToast = (message: string) => {
+    showToast(message, 0, false);
   }
 
   // 会話履歴が更新されたら会話履歴の最新のインデックスを更新

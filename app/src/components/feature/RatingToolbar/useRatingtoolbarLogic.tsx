@@ -1,20 +1,24 @@
 // src/components/feature/RatingToolbar/useRatingtoolbarLogic.tsx
+import { useAtom } from "jotai";
 import { useState, useEffect } from "react";
-import { useCornerDialogLogic } from "~/components/feature/CornerDialog/useCornerDialogLogic.tsx";
+import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
+// TODO：ステート管理のリファクタリングで修正予定
+import { DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from "~/components/feature/CornerDialog/CornerDialogState";
 import { UserRating, ErrorMessage } from '~/constants';
 import { ChatHistoryItem } from "~/types/ai";
 import { KintoneProxyResponse, KintoneProxyResponseBody } from "~/types/apiResponse";
 
 // src/components/feature/RatingToolbar/useRatingtoolbar.tsx
 export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
+  const [isPcViewMode] = useAtom(ViewModeState);
+  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
   const [thumbsUpPressed, setThumbsUpPressed] = useState(false);
   const [thumbsDownPressed, setThumbsDownPressed] = useState(false);
   const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
   const [activeConversationId, ] = useState<string>(chatHistoryItem.conversationId);
   const [feedback, setFeedback] = useState('');
-  const [updateErrorMessage, setUpdateErrorMessage] = useState('');
 
-  const {chatHistoryItems, setChatHistory} = useCornerDialogLogic();
+  const { showToast } = useToast();
 
   // Goodボタン押下時
   const handleThumbsUpClick = async () => {
@@ -74,8 +78,8 @@ export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
     const [resBody, resStatus] = resUpdateUserRating;
     const resBodyUpdateUserRating = JSON.parse(resBody) as KintoneProxyResponseBody;
     if (resStatus !== 200) {
-      // TODO: トーストでエラーメッセージ表示に差し替え予定
-      setUpdateErrorMessage(`${ErrorMessage.E_MSG001}（${resBodyUpdateUserRating.errorCode}）`);
+      // トーストでエラーメッセージ表示
+      showToast(`${ErrorMessage.E_MSG001}（${resBodyUpdateUserRating.errorCode}）`, 3000, true);
       return false;
     }
 
@@ -102,6 +106,5 @@ export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
     feedback,
     setFeedback,
     handleFeedbackSendClick,
-    updateErrorMessage,
   };
 };

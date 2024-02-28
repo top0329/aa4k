@@ -1,9 +1,15 @@
 // src/components/feature/CodeActionDialog/CodeFix.tsx
 import { Button, Flex, Text } from "@radix-ui/themes";
-import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 
-const CodeFix = () => {
-  const { setIsCodeActionDialog, handleReflectClick } = useCodeActionDialogLogic();
+type CodeFixProps = {
+  setIsCodeActionDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  handleReflectClick: () => Promise<void>;
+}
+
+const CodeFix: React.FC<CodeFixProps> = ({
+  setIsCodeActionDialog,
+  handleReflectClick
+}) => {
 
   return (<>
     <Flex

@@ -2,7 +2,7 @@
 import { faClose, faThumbsDown, faThumbsUp } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Button, Flex, TextArea, Text } from '@radix-ui/themes';
+import { Button, Flex, TextArea } from '@radix-ui/themes';
 import Copy from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
@@ -28,7 +28,6 @@ const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
     feedback,
     setFeedback,
     handleFeedbackSendClick,
-    updateErrorMessage,
   } = useRatingToolbarLogic(chatHistoryItem);
 
   const buttonStyle = {
@@ -74,12 +73,6 @@ const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
               isCopied={copySuccess}
               onCopy={() => copyToClipboard(content)}
             />
-          }
-          {/* TODO: トーストでエラーメッセージ表示に差し替え予定 */}
-          {updateErrorMessage !== "" &&
-            <Text size={'1'} color='tomato'>
-              {updateErrorMessage}
-            </Text>
           }
 
         </Toolbar.ToggleGroup>

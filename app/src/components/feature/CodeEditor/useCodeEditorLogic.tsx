@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
 import { ViewModeState } from '../CornerDialog/CornerDialogState';
 import { CodeState, CodeLatestState, IsChangeCodeState } from "~/components/feature/CodeEditor/CodeEditorState";
-import { useCodeCheckLogic } from "~/components/feature/CodeActionDialog/useCodeCheckLogic";
+import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
-import { codeActionDialogTypeState, isCodeActionDialogState, codeCheckStatusState } from '../CodeActionDialog/CodeActionDialogState';
-import { DeviceDiv, CodeActionDialogType, CodeCheckStatus, ErrorCode, InfoMessage, ErrorMessage } from "~/constants";
+import { codeActionDialogTypeState, isCodeActionDialogState } from '../CodeActionDialog/CodeActionDialogState';
+import { DeviceDiv, CodeActionDialogType, ErrorCode, InfoMessage, ErrorMessage } from "~/constants";
 import { getKintoneCustomizeJs } from "~/util/kintoneCustomize";
 
 export const useCodeEditorLogic = () => {
@@ -19,10 +19,9 @@ export const useCodeEditorLogic = () => {
   const [, setDialogType] = useAtom(codeActionDialogTypeState);
   const [codeLatest, setCodeLatest] = useAtom(CodeLatestState);
   const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
-  const [, setCodeCheckStatus] = useAtom(codeCheckStatusState);
 
   const { copyToClipboard, copySuccess } = useCopyToClipboard();
-  const { executeCodeCheck } = useCodeCheckLogic();
+  const { showToast } = useToast();
 
   const handleCodeEditorClick = async () => {
     if (dockState.codeEditorVisible) {
@@ -40,11 +39,6 @@ export const useCodeEditorLogic = () => {
 
   const handleRunCodeAction = (type: CodeActionDialogType) => {
     setDialogType(type);
-    if (type === CodeActionDialogType.CodeCheck) {
-      setCodeCheckStatus(CodeCheckStatus.loading);
-      // コードチェック実行
-      executeCodeCheck();
-    }
     setIsCodeActionDialog(true);
   };
 
@@ -76,11 +70,11 @@ export const useCodeEditorLogic = () => {
       const appId = kintone.app.getId();
       const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
       const isGuestSpace = kintone.getLoginUser().isGuest;
-  
+
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
-        // TODO: トーストでエラーメッセージ表示に差し替え予定
-        alert(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`);
+        // トーストでエラーメッセージ表示
+        showToast(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`, 0, false);
         return;
       }
   
@@ -91,8 +85,8 @@ export const useCodeEditorLogic = () => {
       setIsChangeCode(false);
       setDockState(dockState => ({ ...dockState, codeEditorVisible: true }));
     } catch (err) {
-      // TODO: トーストでエラーメッセージ表示に差し替え予定
-      alert(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`);
+      // トーストでエラーメッセージ表示
+      showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
     }
   }
 
