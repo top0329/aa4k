@@ -37,7 +37,7 @@ export interface GeneratedCodeGetResponseBody extends KintoneProxyResponseBody {
 
 export interface CodeTemplateRetrieverResponseBody
   extends KintoneProxyResponseBody {
-  documents: [DocumentInterface, number][];
+  documents: DocumentInterface[];
 }
 
 export interface InsertConversationResponseBody
