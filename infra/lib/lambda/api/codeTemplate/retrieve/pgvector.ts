@@ -4,6 +4,7 @@ import { PGVectorStore } from "langchain/vectorstores/pgvector";
 
 /**
  * pgvectorレトリバー
+ *     類似性スコアによる対象の絞り込みを行うため独自のRetrieverを用意
  */
 export class PgVectorRetriever extends BaseRetriever {
   pgvectorStore: PGVectorStore;
@@ -21,18 +22,24 @@ export class PgVectorRetriever extends BaseRetriever {
   };
 
   async getRelevantDocuments(query: string): Promise<Document[]> {
-    const pgVectorDocuments = await getPgVector(query, this.pgvectorStore, this.threshold, this.k);
+    const pgVectorDocuments = await this.getPgVectorDocuments(query, this.pgvectorStore, this.threshold, this.k);
     return pgVectorDocuments;
+  }
+
+  /**
+   * pgVector検索
+   * @param query 
+   * @returns 
+   */
+  async getPgVectorDocuments(query: string, pgvectorStore: PGVectorStore, threshold: number, k?: number): Promise<Document[]> {
+    // pgvectorStoreを使用して検索
+    const documents = await pgvectorStore.similaritySearchWithScore(query, k);
+
+    // スコアが閾値未満のものを返却
+    return documents
+      .filter(([_doc, score]) => score < threshold)
+      .map(([doc, _score]) => new Document(doc));
   }
 }
 
-export const getPgVector = async (query: string, pgvectorStore: PGVectorStore, threshold: number, k?: number): Promise<Document[]> => {
-  // pgvectorStoreを使用して検索
-  const documents = await pgvectorStore.similaritySearchWithScore(query, k);
-
-  // スコアが閾値未満のものを返却
-  return documents
-    .filter(([_doc, score]) => score < threshold)
-    .map(([doc, _score]) => new Document(doc));
-}
 

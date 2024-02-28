@@ -17,7 +17,7 @@ const stageName = context.stageName;
 const SUGURES_ENDPOINT_STG = "https://message-stage.sugures.app";
 const SUGURES_CLIENT_ID_STG = "7a1cdbef-c4b4-4b2e-b76b-9bd37dd6fbfd";
 const SUGURES_ENDPOINT_PROD = "https://message.sugures.app";
-const SUGURES_CLIENT_ID_PROD = "xxxxxxxxxxxx";
+const SUGURES_CLIENT_ID_PROD = "xxxxxxxxxxxx";  // TODO: 本番用スグレスのCLIENT_IDを設定する
 
 const contextProps: ContextProps = {
   stageKey: stageKey,
