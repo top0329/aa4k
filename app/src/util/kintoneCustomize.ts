@@ -12,18 +12,18 @@ export type AppCustomizeScope =
   (typeof AppCustomizeScope)[keyof typeof AppCustomizeScope];
 export type AppCustomizeResourceForResponse =
   | {
-      type: "URL";
-      url: string;
-    }
+    type: "URL";
+    url: string;
+  }
   | {
-      type: "FILE";
-      file: {
-        fileKey: string;
-        name: string;
-        contentType: string;
-        size: string;
-      };
+    type: "FILE";
+    file: {
+      fileKey: string;
+      name: string;
+      contentType: string;
+      size: string;
     };
+  };
 export type AppCustomizeForResponse = {
   js: AppCustomizeResourceForResponse[];
   css: AppCustomizeResourceForResponse[];
@@ -53,17 +53,10 @@ export async function getKintoneCustomizeJs(
   let jsCodeForKintone = "";
   let targetFileKey: string = "";
 
-  // 開発環境と本番環境でURLを変更
-  const apiUrl =
-    process.env.NODE_ENV === "development"
-      ? "/k/v1/preview/app/customize.json"
-      : kintone.api.url("/k/v1/preview/app/customize.json", isGuestSpace);
-
-  console.log("apiUrl", apiUrl);
-
-  const kintoneCustomizeFiles = (await kintone.api(apiUrl, "GET", {
-    app: appId,
-  })) as AppCustomize;
+  const kintoneCustomizeFiles = await kintone.api(
+    kintone.api.url("/k/v1/preview/app/customize.json", isGuestSpace),
+    "GET", { app: appId },
+  ) as AppCustomize;
   const jsFiles =
     deviceDiv === DeviceDiv.desktop
       ? kintoneCustomizeFiles.desktop.js
