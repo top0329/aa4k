@@ -3,8 +3,7 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "~/styles/theme.css";
 
 export const sCodeEditor = style({
-  background: `rgba(255, 255, 255, 0.96)`,
-  border: `1px solid ${vars.color.grayA.grayA4}`,
+  background: vars.color.gray.gray1,
   borderRadius: 16,
   position: `fixed`,
   bottom: `64px`,
@@ -24,11 +23,10 @@ export const sCodeEditorFullScreen = style({
   top: 'calc(50% - 30px)',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: `90vw`,
-  height: `calc(90vh - 60px)`,
+  width: `98vw`,
+  height: `calc(98vh - 60px)`,
   zIndex: 101,
-  background: `rgba(255, 255, 255, 0.96)`,
-  border: `1px solid ${vars.color.grayA.grayA4}`,
+  background: vars.color.gray.gray1,
   borderRadius: 0,
   display: `flex`,
   flexDirection: `column`,

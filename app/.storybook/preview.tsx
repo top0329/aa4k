@@ -3,8 +3,9 @@ import '@radix-ui/themes/styles.css';
 import type { Preview } from '@storybook/react';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import React from 'react';
+import "regenerator-runtime/runtime";
 import ThemeProvider from '../src/ThemeProvider';
-import './mocks/kintoneMocks';
+import '../src/mocks/kintoneMocks';
 
 initialize({
   onUnhandledRequest: 'bypass'

@@ -1,6 +1,6 @@
 // src/components/ui/CodeEditor/CodeEditor.tsx
-import { faExpandAlt, faRotateRight } from '@fortawesome/pro-duotone-svg-icons';
-import { Box, Button, Flex } from '@radix-ui/themes';
+import { faArrowsRetweet, faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
+import { Box, Button, Flex, Separator } from '@radix-ui/themes';
 import 'ace-builds/src-min-noconflict/ace';
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/ext-searchbox";
@@ -10,10 +10,13 @@ import "ace-builds/src-min-noconflict/snippets/snippets";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import 'ace-builds/src-min-noconflict/theme-tomorrow';
 import clsx from 'clsx';
+import { useAtom } from 'jotai';
 import AceEditor from "react-ace-builds";
 import CopyButton from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { CodeActionDialogType } from '~/constants';
+import { vars } from '~/styles/theme.css';
+import { ViewModeState } from '../CornerDialog/CornerDialogState';
 import { sCodeEditor, sCodeEditorFullScreen } from './CodeEditor.css';
 import { useCodeEditorLogic } from './useCodeEditorLogic';
 
@@ -25,12 +28,59 @@ const CodeEditor = () => {
     handleRunCodeAction,
     handleRefreshClick
   } = useCodeEditorLogic();
+  // リファクタリング時に対応想定
+  const [isPcViewMode] = useAtom(ViewModeState);
 
   return (
-    <Box className={clsx(
-      !isFullScreen ?
-        sCodeEditor : sCodeEditorFullScreen
-    )}>
+    <Flex
+      direction={'column'}
+      p={'3'}
+      className={clsx(
+        !isFullScreen ?
+          sCodeEditor : sCodeEditorFullScreen
+      )}
+      style={isPcViewMode ? {
+        border: `8px solid ${vars.color.indigo.indigo3}`,
+      } : {
+        border: `8px solid ${vars.color.crimson.crimson3}`,
+      }}
+    >
+      <Flex
+        justify={'end'}
+      >
+        {/* TODO: リフレッシュボタン仮置き 後で正式版に差し替え予定 */}
+        <IconTooltipButton
+          icon={faArrowsRetweet}
+          tooltip={'Code ReNew'}
+          onClick={handleRefreshClick}
+          style={{
+            width: 40,
+            height: 40,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 8,
+            transition: 'all 0.2s ease-in-out',
+            cursor: 'pointer',
+          }} />
+        <CopyButton isCopied={copySuccess} onCopy={() => copyToClipboard(code)} />
+        <IconTooltipButton
+          icon={faExpandAlt}
+          tooltip={'FullScreen'}
+          onClick={toggleFullScreen}
+          style={{
+            width: 40,
+            height: 40,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 8,
+            transition: 'all 0.2s ease-in-out',
+            cursor: 'pointer',
+          }} />
+      </Flex>
+
+      <Separator my="3" size="4" />
       <Box
         width={'100%'}
         style={{
@@ -38,50 +88,6 @@ const CodeEditor = () => {
           height: '100%',
         }}
       >
-        <Box
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            zIndex: 101,
-            display: 'flex',
-            gap: '16px',
-          }}
-        >
-          {/* TODO: リフレッシュボタン仮置き 後で正式版に差し替え予定 */}
-          <IconTooltipButton
-            icon={faRotateRight}
-            tooltip={'Refresh'}
-            onClick={handleRefreshClick}
-            style={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 8,
-              borderRadius: 8,
-              transition: 'all 0.2s ease-in-out',
-              cursor: 'pointer',
-          }} />
-          <CopyButton isCopied={copySuccess} onCopy={() => copyToClipboard(code)} />
-          <IconTooltipButton
-            icon={faExpandAlt}
-            tooltip={'FullScreen'}
-            onClick={toggleFullScreen}
-            style={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 8,
-              borderRadius: 8,
-              transition: 'all 0.2s ease-in-out',
-              cursor: 'pointer',
-            }} />
-        </Box>
-
         <AceEditor
           className={clsx('scrollbar')}
           style={
@@ -109,9 +115,9 @@ const CodeEditor = () => {
             tabSize: 2,
             useWorker: false
           }} />
+        <Separator my="3" size="4" />
         <Flex
           width={'100%'}
-          p={'4'}
           justify={'end'}
           style={{
             gap: 16,
@@ -133,7 +139,7 @@ const CodeEditor = () => {
           </Button>
         </Flex>
       </Box>
-    </Box>
+    </Flex>
   )
 }
 

@@ -27,11 +27,15 @@ const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
   className
 }, ref) => {
   return (
-    <Box ref={ref} onClick={onClick} style={style} className={className}>
-      <Tooltip delayDuration={400} content={tooltip}>
+    <Tooltip content={tooltip}
+      style={{
+        zIndex: 10000,
+      }}
+    >
+      <Box ref={ref} onClick={onClick} style={style} className={className}>
         <FontAwesomeIcon icon={icon} size="lg" color={pressed ? pressedColor : defaultColor} />
-      </Tooltip>
-    </Box>
+      </Box>
+    </Tooltip>
   );
 });
 

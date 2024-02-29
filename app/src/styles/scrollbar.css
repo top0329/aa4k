@@ -1,13 +1,16 @@
 .scrollbar,
+.ace_scrollbar,
 .w-100 {
   width: 100%;
 }
 
-.scrollbar::-webkit-scrollbar {
+.scrollbar::-webkit-scrollbar,
+.ace_scrollbar::-webkit-scrollbar {
   width: 2px;
   height: 2px;
 }
-.scrollbar::-webkit-scrollbar-track {
+.scrollbar::-webkit-scrollbar-track,
+.ace_scrollbar::-webkit-scrollbar-track {
   background-color: rgba(255, 255, 255, 0.1);
 }
 .scrollbar::-webkit-scrollbar-thumb {
