@@ -29,11 +29,9 @@ export const sAccordionChevron = style({
 export const sAccordionTrigger = style({
   marginBottom: 16,
   width: "100%",
-  height: 45,
-  fontSize: 16,
+  minHeight: 45,
   flex: 1,
   display: "flex",
-  alignItems: "center",
   justifyContent: "space-between",
   gap: 16,
   border: "none",
@@ -52,4 +50,9 @@ export const sAccordionTriggerInner = style({
   ":hover": {
     backgroundColor: vars.color.mauve.mauve2,
   },
+});
+
+export const sAccordionTriggerText = style({
+  color: vars.color.grayDark.gray8,
+  fontWeight: 600,
 });

@@ -1,18 +1,21 @@
 // src/components/ui/Accordion/AccordionTrigger.tsx
 import * as Accordion from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-import { Box } from '@radix-ui/themes';
+import { Box, Text } from '@radix-ui/themes';
 import clsx from 'clsx';
-import React, { forwardRef } from "react";
-import { sAccordionChevron, sAccordionHeader, sAccordionTrigger, sAccordionTriggerInner } from './AccordionTrigger.css';
+import { forwardRef } from "react";
+import { vars } from '~/styles/theme.css';
+import LineClamp from '../ClampedText/LineClamp';
+import { sAccordionChevron, sAccordionHeader, sAccordionTrigger, sAccordionTriggerInner, sAccordionTriggerText } from './AccordionTrigger.css';
 
 type AccordionTriggerProps = Accordion.AccordionTriggerProps & {
-  children: React.ReactNode;
+  text: string
   className?: string;
+  isOpen?: boolean;
 };
 
 const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
-  ({ children, className, ...props }, forwardedRef) => {
+  ({ text, className, isOpen, ...props }, forwardedRef) => {
     return (
       <Accordion.Header className={sAccordionHeader}>
         <Accordion.Trigger
@@ -20,8 +23,26 @@ const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
           {...props}
           ref={forwardedRef}
         >
-          <Box className={sAccordionTriggerInner}>
-            {children}
+          <Box
+            className={sAccordionTriggerInner}
+          >{isOpen ?
+            <Text
+              size={'2'}
+              className={sAccordionTriggerText}
+            >
+              {text}
+            </Text>
+            : <LineClamp
+              lines={2}
+              size={'1'}
+              className={sAccordionTriggerText}
+              style={{
+                color: vars.color.grayDark.gray8,
+                fontWeight: 400,
+              }}
+              text={text}
+            />
+            }
           </Box>
           <ChevronDownIcon className={sAccordionChevron} />
         </Accordion.Trigger>

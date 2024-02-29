@@ -11,6 +11,7 @@ export const sChat = style({
   display: `flex`,
   justifyContent: "flex-end",
   alignItems: "flex-end",
+  flexDirection: "column",
   width: 640,
   height: `90vh`,
   overflowY: `auto`,
@@ -19,4 +20,8 @@ export const sChat = style({
   ":focus": {
     outline: `none`,
   },
+});
+
+export const sChatInner = style({
+  height: `calc(100% - 100px)`,
 });

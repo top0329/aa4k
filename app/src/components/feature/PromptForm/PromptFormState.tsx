@@ -1,3 +1,4 @@
+// src/components/feature/PromptForm/PromptFormState.tsx
 import { atom } from "jotai";
 
 export const humanMessageState = atom<string>('');

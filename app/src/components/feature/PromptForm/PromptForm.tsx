@@ -45,12 +45,12 @@ const PromptForm = () => {
   };
 
   return (
-    <form onSubmit={(e) => handleSubmit(e)}>
-      <Box p={'5'}
-        width={'100%'}
-        style={{
-          background: isPcViewMode ? vars.color.indigoA.indigoA2 : vars.color.crimsonA.crimsonA1
-        }}>
+    <Box p={'5'}
+      width={'100%'}
+      style={{
+        background: isPcViewMode ? vars.color.indigoA.indigoA2 : vars.color.crimsonA.crimsonA1
+      }}>
+      <form onSubmit={(e) => handleSubmit(e)}>
 
         <Flex direction={'column'} position={'relative'} gap={'1'}>
           <Flex
@@ -141,8 +141,8 @@ const PromptForm = () => {
             </motion.div>
           </Flex>
         </Flex>
-      </Box>
-    </form >
+      </form >
+    </Box>
   );
 };
 

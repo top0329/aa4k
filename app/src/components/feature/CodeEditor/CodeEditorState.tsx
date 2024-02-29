@@ -1,3 +1,4 @@
+// src/components/feature/CodeEditor/CodeEditorState.tsx
 import { atom } from "jotai";
 
 export const CodeState = atom<string>("");

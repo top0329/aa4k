@@ -24,7 +24,7 @@ export const AccordionHistory = () => {
     >
       {chatHistoryItems.map((item, index) => (
         <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
-          <AccordionTrigger>{item.human.content}</AccordionTrigger>
+          <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item.human.content} />
           <AccordionContent
             style={{
               padding: '0 16px'
