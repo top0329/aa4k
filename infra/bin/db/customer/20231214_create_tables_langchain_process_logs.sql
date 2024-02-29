@@ -1,17 +1,21 @@
 -- LangChain実行ログテーブル
-CREATE TABLE LANGCHAIN_PROCESS_LOGS (
-    ID bigserial PRIMARY KEY,
-    SUBSCRIPTION_ID varchar(36),
-    HISTORY_ID varchar(36),
-    SESSION_ID varchar(36),
-    HANDLE_NAME varchar(50),
-    RUN_NAME varchar(50),
-    RUN_ID varchar(36),
-    PARENT_RUN_ID varchar(36),
-    CONTENT text,
-    METADATA_LANGCHAIN_PARAMS text,
-    METADATA_EXTRA_PARAMS text,
-    TOKENS integer,
-    EXECUTE_DATE timestamp,
-    CREATE_DATE timestamp
-);
+CREATE TABLE IF NOT EXISTS langchain_process_logs (
+    id bigserial,
+    subscription_id varchar(36),
+    app_id text,
+    user_id text,
+    session_id varchar(36),
+    conversation_id bigint,
+    handle_name varchar(50),
+    run_name varchar(50),
+    run_id varchar(36),
+    parent_run_id varchar(36),
+    content text,
+    metadata_langchain_params text,
+    metadata_extra_params text,
+    tokens integer,
+    execute_date timestamp,
+    create_date timestamp,
+    created_on date default current_date not null,
+    primary key (id, created_on)
+) partition by range (created_on);

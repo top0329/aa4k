@@ -1,11 +1,11 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts"
-import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { v4 as uuidv4 } from 'uuid';
 
 import { CODE_CHECK_SYSTEM_PROMPT } from "./prompt"
-import { langchainCallbacks } from "../langchainCallbacks";
+import { CustomHandler } from "../langchainCallbacks";
 import { openAIModel, getCodingGuidelines } from "../common"
 import { ContractStatus, CodeCheckStatus } from "../../constants"
 import { CodeCheckResponse } from "../../types/ai";
@@ -20,9 +20,10 @@ export class LlmError extends Error { }
  * @param contractStatus 
  * @returns AiResponse
  */
-export const codeCheck = async (code: string, contractStatus: ContractStatus): Promise<CodeCheckResponse> => {
+export const codeCheck = async (code: string, contractStatus: ContractStatus, appId: number, userId: string): Promise<CodeCheckResponse> => {
 
   try {
+    const sessionId = uuidv4();
     // --------------------
     // ガイドライン取得
     // --------------------
@@ -31,7 +32,7 @@ export const codeCheck = async (code: string, contractStatus: ContractStatus): P
     // --------------------
     // コードチェック
     // --------------------
-    const handler = BaseCallbackHandler.fromMethods({ ...langchainCallbacks });
+    const handler = new CustomHandler(sessionId, appId, userId);
     const model = openAIModel(contractStatus);
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", CODE_CHECK_SYSTEM_PROMPT],

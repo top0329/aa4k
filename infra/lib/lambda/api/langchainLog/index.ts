@@ -5,7 +5,7 @@ import { z } from "zod";
 import { LogLangchainRequestBodySchema, LogLangchainRequestBody, InsertLangchainProcessLogProps } from "./schema";
 import { insertLangchainProcessLog } from "./dao";
 import { ErrorCode } from "./constants";
-import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName } from "../../utils";
+import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubscriptionData, changeSchemaSearchPath } from "../../utils";
 
 /**
  * Langchain処理ログ登録API
@@ -41,11 +41,25 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     // Secret Manager情報の取得(DB_ACCESS_SECRET)
     const { dbAccessSecretValue } = await getSecretValues();
 
+    // サブスクリプション情報の取得
+    const subscriptionData = await getSubscriptionData(subscriptionId, dbAccessSecretValue);
+    if (!subscriptionData) {
+      retErrorStatus = 404;
+      retErrorMessage = "SubscriptionData is Not Found";
+      retErrorCode = ErrorCode.A06002;
+      throw new Error("SubscriptionData is Not Found")
+    }
+    // スキーマ名
+    const schema = subscriptionData.schema_name;
+
     // データベース接続情報
     const dbConfig = getDbConfig(dbAccessSecretValue)
     // データベース接続
     dbClient = new Client(dbConfig);
     await dbClient.connect();
+
+    // スキーマ検索パスを変更
+    await changeSchemaSearchPath(dbClient, schema);
 
     // SQL クエリの実行
     const props = {

@@ -1,16 +1,16 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts"
-import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { Document } from "@langchain/core/documents";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { AIMessage, BaseMessage, HumanMessage } from "langchain/schema"
 
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { v4 as uuidv4 } from 'uuid';
 
 import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
-import { langchainCallbacks } from "../langchainCallbacks";
+import { CustomHandler } from "../langchainCallbacks";
 import { openAIModel, ContractExpiredError, ContractStatusError, getCodingGuidelines } from "../common"
 import { DeviceDiv, CodeCreateMethod, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
@@ -33,6 +33,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
   const callbackFuncs: Function[] = [];
   const appCreateJsContext = conversation.context as AppCreateJsContext;
   const { appId, userId, conversationId, deviceDiv, isGuestSpace } = appCreateJsContext;
+  const sessionId = uuidv4();
   try {
     // --------------------
     // コード生成に必要なリソースの取得
@@ -44,12 +45,12 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
       kintoneCustomizeFiles,
       targetFileKey,
       originalCode
-    } = await preGetResource(conversation);
+    } = await preGetResource(conversation, sessionId);
 
     // --------------------
     // コード生成
     // --------------------
-    const { llmResponse, formattedCode } = await createJs(conversation, fieldInfo, isLatestCode, codingGuidelineList, codeTemplate, originalCode);
+    const { llmResponse, formattedCode } = await createJs(conversation, fieldInfo, isLatestCode, codingGuidelineList, codeTemplate, originalCode, sessionId);
 
     // --------------------
     // kintoneカスタマイズへの反映
@@ -114,9 +115,10 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
 /**
  * コード生成に必要なリソースの取得
  * @param conversation 
+ * @param sessionId
  * @returns isLatestCode, fieldInfo, codingGuidelineList[], codeTemplate, kintoneCustomizeFiles, targetFileKey, originalCode
  */
-async function preGetResource(conversation: Conversation) {
+async function preGetResource(conversation: Conversation, sessionId: string) {
   const { message } = conversation;
   const appCreateJsContext = conversation.context as AppCreateJsContext;
   const { appId, userId, conversationId, deviceDiv, isGuestSpace } = appCreateJsContext;
@@ -133,7 +135,7 @@ async function preGetResource(conversation: Conversation) {
   // --------------------
   // コードテンプレートの取得
   // --------------------
-  const codeTemplateRetriever = new CodeTemplateRetriever(conversationId);
+  const codeTemplateRetriever = new CodeTemplateRetriever(sessionId, appId, userId, conversationId);
   const codeTemplate = await codeTemplateRetriever.getRelevantDocuments(message.content);
 
   // --------------------
@@ -193,10 +195,11 @@ async function createJs(
   codingGuidelineList: string[],
   codeTemplate: Document[],
   originalCode: string,
+  sessionId: string,
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { contractStatus, systemSettings } = appCreateJsContext;
+  const { appId, userId, conversationId, contractStatus, systemSettings } = appCreateJsContext;
   const codingGuideline = codingGuidelineList[0];
   const secureCodingGuideline = codingGuidelineList[1];
 
@@ -214,7 +217,7 @@ async function createJs(
     });
   }
   // 生成（LLM実行）
-  const handler = BaseCallbackHandler.fromMethods({ ...langchainCallbacks });
+  const handler = new CustomHandler(sessionId, appId, userId, conversationId);
   const model = openAIModel(contractStatus);
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", APP_CREATE_JS_SYSTEM_PROMPT],
@@ -257,7 +260,7 @@ async function createJs(
     secureCodingGuideline: secureCodingGuideline,
     fieldInfo: JSON.stringify(fieldInfo),
     originalCode: addLineNumbersToCode(originalCode),
-    codeTemplate: codeTemplate,
+    codeTemplate: codeTemplate.map((template) => template.pageContent),
   }, { callbacks: [handler] }).catch(() => { throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`) })) as LLMResponse;
 
   // 出力コード編集

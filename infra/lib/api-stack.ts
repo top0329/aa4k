@@ -255,11 +255,13 @@ export class Aa4kApiStack extends cdk.Stack {
       entry: __dirname + "/lambda/api/langchainLog/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.auroraAccessableSG],
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
         DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
         RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X

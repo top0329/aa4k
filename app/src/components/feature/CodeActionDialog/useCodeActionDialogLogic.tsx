@@ -96,9 +96,18 @@ export const useCodeActionDialogLogic = () => {
         return;
       }
       const contractStatus = preCheckResult.contractStatus;
+      const appId = kintone.app.getId();
+      const userId = kintone.getLoginUser().id;
 
+      // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
+      if (appId === null) {
+        setIsCodeActionDialog(false);
+        // トーストでエラーメッセージ表示
+        showToast(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`, 0, false);
+        return;
+      }
       // コードチェックの呼び出し
-      const resCodeCheck = await codeCheck(code, contractStatus);
+      const resCodeCheck = await codeCheck(code, contractStatus, appId, userId);
 
       switch (resCodeCheck.result) {
         case CodeCheckStatus.safe:
@@ -170,16 +179,16 @@ const CodeActionDialogContent = ({ dialogType, isLoading, codeCheckStatus, setIs
   switch (dialogType) {
     case CodeActionDialogType.CodeCheck:
       return (<CodeCheck
-                isLoading={isLoading}
-                codeCheckStatus={codeCheckStatus}
-                setIsCodeActionDialog={setIsCodeActionDialog}
-                codeViolations={codeViolations}
-              />);
+        isLoading={isLoading}
+        codeCheckStatus={codeCheckStatus}
+        setIsCodeActionDialog={setIsCodeActionDialog}
+        codeViolations={codeViolations}
+      />);
     case CodeActionDialogType.CodeFix:
       return (<CodeFix
-                setIsCodeActionDialog={setIsCodeActionDialog}
-                handleReflectClick={handleReflectClick}
-              />);
+        setIsCodeActionDialog={setIsCodeActionDialog}
+        handleReflectClick={handleReflectClick}
+      />);
     default:
       const unexpected: never = dialogType
       throw Error("想定されていないdialogTypeです. dialogType=", unexpected)
