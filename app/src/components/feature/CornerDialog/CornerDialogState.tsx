@@ -18,3 +18,6 @@ export const LatestAiResponseIndexState = atom<number | null>(null);
 export const InTypeWriteState = atom<boolean>(false);
 
 export const IsSubmittingState = atom<boolean>(false);
+
+// TODO：ステート管理のリファクタリングで修正予定
+export const PluginIdState = atom('');

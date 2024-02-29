@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 // TODO：ステート管理のリファクタリングで修正予定
 import { DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from "~/components/feature/CornerDialog/CornerDialogState";
+import { PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
 import { UserRating, ErrorMessage } from '~/constants';
 import { ChatHistoryItem } from "~/types/ai";
 import { KintoneProxyResponse, KintoneProxyResponseBody } from "~/types/apiResponse";
@@ -17,6 +18,7 @@ export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
   const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
   const [activeConversationId, ] = useState<string>(chatHistoryItem.conversationId);
   const [feedback, setFeedback] = useState('');
+  const [pluginId] = useAtom(PluginIdState);
 
   const { showToast } = useToast();
 
@@ -49,10 +51,11 @@ export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
   // フィードバック送信ボタン押下時
   const handleFeedbackSendClick = async () => {
     // ユーザー評価コメント更新(※ユーザー評価コメント更新でエラーが発生しても、画面にはエラーメッセージは表示しない)
-    await kintone.proxy(
+    await kintone.plugin.app.proxy(
+      pluginId,
       `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/update-user-rating`,
       "POST",
-      { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+      {},
       { conversationId: activeConversationId, userRating: chatHistoryItem.userRating, userRatingComment: feedback },
     ) as KintoneProxyResponse;
     setFeedback('');
@@ -69,10 +72,11 @@ export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
 
   // ユーザー評価更新
   const updateUserRating = async (userRating: UserRating): Promise<boolean> => {
-    const resUpdateUserRating = await kintone.proxy(
+    const resUpdateUserRating = await kintone.plugin.app.proxy(
+      pluginId,
       `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/update-user-rating`,
       "POST",
-      { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+      {},
       { conversationId: activeConversationId, userRating: userRating },
     ) as KintoneProxyResponse;
     const [resBody, resStatus] = resUpdateUserRating;

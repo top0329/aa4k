@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { codeCheck } from '~/ai/codeCheck';
 import { preCheck } from '~/util/preCheck';
 import { CodeLatestState, CodeState, IsChangeCodeState } from '~/components/feature/CodeEditor/CodeEditorState';
-import { ViewModeState } from '~/components/feature/CornerDialog/CornerDialogState';
+import { ViewModeState, PluginIdState } from '~/components/feature/CornerDialog/CornerDialogState';
 import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { CodeCheckStatus, CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage } from "~/constants";
@@ -25,6 +25,7 @@ export const useCodeActionDialogLogic = () => {
   ] = useAtom(codeCheckStatusState);
   const [codeViolations, setCodeViolations] = useAtom(codeViolationsState);
   const [isPcViewMode] = useAtom(ViewModeState);
+  const [pluginId] = useAtom(PluginIdState);
   const [code] = useAtom(CodeState);
   const [, setCodeLatest] = useAtom(CodeLatestState);
   const [, setIsChangeCode] = useAtom(IsChangeCodeState);
@@ -85,7 +86,7 @@ export const useCodeActionDialogLogic = () => {
     try {
       setCodeCheckStatus(CodeCheckStatus.loading);
       // 事前チェックの呼び出し
-      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck();
+      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
       if (resPreCheckStatus !== 200) {
         setIsCodeActionDialog(false);
         // トーストでエラーメッセージ表示

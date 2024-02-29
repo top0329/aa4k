@@ -1,6 +1,8 @@
 // src/hooks/useTextSpeech.ts
+import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { split } from "sentence-splitter";
+import { PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
 import { SpeechResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 
 export const useTextSpeech = (
@@ -8,6 +10,7 @@ export const useTextSpeech = (
   finishAiAnswerRef: React.MutableRefObject<boolean>,
 ) =>{
   const [isSpeech, setIsSpeech] = useState<boolean>(false);
+  const [pluginId] = useAtom(PluginIdState);
   // Ref
   const speechText = useRef<string>("");
   const sentences = useRef<string[]>([]);   // 読み上げを行う文章を文章として区切った形で格納しておくRef
@@ -49,10 +52,11 @@ export const useTextSpeech = (
       if (!sentence) return;
 
       audioPlaying.current = true;
-      const resSpeech = await kintone.proxy(
+      const resSpeech = await kintone.plugin.app.proxy(
+        pluginId,
         `${import.meta.env.VITE_API_ENDPOINT}/speech`,
         "POST",
-        { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+        {},
         { text: sentence },
       ) as KintoneProxyResponse;
       const [resBody] = resSpeech;

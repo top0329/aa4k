@@ -1,7 +1,7 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
-import { LatestAiResponseIndexState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from "~/components/feature/CornerDialog/CornerDialogState";
+import { LatestAiResponseIndexState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
 import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
@@ -15,6 +15,7 @@ export const useCornerDialogLogic = () => {
   const [desktopChatHistory, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
   const [mobileChatHistory, setMobileChatHistory] = useAtom(MobileChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
+  const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
 
@@ -40,7 +41,7 @@ export const useCornerDialogLogic = () => {
       setIsBannerClicked(true);
 
       // 事前チェックの呼び出し
-      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck();
+      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
       if (resPreCheckStatus !== 200) {
         setIsBannerClicked(false);
         // APIエラーの場合、エラーメッセージ表示
@@ -53,10 +54,11 @@ export const useCornerDialogLogic = () => {
       }
 
       // 会話履歴一覧取得
-      const resConversationHistory = await kintone.proxy(
+      const resConversationHistory = await kintone.plugin.app.proxy(
+        pluginId,
         `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/list`,
         "POST",
-        { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+        {},
         { appId: appId, userId: userId },
       ) as KintoneProxyResponse;
       const [resBody, resStatus] = resConversationHistory;

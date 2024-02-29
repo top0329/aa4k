@@ -8,6 +8,7 @@ import ThemeProvider from "./ThemeProvider";
 export const handleKintoneEvent = (
   mainElementId: string,
   altElementId: string,
+  pluginId: string,
 ) => {
   const el = document.createElement("div");
   el.id = mainElementId;
@@ -26,21 +27,22 @@ export const handleKintoneEvent = (
   ReactDOM.render(
     <React.StrictMode>
       <ThemeProvider>
-        {modalDialogFab ? '' : <App />}
+        {modalDialogFab ? '' : <App pluginId={pluginId} />}
       </ThemeProvider>
     </React.StrictMode >,
     document.getElementById(mainElementId),
   );
 };
+((PLUGIN_ID: string) => {
+    kintone.events.on("portal.show", () =>
+    handleKintoneEvent("modal-dialog-fab", "corner-dialog-fab", PLUGIN_ID),
+  );
 
-kintone.events.on("portal.show", () =>
-  handleKintoneEvent("modal-dialog-fab", "corner-dialog-fab"),
-);
+  kintone.events.on("space.portal.show", () =>
+    handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID),
+  );
 
-kintone.events.on("space.portal.show", () =>
-  handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab"),
-);
-
-kintone.events.on("app.record.index.show", () =>
-  handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab"),
-);
+  kintone.events.on("app.record.index.show", () =>
+    handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID),
+  );
+})(`${kintone.$PLUGIN_ID}`);

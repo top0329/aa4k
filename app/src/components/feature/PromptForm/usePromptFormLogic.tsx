@@ -9,7 +9,7 @@ import { DeviceDiv, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } 
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
-import { InTypeWriteState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, IsSubmittingState } from '../CornerDialog/CornerDialogState';
+import { InTypeWriteState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, IsSubmittingState, PluginIdState } from '../CornerDialog/CornerDialogState';
 import { humanMessageState, voiceInputState, callbackFuncsState, voiceInputVisibleState } from './PromptFormState';
 
 export const usePromptFormLogic = () => {
@@ -18,6 +18,7 @@ export const usePromptFormLogic = () => {
   const [humanMessage, setHumanMessage] = useAtom(humanMessageState);
   const [isSubmitting, setIsSubmitting] = useAtom(IsSubmittingState);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
+  const [pluginId] = useAtom(PluginIdState);
   const [isVoiceInput,
     setVoiceInput] = useAtom(voiceInputState);
   const [callbackFuncs, setCallbackFuncs] = useAtom(callbackFuncsState);
@@ -80,7 +81,7 @@ export const usePromptFormLogic = () => {
     }
 
     // 事前チェックの呼び出し
-    const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck();
+    const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
     if (resPreCheckStatus !== 200) {
       const errorMessage: ErrorMessage = {
         role: MessageType.error,
@@ -123,18 +124,11 @@ export const usePromptFormLogic = () => {
     setInTypeWrite(true);
 
     // ユーザ発話の登録
-    // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
-    // const pluginId = kintone.$PLUGIN_ID;
-    // const pluginId = "1234567890";
-    // const insertConversation = await kintone.plugin.app.proxy(pluginId, `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
-    //   "POST",
-    //   { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
-    //   { appId: appId, userId: userId, deviceDiv: deviceDiv, messageDiv: "user", message: userMessage },
-    // );
-    const resInsertConversation = await kintone.proxy(
+    const resInsertConversation = await kintone.plugin.app.proxy(
+      pluginId,
       `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
       "POST",
-      { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+      {},
       { appId: appId, userId: userId, deviceDiv: deviceDiv, messageType: MessageType.human, message: humanMessage },
     ) as KintoneProxyResponse;
     const [resBody, resInsertConversationStatus] = resInsertConversation;

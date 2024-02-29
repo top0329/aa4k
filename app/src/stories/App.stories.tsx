@@ -7,4 +7,4 @@ export default {
   component: App,
 } as Meta;
 
-export const Default = () => <App />;
+export const Default = () => <App pluginId={"pluginId"}/>;
