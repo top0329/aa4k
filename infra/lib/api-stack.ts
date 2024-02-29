@@ -52,7 +52,7 @@ export class Aa4kApiStack extends cdk.Stack {
     })
 
     // Gateway Response
-    restapi.addGatewayResponse('GatewayResponse',  {
+    restapi.addGatewayResponse('GatewayResponse', {
       type: apigateway.ResponseType.ACCESS_DENIED,
       statusCode: '403',
       templates: {
@@ -117,19 +117,23 @@ export class Aa4kApiStack extends cdk.Stack {
       entry: __dirname + "/lambda/api/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
         DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
         RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
         REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
         REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+        SUGURES_ENDPOINT: contextProps.suguresEndpoint,
+        SUGURES_CLIENT_ID: contextProps.suguresClientId,
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X
     })
     secretsStack.azureSecret.grantRead(codeTemplateLambda)
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(codeTemplateLambda)
+    parameterStack.aa4kConstParameter.grantRead(codeTemplateLambda);
     restapi.root.addResource("code_template").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(codeTemplateLambda),
       anyMethod: true,
@@ -151,6 +155,8 @@ export class Aa4kApiStack extends cdk.Stack {
         RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
         REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
         REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        SUGURES_ENDPOINT: contextProps.suguresEndpoint,
+        SUGURES_CLIENT_ID: contextProps.suguresClientId,
       },
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X

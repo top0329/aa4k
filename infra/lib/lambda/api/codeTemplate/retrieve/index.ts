@@ -1,11 +1,14 @@
 import { Response, Request } from "express"
 import { Client } from "pg";
 import { z } from "zod";
+import { EnsembleRetriever } from "./ensemble"
+import { SuguresRetriever } from "./sugures"
+import { PgVectorRetriever } from "./pgvector"
 import { RetrieveRequestBody, RetrieveRequestBodySchema } from "./schema"
 import { selectTemplateCode } from "./dao";
 import { pgVectorInitialize } from "../common";
 import { ErrorCode } from "../constants";
-import { getDbConfig, getSecretValues, ValidationError, RequestHeaderName, getSubscriptionData, getContractStatus, ContractStatus } from "../../../utils";
+import { getDbConfig, getSecretValues, getParameterValues, ValidationError, RequestHeaderName, getSubscriptionData, getContractStatus, ContractStatus } from "../../../utils";
 
 export const retrieveHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -30,8 +33,14 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     };
     console.info(startLog);
 
-    // Secret Manager情報の取得(DB_ACCESS_SECRET, AZURE_SECRET)
-    const { dbAccessSecretValue, azureSecretValue } = await getSecretValues()
+    // 並列でSecret Manager情報とParameter Store情報を取得させる
+    const [secret, parameter] = await Promise.all([
+      getSecretValues(),
+      getParameterValues(),
+    ]);
+    const azureSecretValue = secret.azureSecretValue;
+    const dbAccessSecretValue = secret.dbAccessSecretValue;
+    const aa4kConstParameterValue = parameter.aa4kConstParameterValue;
 
     // サブスクリプション情報の取得
     const subscriptionData = await getSubscriptionData(subscriptionId, dbAccessSecretValue);
@@ -53,10 +62,12 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     // pgvectorStoreの初期設定 契約ステータスが契約中(trial)の場合のみヘッダのOpenAI API_KEYを渡す
     const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey: contractStatus === ContractStatus.trial ? openAiApiKey : undefined })
 
-    // pgvectorStoreを使用して検索
-    const documents = await pgvectorStore.similaritySearchWithScore(body.query, body.k);
+    const pgvectorRetriever = new PgVectorRetriever(pgvectorStore, aa4kConstParameterValue.retrieveScoreThreshold, aa4kConstParameterValue.retrieveMaxCount);
+    const suguresRetriever = new SuguresRetriever(subscriptionId, body.conversationId);
+    const ensemble = new EnsembleRetriever({ retrievers: [suguresRetriever, pgvectorRetriever], weights: [0.5, 0.5] })
+    const documents = await ensemble.getRelevantDocuments(body.query);
 
-    for (const [doc, num] of documents) {
+    for (const doc of documents) {
       const templateCodeId = doc.metadata.templateCodeId;
       // SQL クエリの実行（取得したtemplateCodeIdに該当するコードを取得）
       const result = await selectTemplateCode(dbClient, templateCodeId);

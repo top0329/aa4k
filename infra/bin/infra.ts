@@ -13,12 +13,19 @@ const app = new cdk.App();
 const stageKey = app.node.tryGetContext('environment');
 const context = app.node.tryGetContext(stageKey);
 const stageName = context.stageName;
+// スグレス接続情報
+const SUGURES_ENDPOINT_STG = "https://message-stage.sugures.app";
+const SUGURES_CLIENT_ID_STG = "7a1cdbef-c4b4-4b2e-b76b-9bd37dd6fbfd";
+const SUGURES_ENDPOINT_PROD = "https://message.sugures.app";
+const SUGURES_CLIENT_ID_PROD = "xxxxxxxxxxxx";  // TODO: 本番用スグレスのCLIENT_IDを設定する
 
 const contextProps: ContextProps = {
   stageKey: stageKey,
   stageName: stageName,
   deletionProtection: stageName === "prod" ? true : false,
   cacheNodeType: stageName === "prod" ? "cache.m7g.large" : "cache.t4g.micro",
+  suguresEndpoint: stageName === "prod" ? SUGURES_ENDPOINT_PROD : SUGURES_ENDPOINT_STG,
+  suguresClientId: stageName === "prod" ? SUGURES_CLIENT_ID_PROD : SUGURES_CLIENT_ID_STG,
 }
 
 const stackProps: cdk.StackProps = {
