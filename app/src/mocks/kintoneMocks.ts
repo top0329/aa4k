@@ -78,33 +78,38 @@ const kintoneMocks = {
     ];
     // You can add more conditions to mock different endpoints with different responses
   },
-  api: async (url: string) => {
-    if (url.includes("/k/v1/preview/app/customize.json")) {
-      const mockAppCustomize = {
-        scope: "ALL",
-        desktop: {
-          js: [
-            {
-              type: "URL",
-              url: "https://example.com/customize.js",
-            },
-          ],
-          css: [],
-        },
-        mobile: {
-          js: [
-            {
-              type: "URL",
-              url: "https://example.com/mobile_customize.js",
-            },
-          ],
-          css: [],
-        },
-        revision: "12345",
-      };
-      return mockAppCustomize;
+  api: Object.assign(
+    async (url: string) => {
+      if (url.includes("/k/v1/preview/app/customize.json")) {
+        const mockAppCustomize = {
+          scope: "ALL",
+          desktop: {
+            js: [
+              {
+                type: "URL",
+                url: "https://example.com/customize.js",
+              },
+            ],
+            css: [],
+          },
+          mobile: {
+            js: [
+              {
+                type: "URL",
+                url: "https://example.com/mobile_customize.js",
+              },
+            ],
+            css: [],
+          },
+          revision: "12345",
+        };
+        return mockAppCustomize;
+      }
+    },
+    {
+      url: (path: string) => `https://example.kintone.com${path}`,
     }
-  },
+  ),
 };
 
 // Set the kintone mocks on the global window object
