@@ -31,8 +31,6 @@ const kintoneMocks = {
         errorCode: "A01001", // Replace "" with a valid error code value
         contractStatus: "active", // Use an appropriate value from ContractStatus enum
         systemSettings: {
-          retrieveMaxCount: 0,
-          retrieveScoreThreshold: 0,
           historyUseCount: 0,
         },
       };

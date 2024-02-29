@@ -5,7 +5,7 @@ import { Box, Text } from '@radix-ui/themes';
 import clsx from 'clsx';
 import { forwardRef } from "react";
 import { vars } from '~/styles/theme.css';
-import LineClamp from '../ClampedText/LineClamp';
+import LineClamp from '../LineClamp/LineClamp';
 import { sAccordionChevron, sAccordionHeader, sAccordionTrigger, sAccordionTriggerInner, sAccordionTriggerText } from './AccordionTrigger.css';
 
 type AccordionTriggerProps = Accordion.AccordionTriggerProps & {
