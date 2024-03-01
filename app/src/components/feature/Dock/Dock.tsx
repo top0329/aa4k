@@ -1,5 +1,5 @@
 // src/components/feature/Dock/Dock.tsx
-import { faClose, faCode, faHistory, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
+import { faClose, faCode, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
 import { Box } from "@radix-ui/themes";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import { vars } from "~/styles/theme.css";
@@ -13,7 +13,6 @@ const Dock = () => {
     isPcViewMode,
     activeChatMode,
     toggleChatVisibility,
-    deleteHistory,
     initDockState,
   } = useDockLogic();
   const { handleCodeEditorClick } = useCodeEditorLogic();
@@ -36,11 +35,6 @@ const Dock = () => {
               ? vars.color.indigoA.indigoA9
               : vars.color.crimsonA.crimsonA9
           }
-          className={DockItem} />
-        <IconTooltipButton
-          icon={faHistory}
-          tooltip={'履歴削除'}
-          onClick={deleteHistory}
           className={DockItem} />
         <IconTooltipButton
           icon={faClose}

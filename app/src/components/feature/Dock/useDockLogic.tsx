@@ -40,8 +40,6 @@ export const useDockLogic = () => {
     setActiveChatMode(ChatMode.mobileChat);
   };
 
-  const deleteHistory = () => { }
-
   return {
     isPcViewMode,
     activeChatMode,
@@ -51,6 +49,5 @@ export const useDockLogic = () => {
     toggleChatVisibility,
     toggleSpChatVisibility,
     initDockState,
-    deleteHistory,
   };
 }
