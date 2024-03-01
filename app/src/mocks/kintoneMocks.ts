@@ -23,60 +23,65 @@ const kintoneMocks = {
     id: "mockUserId",
     isGuest: true,
   }),
-  proxy: async (url: string) => {
-    // Mock your response based on the request URL, method, headers, and body
-    if (url.includes("/pre_check")) {
-      const mockPreCheckResponse: PreCheckResponseBody = {
-        message: "Success",
-        errorCode: "A01001", // Replace "" with a valid error code value
-        contractStatus: "active", // Use an appropriate value from ContractStatus enum
-        systemSettings: {
-          historyUseCount: 0,
-        },
-      };
-      return [
-        JSON.stringify(mockPreCheckResponse), // First element is the response body as a string
-        200, // Second element is the response status code
-        {}, // Third element is an empty object for the response headers
-      ];
-    }
-    if (url.includes("/conversation_history/list")) {
-      const mockConversationHistoryList: ConversationHistoryListResponseBody = {
-        message: "Success",
-        errorCode: "A01001",
-        desktopConversationHistoryList: [
-          {
-            id: "1",
-            user_message: "How can I reset my password?",
-            ai_message:
-              "You can reset your password by clicking the 'Forgot Password' link on the login page.",
-            ai_message_comment: "Standard procedure for password reset.",
-            error_message: "",
-            user_rating: "good",
-          },
-          // Add more mock records as needed
-        ],
-        mobileConversationHistoryList: [
-          // Optionally, you can mock different data for mobile, or replicate desktop
-        ],
-      };
+  plugin: {
+    app: {
+      proxy: async (pluguinId: string, url: string) => {
+        console.log({ url })
+        // Mock your response based on the request URL, method, headers, and body
+        if (url.includes("/pre_check")) {
+          const mockPreCheckResponse: PreCheckResponseBody = {
+            message: "Success",
+            errorCode: "A01001", // Replace "" with a valid error code value
+            contractStatus: "active", // Use an appropriate value from ContractStatus enum
+            systemSettings: {
+              historyUseCount: 0,
+            },
+          };
+          return [
+            JSON.stringify(mockPreCheckResponse), // First element is the response body as a string
+            200, // Second element is the response status code
+            {}, // Third element is an empty object for the response headers
+          ];
+        }
+        if (url.includes("/conversation_history/list")) {
+          const mockConversationHistoryList: ConversationHistoryListResponseBody = {
+            message: "Success",
+            errorCode: "A01001",
+            desktopConversationHistoryList: [
+              {
+                id: "1",
+                user_message: "How can I reset my password?",
+                ai_message:
+                  "You can reset your password by clicking the 'Forgot Password' link on the login page.",
+                ai_message_comment: "Standard procedure for password reset.",
+                error_message: "",
+                user_rating: "good",
+              },
+              // Add more mock records as needed
+            ],
+            mobileConversationHistoryList: [
+              // Optionally, you can mock different data for mobile, or replicate desktop
+            ],
+          };
 
-      const resConversationHistory: KintoneProxyResponse = [
-        JSON.stringify(mockConversationHistoryList), // Response body as a string
-        200, // HTTP status code
-        {}, // Response headers (can be mocked as needed)
-      ];
+          const resConversationHistory: KintoneProxyResponse = [
+            JSON.stringify(mockConversationHistoryList), // Response body as a string
+            200, // HTTP status code
+            {}, // Response headers (can be mocked as needed)
+          ];
 
-      return resConversationHistory;
+          return resConversationHistory;
+        }
+        // ...other conditions for different endpoints
+        // If the endpoint isn't mocked, you could return a generic error or handle it in another way
+        return [
+          JSON.stringify({ errorCode: "NOT_MOCKED" }),
+          500,
+          // Mock response headers
+        ];
+        // You can add more conditions to mock different endpoints with different responses
+      },
     }
-    // ...other conditions for different endpoints
-    // If the endpoint isn't mocked, you could return a generic error or handle it in another way
-    return [
-      JSON.stringify({ errorCode: "NOT_MOCKED" }),
-      500,
-      // Mock response headers
-    ];
-    // You can add more conditions to mock different endpoints with different responses
   },
   api: Object.assign(
     async (url: string) => {
