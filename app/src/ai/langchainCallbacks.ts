@@ -35,7 +35,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(prompts),  // content
       JSON.stringify(llm),  // metadata_langchain_params
       JSON.stringify(extraParams),  // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
 
@@ -53,7 +53,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(err),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleLLMEnd(output: LLMResult, runId: string, parentRunId?: string | undefined) {
@@ -70,7 +70,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(output), // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleChatModelStart(llm: Serialized, messages: BaseMessage[][], runId: string, parentRunId?: string | undefined, extraParams?: Record<string, unknown> | undefined) {
@@ -87,7 +87,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(messages), // content
       JSON.stringify(llm),  // metadata_langchain_params
       JSON.stringify(extraParams),  // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleChainStart(chain: Serialized, inputs: ChainValues, runId: string, parentRunId?: string | undefined) {
@@ -104,7 +104,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(inputs), // content
       JSON.stringify(chain),  // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleChainError(err: any, runId: string, parentRunId?: string | undefined) {
@@ -121,7 +121,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(err),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleChainEnd(outputs: ChainValues, runId: string, parentRunId?: string | undefined) {
@@ -141,7 +141,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(outputs),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleToolStart(tool: Serialized, input: string, runId: string, parentRunId?: string | undefined) {
@@ -158,7 +158,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(input),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleToolError(err: any, runId: string, parentRunId?: string | undefined) {
@@ -175,7 +175,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(err),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleToolEnd(output: string, runId: string, parentRunId?: string | undefined) {
@@ -192,7 +192,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(output), // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleText(text: string, runId: string, parentRunId?: string | undefined) {
@@ -209,7 +209,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(text), // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleAgentAction(action: AgentAction, runId: string, parentRunId?: string | undefined) {
@@ -226,7 +226,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(action), // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleAgentEnd(action: AgentFinish, runId: string, parentRunId?: string | undefined) {
@@ -243,7 +243,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(action), // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleRetrieverStart(retriever: Serialized, query: string, runId: string, parentRunId?: string | undefined) {
@@ -260,7 +260,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(query),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleRetrieverEnd(documents: Document<Record<string, any>>[], runId: string, parentRunId?: string | undefined) {
@@ -277,7 +277,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(documents),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
   handleRetrieverError(err: any, runId: string, parentRunId?: string | undefined) {
@@ -294,7 +294,7 @@ export class CustomHandler extends BaseCallbackHandler {
       JSON.stringify(err),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      ""  // tokens
+      0  // tokens
     )
   }
 }
@@ -302,7 +302,7 @@ export class CustomHandler extends BaseCallbackHandler {
 /**
  * Langchainログ登録
  */
-export const langchainLogInsert = (appId: number, userId: string, sessionId: string, conversationId: string, handleName: string, runName: string, runId: string, parentRunId: string, content: string, metadataLangChainParams: string, metadataExtraParams: string, tokens: string) => {
+export const langchainLogInsert = (appId: number, userId: string, sessionId: string, conversationId: string, handleName: string, runName: string, runId: string, parentRunId: string, content: string, metadataLangChainParams: string, metadataExtraParams: string, tokens: number) => {
   const body = {
     app_id: appId,
     user_id: userId,
