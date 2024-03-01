@@ -315,7 +315,7 @@ export const langchainLogInsert = (appId: number, userId: string, sessionId: str
     content: content,
     metadata_lang_chain_params: metadataLangChainParams,
     metadata_extra_params: metadataExtraParams,
-    tokens: tokens ? 0 : 0,
+    tokens: tokens,
   }
   // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
   kintone.proxy(
