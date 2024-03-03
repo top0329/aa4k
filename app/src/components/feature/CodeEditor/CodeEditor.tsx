@@ -15,8 +15,8 @@ import AceEditor from "react-ace-builds";
 import CopyButton from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { CodeActionDialogType } from '~/constants';
+import { ViewModeState } from '~/state/viewModeState';
 import { vars } from '~/styles/theme.css';
-import { ViewModeState } from '../CornerDialog/CornerDialogState';
 import { sCodeEditor, sCodeEditorFullScreen } from './CodeEditor.css';
 import { useCodeEditorLogic } from './useCodeEditorLogic';
 

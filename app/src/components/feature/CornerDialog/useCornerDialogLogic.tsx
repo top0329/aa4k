@@ -1,19 +1,20 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
-import { LatestAiResponseIndexState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
 import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
-import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
-import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
-import { ConversationHistoryListResponseBody, ConversationHistoryRow, ConversationHistory, KintoneProxyResponse } from "~/types/apiResponse";
-import { preCheck } from "~/util/preCheck";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
+import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
+import { useChatHistory } from "~/hooks/useChatHistory";
+import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
+import { PluginIdState } from "~/state/pluginIdState";
+import { ViewModeState } from "~/state/viewModeState";
+import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
+import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse } from "~/types/apiResponse";
+import { preCheck } from "~/util/preCheck";
 
 export const useCornerDialogLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
-  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
-  const [desktopChatHistory, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
-  const [mobileChatHistory, setMobileChatHistory] = useAtom(MobileChatHistoryState);
+  const { chatHistoryItems, setChatHistory } = useChatHistory(isPcViewMode);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
@@ -36,7 +37,7 @@ export const useCornerDialogLogic = () => {
         showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
         return;
       }
-  
+
       // 二重押下防止
       setIsBannerClicked(true);
 
@@ -69,10 +70,14 @@ export const useCornerDialogLogic = () => {
         return;
       }
 
-      const desktopChatHistoryItemList = convertChatHistory(resBodyConversationHistoryList.desktopConversationHistoryList);
-      const mobileChatHistoryItemList = convertChatHistory(resBodyConversationHistoryList.mobileConversationHistoryList);
-      setDesktopChatHistory(desktopChatHistoryItemList);
-      setMobileChatHistory(mobileChatHistoryItemList);
+      // チャット履歴の変換
+      const chatHistoryItemList = isPcViewMode
+        ? convertChatHistory(resBodyConversationHistoryList.desktopConversationHistoryList)
+        : convertChatHistory(resBodyConversationHistoryList.mobileConversationHistoryList);
+
+      // チャット履歴の更新
+      setChatHistory(chatHistoryItemList);
+
       setIsBannerClicked(false);
       setDockState(dockState => ({ ...dockState, dialogVisible: true, chatVisible: true }));
     } catch (err) {
@@ -126,13 +131,11 @@ export const useCornerDialogLogic = () => {
   }, [chatHistoryItems]);
 
   useEffect(() => {
-    if (dockState.chatVisible) {
-      if (desktopChatHistory.length === 0 && mobileChatHistory.length === 0) {
-        // 会話履歴一覧が未取得の場合、取得して表示
-        getChatHistoryItemList();
-      }
+    if (dockState.chatVisible && chatHistoryItems.length === 0) {
+      // 会話履歴一覧が未取得の場合、取得して表示
+      getChatHistoryItemList();
     }
-  }, [dockState.chatVisible]);
+  }, [dockState.chatVisible, chatHistoryItems.length]);
 
   return {
     dockState,

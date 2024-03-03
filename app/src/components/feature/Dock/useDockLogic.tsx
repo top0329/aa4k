@@ -1,8 +1,8 @@
 // src/components/feature/Dock/useDockLogic.tsx
 import { useAtom } from "jotai";
-import { ViewModeState } from "../CornerDialog/CornerDialogState";
-import { DockItemVisibleState, activeChatModeState } from "./DockState";
 import { ChatMode } from "~/constants";
+import { ViewModeState } from "~/state/viewModeState";
+import { DockItemVisibleState, activeChatModeState } from "./DockState";
 
 export const useDockLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);

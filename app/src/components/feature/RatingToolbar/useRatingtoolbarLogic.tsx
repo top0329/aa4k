@@ -1,22 +1,22 @@
 // src/components/feature/RatingToolbar/useRatingtoolbarLogic.tsx
 import { useAtom } from "jotai";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
-// TODO：ステート管理のリファクタリングで修正予定
-import { DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from "~/components/feature/CornerDialog/CornerDialogState";
-import { PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
-import { UserRating, ErrorMessage } from '~/constants';
+import { ErrorMessage, UserRating } from '~/constants';
+import { useChatHistory } from "~/hooks/useChatHistory";
+import { PluginIdState } from "~/state/pluginIdState";
+import { ViewModeState } from "~/state/viewModeState";
 import { ChatHistoryItem } from "~/types/ai";
 import { KintoneProxyResponse, KintoneProxyResponseBody } from "~/types/apiResponse";
 
 // src/components/feature/RatingToolbar/useRatingtoolbar.tsx
 export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
   const [isPcViewMode] = useAtom(ViewModeState);
-  const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
+  const { chatHistoryItems, setChatHistory } = useChatHistory(isPcViewMode);
   const [thumbsUpPressed, setThumbsUpPressed] = useState(false);
   const [thumbsDownPressed, setThumbsDownPressed] = useState(false);
   const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
-  const [activeConversationId, ] = useState<string>(chatHistoryItem.conversationId);
+  const [activeConversationId,] = useState<string>(chatHistoryItem.conversationId);
   const [feedback, setFeedback] = useState('');
   const [pluginId] = useAtom(PluginIdState);
 

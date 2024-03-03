@@ -2,13 +2,14 @@
 import { useAtom } from 'jotai';
 import { useEffect } from 'react';
 import { codeCheck } from '~/ai/codeCheck';
-import { preCheck } from '~/util/preCheck';
 import { CodeLatestState, CodeState, IsChangeCodeState } from '~/components/feature/CodeEditor/CodeEditorState';
-import { ViewModeState, PluginIdState } from '~/components/feature/CornerDialog/CornerDialogState';
-import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
-import { CodeCheckStatus, CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage } from "~/constants";
+import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
+import { CodeActionDialogType, CodeCheckStatus, DeviceDiv, ErrorCode, ErrorMessage } from "~/constants";
+import { PluginIdState } from '~/state/pluginIdState';
+import { ViewModeState } from '~/state/viewModeState';
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
+import { preCheck } from '~/util/preCheck';
 import { codeActionDialogTypeState, codeCheckStatusState, codeViolationsState, isCodeActionDialogState } from './CodeActionDialogState';
 import CodeCheck from './CodeCheck';
 import CodeFix from './CodeFix';
@@ -171,16 +172,16 @@ const CodeActionDialogContent = ({ dialogType, isLoading, codeCheckStatus, setIs
   switch (dialogType) {
     case CodeActionDialogType.CodeCheck:
       return (<CodeCheck
-                isLoading={isLoading}
-                codeCheckStatus={codeCheckStatus}
-                setIsCodeActionDialog={setIsCodeActionDialog}
-                codeViolations={codeViolations}
-              />);
+        isLoading={isLoading}
+        codeCheckStatus={codeCheckStatus}
+        setIsCodeActionDialog={setIsCodeActionDialog}
+        codeViolations={codeViolations}
+      />);
     case CodeActionDialogType.CodeFix:
       return (<CodeFix
-                setIsCodeActionDialog={setIsCodeActionDialog}
-                handleReflectClick={handleReflectClick}
-              />);
+        setIsCodeActionDialog={setIsCodeActionDialog}
+        handleReflectClick={handleReflectClick}
+      />);
     default:
       const unexpected: never = dialogType
       throw Error("想定されていないdialogTypeです. dialogType=", unexpected)

@@ -4,7 +4,7 @@ import CodeActionDialog from "./components/feature/CodeActionDialog/CodeActionDi
 import { isCodeActionDialogState } from "./components/feature/CodeActionDialog/CodeActionDialogState";
 import CornerDialog from "./components/feature/CornerDialog/CornerDialog";
 import { ErrorToastProvider } from "./components/ui/ErrorToast/ErrorToastProvider";
-import { PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
+import { PluginIdState } from "./state/pluginIdState";
 
 const App = ({ pluginId }: { pluginId: string }) => {
   const [, setPluginId] = useAtom(PluginIdState);

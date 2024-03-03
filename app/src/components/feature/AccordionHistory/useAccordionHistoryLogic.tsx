@@ -3,12 +3,15 @@ import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { ChatContent } from "~/components/ui/ChatContent/ChatContent";
 import { TypewriterEffect } from "~/components/ui/TypewriterEffect/TypewriterEffect";
+import { useChatHistory } from '~/hooks/useChatHistory';
+import { InTypeWriteState } from '~/state/inTypeWriteState';
+import { LatestAiResponseIndexState } from '~/state/latestAiResponseIndexState';
+import { ViewModeState } from '~/state/viewModeState';
 import { AiMessage, ChatHistoryItem, ErrorMessage } from '~/types/ai';
-import { InTypeWriteState, LatestAiResponseIndexState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState } from '../CornerDialog/CornerDialogState';
 
 export const useAccordionHistoryLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
-  const [chatHistoryItems] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
+  const { chatHistoryItems } = useChatHistory(isPcViewMode);
   const [latestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [inTypeWrite] = useAtom(InTypeWriteState);
   const [activeItem, setActiveItem] = useState('');

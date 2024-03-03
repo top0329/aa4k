@@ -5,18 +5,21 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { appCreateJs } from '~/ai/appCreateJs';
-import { DeviceDiv, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from '~/constants';
+import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
+import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
+import { InTypeWriteState } from '~/state/inTypeWriteState';
+import { PluginIdState } from '~/state/pluginIdState';
+import { ViewModeState } from '~/state/viewModeState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
-import { InTypeWriteState, DesktopChatHistoryState, MobileChatHistoryState, ViewModeState, IsSubmittingState, PluginIdState } from '../CornerDialog/CornerDialogState';
-import { humanMessageState, voiceInputState, callbackFuncsState, voiceInputVisibleState } from './PromptFormState';
+import { callbackFuncsState, humanMessageState, voiceInputState, voiceInputVisibleState } from './PromptFormState';
 
 export const usePromptFormLogic = () => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
   const [humanMessage, setHumanMessage] = useAtom(humanMessageState);
-  const [isSubmitting, setIsSubmitting] = useAtom(IsSubmittingState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [pluginId] = useAtom(PluginIdState);
   const [isVoiceInput,

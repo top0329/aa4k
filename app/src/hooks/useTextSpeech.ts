@@ -2,18 +2,18 @@
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { split } from "sentence-splitter";
-import { PluginIdState } from "~/components/feature/CornerDialog/CornerDialogState";
-import { SpeechResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
+import { PluginIdState } from "~/state/pluginIdState";
+import { KintoneProxyResponse, SpeechResponseBody } from "~/types/apiResponse";
 
 export const useTextSpeech = (
   aiAnswerRef: React.MutableRefObject<string>,
   finishAiAnswerRef: React.MutableRefObject<boolean>,
-) =>{
+) => {
   const [isSpeech, setIsSpeech] = useState<boolean>(false);
   const [pluginId] = useAtom(PluginIdState);
   // Ref
   const speechText = useRef<string>("");
-  const sentences = useRef<string[]>([]);   // 読み上げを行う文章を文章として区切った形で格納しておくRef
+  const sentences = useRef<string[]>([]); // 読み上げを行う文章を文章として区切った形で格納しておくRef
   const audioPlaying = useRef<boolean>(false);
   const sound = useRef<HTMLAudioElement | undefined>();
 
@@ -36,11 +36,7 @@ export const useTextSpeech = (
       }
       aiAnswerRef.current = "";
     });
-  }, [
-    speechText.current,
-    aiAnswerRef.current,
-    finishAiAnswerRef.current,
-  ]);
+  }, [speechText.current, aiAnswerRef.current, finishAiAnswerRef.current]);
 
   // sentencesから文章を1つずつ取り出して順番に再生するのを繰り返すIntervalを設定する
   useEffect(() => {
@@ -52,13 +48,13 @@ export const useTextSpeech = (
       if (!sentence) return;
 
       audioPlaying.current = true;
-      const resSpeech = await kintone.plugin.app.proxy(
+      const resSpeech = (await kintone.plugin.app.proxy(
         pluginId,
         `${import.meta.env.VITE_API_ENDPOINT}/speech`,
         "POST",
         {},
         { text: sentence },
-      ) as KintoneProxyResponse;
+      )) as KintoneProxyResponse;
       const [resBody] = resSpeech;
       const resJsonSpeech = JSON.parse(resBody) as SpeechResponseBody;
       sound.current = new Audio(`data:audio/mp3;base64,${resJsonSpeech.data}`);
@@ -89,4 +85,4 @@ export const useTextSpeech = (
   return {
     isSpeech,
   };
-}
+};

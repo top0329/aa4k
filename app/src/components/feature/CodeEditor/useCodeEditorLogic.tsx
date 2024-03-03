@@ -1,14 +1,14 @@
 // src/components/feature/CodeEditor/useCodeEditorLogic.tsx
 import { useAtom } from 'jotai';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { CodeLatestState, CodeState, IsChangeCodeState } from "~/components/feature/CodeEditor/CodeEditorState";
 import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
-import { ViewModeState } from '../CornerDialog/CornerDialogState';
-import { CodeState, CodeLatestState, IsChangeCodeState } from "~/components/feature/CodeEditor/CodeEditorState";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
+import { CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage, InfoMessage } from "~/constants";
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
-import { codeActionDialogTypeState, isCodeActionDialogState } from '../CodeActionDialog/CodeActionDialogState';
-import { DeviceDiv, CodeActionDialogType, ErrorCode, InfoMessage, ErrorMessage } from "~/constants";
+import { ViewModeState } from '~/state/viewModeState';
 import { getKintoneCustomizeJs } from "~/util/kintoneCustomize";
+import { codeActionDialogTypeState, isCodeActionDialogState } from '../CodeActionDialog/CodeActionDialogState';
 
 export const useCodeEditorLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
@@ -77,7 +77,7 @@ export const useCodeEditorLogic = () => {
         showToast(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`, 0, false);
         return;
       }
-  
+
       // 最新JSの取得（from kintone）
       const { jsCodeForKintone } = await getKintoneCustomizeJs(appId, deviceDiv, isGuestSpace);
       setCode(jsCodeForKintone);
