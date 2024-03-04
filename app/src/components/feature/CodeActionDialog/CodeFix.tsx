@@ -51,7 +51,7 @@ const CodeFix: React.FC<CodeFixProps> = ({
           キャンセル
         </Text>
       </Button>
-      <Button color='indigo'
+      <Button color='iris'
         variant="soft"
         size={'3'}
         onClick={handleReflectClick}

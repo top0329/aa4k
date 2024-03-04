@@ -14,13 +14,15 @@ type PromptTextAreaProps = {
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   lineHeight?: number;
   maxRows?: number;
+  isPcViewMode: boolean;
 }
 
-export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, required, value, disabled, onChange, onKeyDown, lineHeight, maxRows, ...rest }) => {
+export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, required, value, disabled, onChange, onKeyDown, lineHeight, maxRows, isPcViewMode, ...rest }) => {
   const textAreaRef = useAutoResizeTextArea(value, maxRows, lineHeight);
 
   return (
     <TextArea
+      color={isPcViewMode ? 'iris' : 'cyan'}
       className={StyledItem}
       size={'3'}
       id={name}

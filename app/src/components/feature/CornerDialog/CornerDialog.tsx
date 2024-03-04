@@ -1,5 +1,7 @@
 // src/componetns/feature/CornerDialog/CornerDialog.tsx
 import * as Dialog from "@radix-ui/react-dialog";
+import { Flex } from "@radix-ui/themes";
+import logoSVG from "~/assets/logo.svg";
 import Dock from "~/components/feature/Dock/Dock.tsx";
 import "~/styles/scrollbar.css";
 import Chat from "../Chat/Chat.tsx";
@@ -13,7 +15,11 @@ const CornerDialog = () => {
   return (
     <Dialog.Root open={dockState.dialogVisible}>
       <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
-        Open
+        <Flex style={{
+          cursor: 'pointer',
+        }}>
+          <img src={logoSVG} alt="logo" width={'48'} />
+        </Flex>
       </Dialog.Trigger>
       <Dialog.Overlay className={DialogOverlay} />
       <Dialog.Content onPointerDownOutside={(e) => e.preventDefault()}>

@@ -113,7 +113,7 @@ const kintoneMocks = {
     },
     {
       url: (path: string) => `https://example.kintone.com${path}`,
-    }
+    },
   ),
 };
 

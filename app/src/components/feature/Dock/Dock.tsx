@@ -1,12 +1,13 @@
 // src/components/feature/Dock/Dock.tsx
 import { faClose, faCode, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
-import { Box } from "@radix-ui/themes";
-import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
-import { vars } from "~/styles/theme.css";
-import { DockGroup, DockInner, DockItem } from "./Dock.css";
-import { useDockLogic } from "./useDockLogic";
+import { Box, Flex } from "@radix-ui/themes";
+import logoIcon from "~/assets/logo.svg";
 import { useCodeEditorLogic } from "~/components/feature/CodeEditor/useCodeEditorLogic";
+import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import { ChatMode } from "~/constants";
+import { vars } from "~/styles/theme.css";
+import { DockGroup, DockItem } from "./Dock.css";
+import { useDockLogic } from "./useDockLogic";
 
 const Dock = () => {
   const {
@@ -19,7 +20,12 @@ const Dock = () => {
 
   return (
     <Box className={DockGroup}>
-      <Box className={DockInner}>
+      <Flex>
+        <img src={logoIcon} alt="logo" width={'40'} />
+      </Flex>
+      <Flex
+        gap={'4'}
+      >
         <IconTooltipButton
           icon={faCode}
           tooltip={'コードエディター'}
@@ -32,8 +38,8 @@ const Dock = () => {
           pressed={activeChatMode === ChatMode.desktopChat}
           pressedColor={
             isPcViewMode
-              ? vars.color.indigoA.indigoA9
-              : vars.color.crimsonA.crimsonA9
+              ? vars.color.primaryFocus
+              : vars.color.accentFocus
           }
           className={DockItem} />
         <IconTooltipButton
@@ -41,7 +47,7 @@ const Dock = () => {
           tooltip={'閉じる'}
           onClick={initDockState}
           className={DockItem} />
-      </Box>
+      </Flex>
     </Box>
   );
 }

@@ -8,9 +8,9 @@ export const DockGroup = style({
   bottom: 0,
   left: 0,
   width: "100%",
-  height: 48,
+  height: 56,
   display: "flex",
-  justifyContent: "flex-end",
+  justifyContent: "space-between",
   alignItems: "center",
   padding: "0 16px",
   backdropFilter: "blur(24px)",
@@ -18,7 +18,7 @@ export const DockGroup = style({
   zIndex: 100,
 });
 
-export const DockInner = style({
+export const DockAction = style({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -32,12 +32,6 @@ export const DockItem = style({
   width: 36,
   height: 36,
   cursor: "pointer",
-});
-
-export const DockIconActive = style({
-  background: vars.color.indigo.indigo9,
-  backgroundClip: "text",
-  WebkitTextFillColor: "transparent",
 });
 
 export const DockIcon = style({

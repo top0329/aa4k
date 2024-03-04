@@ -3,8 +3,6 @@ import { vars } from "~/styles/theme.css";
 
 export const sVoiceInput = style({
   boxSizing: "border-box",
-  width: 32,
-  height: 32,
   opacity: 0.5,
   borderRadius: `50%`,
   transition: "opacity 0.2s",
@@ -25,10 +23,7 @@ export const boxShadowAnimation = keyframes({
 
 export const sVoiceInputActive = style({
   boxSizing: "border-box",
-  width: 32,
-  height: 32,
   opacity: 1,
-  borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
   animation: `${boxShadowAnimation} 2s infinite alternate`,

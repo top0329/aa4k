@@ -1,6 +1,6 @@
 // src/components/ui/CodeEditor/CodeEditor.tsx
 import { faArrowsRetweet, faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
-import { Box, Button, Flex, Separator } from '@radix-ui/themes';
+import { Badge, Box, Button, Flex, Separator } from '@radix-ui/themes';
 import 'ace-builds/src-min-noconflict/ace';
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/ext-searchbox";
@@ -34,21 +34,21 @@ const CodeEditor = () => {
   return (
     <Flex
       direction={'column'}
-      p={'3'}
       className={clsx(
         !isFullScreen ?
           sCodeEditor : sCodeEditorFullScreen
       )}
       style={isPcViewMode ? {
-        border: `8px solid ${vars.color.indigo.indigo3}`,
+        border: `4px solid ${vars.color.primaryEleBg}`,
       } : {
-        border: `8px solid ${vars.color.crimson.crimson3}`,
+        border: `4px solid ${vars.color.accentEleBg}`,
       }}
     >
       <Flex
+        py={'3'}
+        pr={'3'}
         justify={'end'}
       >
-        {/* TODO: リフレッシュボタン仮置き 後で正式版に差し替え予定 */}
         <IconTooltipButton
           icon={faArrowsRetweet}
           tooltip={'Code ReNew'}
@@ -59,6 +59,7 @@ const CodeEditor = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            padding: 8,
             borderRadius: 8,
             transition: 'all 0.2s ease-in-out',
             cursor: 'pointer',
@@ -74,15 +75,15 @@ const CodeEditor = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            padding: 8,
             borderRadius: 8,
             transition: 'all 0.2s ease-in-out',
             cursor: 'pointer',
           }} />
       </Flex>
-
-      <Separator my="3" size="4" />
       <Box
         width={'100%'}
+        px={'4'}
         style={{
           position: 'relative',
           height: '100%',
@@ -118,25 +119,49 @@ const CodeEditor = () => {
         <Separator my="3" size="4" />
         <Flex
           width={'100%'}
-          justify={'end'}
+          justify={isFullScreen ? 'between' : 'end'}
+          mb={'3'}
           style={{
             gap: 16,
           }}
         >
-          <Button variant='soft' color='crimson' size={'3'}
-            onClick={() => handleRunCodeAction(CodeActionDialogType.CodeCheck)}
+          {
+            isFullScreen &&
+            <Flex
+              display={'inline-flex'}
+              align={'center'}
+              justify={'center'}
+            >
+              {isPcViewMode ? <Badge color='iris'>PC用アプリを編集しています</Badge> : <Badge color='cyan'>スマートフォン用アプリを編集しています</Badge>
+              }
+            </Flex>
+          }
+          <Flex
+            align={'center'}
+            justify={'end'}
             style={{
-              cursor: 'pointer',
-            }}>
-            チェック
-          </Button>
-          <Button variant='soft' size={'3'}
-            onClick={() => handleRunCodeAction(CodeActionDialogType.CodeFix)}
-            style={{
-              cursor: 'pointer',
-            }}>
-            反映
-          </Button>
+              gap: 16,
+            }}
+          >
+            <Button variant='soft' color='crimson' size={'3'}
+              onClick={() => handleRunCodeAction(CodeActionDialogType.CodeCheck)}
+              style={{
+                cursor: 'pointer',
+              }}>
+              チェック
+            </Button>
+            <Button variant='classic' color={
+              isPcViewMode
+                ? 'iris'
+                : 'cyan'
+            } size={'3'}
+              onClick={() => handleRunCodeAction(CodeActionDialogType.CodeFix)}
+              style={{
+                cursor: 'pointer',
+              }}>
+              反映
+            </Button>
+          </Flex>
         </Flex>
       </Box>
     </Flex>

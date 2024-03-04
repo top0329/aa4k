@@ -17,6 +17,7 @@ export const Default = () => {
 
   return (
     <PromptTextArea
+      isPcViewMode={true}
       name="test"
       label="Test Label"
       value={value}

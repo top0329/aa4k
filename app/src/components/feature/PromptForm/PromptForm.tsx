@@ -1,14 +1,14 @@
 // src/components/feature/PromptForm/PromptForm.tsx
-import { useUpdateEffect } from "react-use";
 import { faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Badge, Box, Button, Flex, Switch, Text } from '@radix-ui/themes';
 import { motion } from "framer-motion";
+import { useUpdateEffect } from "react-use";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
+import { useTextSpeech } from "~/hooks/useTextSpeech";
 import { vars } from '~/styles/theme.css';
 import { sVoiceInput, sVoiceInputActive } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
-import { useTextSpeech } from "~/hooks/useTextSpeech";
 
 const PromptForm = () => {
   const {
@@ -48,7 +48,7 @@ const PromptForm = () => {
     <Box p={'5'}
       width={'100%'}
       style={{
-        background: isPcViewMode ? vars.color.indigoA.indigoA2 : vars.color.crimsonA.crimsonA1
+        background: isPcViewMode ? vars.color.primarySubBg : vars.color.accentBg
       }}>
       <form onSubmit={(e) => handleSubmit(e)}>
 
@@ -78,6 +78,7 @@ const PromptForm = () => {
             </motion.div>
           </Flex>
           <PromptTextArea
+            isPcViewMode={isPcViewMode}
             name="humanMessage"
             value={humanMessage}
             onChange={
@@ -97,15 +98,15 @@ const PromptForm = () => {
             <Switch
               color={
                 isPcViewMode
-                  ? 'indigo'
-                  : 'crimson'
+                  ? 'iris'
+                  : 'cyan'
               }
               checked={!isPcViewMode}
               onCheckedChange={() => setIsPcViewMode(!isPcViewMode)}
             />
 
             {
-              isPcViewMode ? <Badge>スマートフォン用アプリのカスタマイズに切り替える</Badge> : <Badge color='crimson'>PC用アプリのカスタマイズに切り替える</Badge>
+              isPcViewMode ? <Badge color='iris'>スマートフォン用アプリのカスタマイズに切り替える</Badge> : <Badge color='cyan'>PC用アプリのカスタマイズに切り替える</Badge>
             }
           </Flex>
           <Flex gap={'5'}
@@ -114,6 +115,12 @@ const PromptForm = () => {
           >
 
             {voiceInputVisible && (<Button
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: `50%`,
+                padding: 0,
+              }}
               variant={'ghost'}
               color={isVoiceInput ? 'crimson' : 'gray'}
               className={isVoiceInput ? sVoiceInputActive : sVoiceInput}
@@ -129,6 +136,7 @@ const PromptForm = () => {
               animate={humanMessage ? 'enabled' : 'disabled'}
             >
               <Button
+                color={isPcViewMode ? 'iris' : 'cyan'}
                 type="submit" disabled={!humanMessage || isSubmitting}
                 style={{
                   cursor: !humanMessage ? 'not-allowed' : 'pointer',

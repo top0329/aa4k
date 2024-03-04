@@ -3,11 +3,11 @@ import { vars } from "~/styles/theme.css";
 
 export const sChat = style({
   background: `rgba(255, 255, 255, 0.96)`,
-  boxShadow: `0px 0px 32px 0 ${vars.color.grayA.grayA5}`,
+  boxShadow: `0px 0px 32px 0 ${vars.color.grayA.grayA4}`,
   borderRadius: 16,
   position: `fixed`,
-  bottom: `64px`,
-  right: 8,
+  bottom: `68px`,
+  right: 12,
   display: `flex`,
   justifyContent: "flex-end",
   alignItems: "flex-end",

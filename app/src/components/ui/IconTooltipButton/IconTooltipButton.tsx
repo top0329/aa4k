@@ -21,7 +21,9 @@ const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
   tooltip,
   onClick,
   pressed = false,
-  style,
+  style = {
+    cursor: 'pointer',
+  },
   pressedColor = vars.color.grayA.grayA12,
   defaultColor = vars.color.gray.gray9,
   className
@@ -29,6 +31,7 @@ const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
   return (
     <Tooltip content={tooltip}
       style={{
+
         zIndex: 10000,
       }}
     >
