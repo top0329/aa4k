@@ -61,7 +61,9 @@
     "react-scroll-to-bottom": "^4.2.0",
     "react-speech-recognition": "^3.10.0",
     "react-use": "^17.4.2",
-    "sentence-splitter": "^5.0.0"
+    "sentence-splitter": "^5.0.0",
+    "tiktoken": "^1.0.13",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@kintone/dts-gen": "^8.0.3",

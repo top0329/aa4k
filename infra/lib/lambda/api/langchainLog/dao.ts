@@ -10,8 +10,10 @@ import { InsertLangchainProcessLogProps } from "./schema";
 export const insertLangchainProcessLog = async (dbClient: Client, props: InsertLangchainProcessLogProps) => {
   const pram = [
     props.subscriptionId,    // subscription_id
-    props.body.history_id ? props.body.history_id : null,    // history_id
+    props.body.app_id ? props.body.app_id : null,    // app_id
+    props.body.user_id ? props.body.user_id : null,    // user_id
     props.body.session_id ? props.body.session_id : null,    // session_id
+    props.body.conversation_id ? props.body.conversation_id : null,    // conversation_id
     props.body.handle_name ? props.body.handle_name : null,   // handle_name
     props.body.run_name ? props.body.run_name : null,    // run_name
     props.body.run_id ? props.body.run_id : null,    // run_id
@@ -24,21 +26,23 @@ export const insertLangchainProcessLog = async (dbClient: Client, props: InsertL
   ]
   let sql = "";
   sql += `insert into`;
-  sql += ` LANGCHAIN_PROCESS_LOGS`;
+  sql += ` langchain_process_logs`;
   sql += ` (`;
-  sql += ` SUBSCRIPTION_ID`;
-  sql += ` , HISTORY_ID`;
-  sql += ` , SESSION_ID`;
-  sql += ` , HANDLE_NAME`;
-  sql += ` , RUN_NAME`;
-  sql += ` , RUN_ID`;
-  sql += ` , PARENT_RUN_ID`;
-  sql += ` , CONTENT`;
-  sql += ` , METADATA_LANGCHAIN_PARAMS`;
-  sql += ` , METADATA_EXTRA_PARAMS`;
-  sql += ` , TOKENS`;
-  sql += ` , EXECUTE_DATE`;
-  sql += ` , CREATE_DATE`;
+  sql += ` subscription_id`;
+  sql += ` , app_id`
+  sql += ` , user_id`
+  sql += ` , session_id`;
+  sql += ` , conversation_id`
+  sql += ` , handle_name`;
+  sql += ` , run_name`;
+  sql += ` , run_id`;
+  sql += ` , parent_run_id`;
+  sql += ` , content`;
+  sql += ` , metadata_langchain_params`;
+  sql += ` , metadata_extra_params`;
+  sql += ` , tokens`;
+  sql += ` , execute_date`;
+  sql += ` , create_date`;
   sql += ` ) `;
   sql += ` values `;
   sql += ` (`;
@@ -54,6 +58,8 @@ export const insertLangchainProcessLog = async (dbClient: Client, props: InsertL
   sql += ` , $10`;
   sql += ` , $11`;
   sql += ` , $12`;
+  sql += ` , $13`;
+  sql += ` , $14`;
   sql += ` , now()`;
   sql += ` )`;
 

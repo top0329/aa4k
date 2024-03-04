@@ -1,6 +1,7 @@
 import { Response, Request } from "express"
 import { Client } from "pg";
 import { z } from "zod";
+import { Document } from "@langchain/core/documents";
 import { EnsembleRetriever } from "./ensemble"
 import { SuguresRetriever } from "./sugures"
 import { PgVectorRetriever } from "./pgvector"
@@ -67,17 +68,25 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     const ensemble = new EnsembleRetriever({ retrievers: [suguresRetriever, pgvectorRetriever], weights: [0.5, 0.5] })
     const documents = await ensemble.getRelevantDocuments(body.query);
 
+    // コードテンプレートの取得
     for (const doc of documents) {
       const templateCodeId = doc.metadata.templateCodeId;
       // SQL クエリの実行（取得したtemplateCodeIdに該当するコードを取得）
       const result = await selectTemplateCode(dbClient, templateCodeId);
       // 取得したコードをオブジェクトに追加
-      const templateCode = result.rows[0].template_code
+      const templateCode = result.rows[0] ? result.rows[0].template_code : "";
       doc.metadata.templateCode = templateCode
     }
+    // 結果編集
+    const resultDocuments = documents
+      .filter((doc) => doc.metadata.templateCode)
+      .map((doc) => {
+        const metaData = doc.metadata;
+        return new Document({ pageContent: metaData.templateCode })
+      });
 
     // 終了
-    res.status(200).json({ documents });
+    res.status(200).json({ documents: resultDocuments });
   } catch (err) {
     // エラーログの出力
     const errorMessage = ({

@@ -3,22 +3,23 @@ import { BaseRetriever, BaseRetrieverInput } from "langchain/schema/retriever";
 import { CodeTemplateRetrieverResponseBody } from "~/types/apiResponse"
 import { CallbackManager, parseCallbackConfigArg, } from "@langchain/core/callbacks/manager";
 import { patchConfig } from "@langchain/core/runnables"
-import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
-import { langchainCallbacks } from "../langchainCallbacks";
+import { LangchainLogsInsertCallbackHandler, LangchainLogsInsertCallbackHandlerProps } from "../langchainLogsInsertCallbackHandler";
 
 export class CodeTemplateRetriever extends BaseRetriever {
+  LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps;
   conversationId: string;
 
   get lc_namespace() {
     return ["langchain", "retrievers", "base"];
   }
-  constructor(conversationId: string, fields?: BaseRetrieverInput) {
+  constructor(LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps, conversationId: string, fields?: BaseRetrieverInput) {
     super(fields);
+    this.LangchainLogsInsertProps = LangchainLogsInsertProps;
     this.conversationId = conversationId;
   };
 
   async getRelevantDocuments(query: string): Promise<Document[]> {
-    const handler = BaseCallbackHandler.fromMethods({ ...langchainCallbacks });
+    const handler = new LangchainLogsInsertCallbackHandler(this.LangchainLogsInsertProps);
     const parsedConfig = patchConfig(parseCallbackConfigArg({ callbacks: [handler] }));
     const callbackManager_ = await CallbackManager.configure(parsedConfig.callbacks, this.callbacks, parsedConfig.tags, this.tags, parsedConfig.metadata, this.metadata, { verbose: this.verbose });
     const runManager = await callbackManager_?.handleRetrieverStart(this.toJSON(), query, undefined, undefined, undefined, undefined, parsedConfig.runName);

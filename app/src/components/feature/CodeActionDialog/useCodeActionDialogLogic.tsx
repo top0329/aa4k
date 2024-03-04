@@ -98,9 +98,18 @@ export const useCodeActionDialogLogic = () => {
         return;
       }
       const contractStatus = preCheckResult.contractStatus;
+      const appId = kintone.app.getId();
+      const userId = kintone.getLoginUser().id;
 
+      // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
+      if (appId === null) {
+        setIsCodeActionDialog(false);
+        // トーストでエラーメッセージ表示
+        showToast(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`, 0, false);
+        return;
+      }
       // コードチェックの呼び出し
-      const resCodeCheck = await codeCheck(code, contractStatus);
+      const resCodeCheck = await codeCheck(code, contractStatus, appId, userId);
 
       switch (resCodeCheck.result) {
         case CodeCheckStatus.safe:
