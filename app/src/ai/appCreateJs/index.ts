@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
-import { CustomHandler } from "../langchainCallbacks";
+import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
 import { openAIModel, ContractExpiredError, ContractStatusError, getCodingGuidelines } from "../common"
 import { DeviceDiv, CodeCreateMethod, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
@@ -135,7 +135,7 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   // --------------------
   // コードテンプレートの取得
   // --------------------
-  const codeTemplateRetriever = new CodeTemplateRetriever(sessionId, appId, userId, conversationId);
+  const codeTemplateRetriever = new CodeTemplateRetriever({ sessionId, appId, userId, conversationId }, conversationId);
   const codeTemplate = await codeTemplateRetriever.getRelevantDocuments(message.content);
 
   // --------------------
@@ -217,7 +217,7 @@ async function createJs(
     });
   }
   // 生成（LLM実行）
-  const handler = new CustomHandler(sessionId, appId, userId, conversationId);
+  const handler = new LangchainLogsInsertCallbackHandler({ sessionId, appId, userId, conversationId });
   const model = openAIModel(contractStatus);
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", APP_CREATE_JS_SYSTEM_PROMPT],

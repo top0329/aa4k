@@ -47,7 +47,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
       retErrorStatus = 404;
       retErrorMessage = "SubscriptionData is Not Found";
       retErrorCode = ErrorCode.A06002;
-      throw new Error("SubscriptionData is Not Found")
+      throw new Error(retErrorMessage)
     }
     // スキーマ名
     const schema = subscriptionData.schema_name;

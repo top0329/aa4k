@@ -5,7 +5,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { v4 as uuidv4 } from 'uuid';
 
 import { CODE_CHECK_SYSTEM_PROMPT } from "./prompt"
-import { CustomHandler } from "../langchainCallbacks";
+import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
 import { openAIModel, getCodingGuidelines } from "../common"
 import { ContractStatus, CodeCheckStatus } from "../../constants"
 import { CodeCheckResponse } from "../../types/ai";
@@ -32,7 +32,7 @@ export const codeCheck = async (code: string, contractStatus: ContractStatus, ap
     // --------------------
     // コードチェック
     // --------------------
-    const handler = new CustomHandler(sessionId, appId, userId);
+    const handler = new LangchainLogsInsertCallbackHandler({ sessionId, appId, userId });
     const model = openAIModel(contractStatus);
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", CODE_CHECK_SYSTEM_PROMPT],

@@ -1,33 +1,27 @@
 import { Serialized } from "@langchain/core/load/serializable";
-import { AgentAction, AgentFinish, ChainValues, LLMResult, BaseMessage, ChatGenerationChunk, GenerationChunk } from "langchain/schema";
+import { AgentAction, AgentFinish, ChainValues, LLMResult, BaseMessage } from "langchain/schema";
 import { Document } from "langchain/document"
-export type HandleLLMNewTokenCallbackFields = {
-  chunk?: GenerationChunk | ChatGenerationChunk;
-};
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 
-
-export class CustomHandler extends BaseCallbackHandler {
+export interface LangchainLogsInsertCallbackHandlerProps {
   sessionId: string;
   appId: number;
   userId: string;
   conversationId?: string;
-  name = "custom_handler";
-  constructor(sessionId: string, appId: number, userId: string, conversationId?: string) {
+}
+
+export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
+  props: LangchainLogsInsertCallbackHandlerProps;
+  name = "LangchainLogsInsertCallbackHandler";
+  constructor(props: LangchainLogsInsertCallbackHandlerProps) {
     super();
-    this.sessionId = sessionId;
-    this.appId = appId;
-    this.userId = userId;
-    this.conversationId = conversationId;
+    this.props = props;
   };
 
   handleLLMStart(llm: Serialized, prompts: string[], runId: string, parentRunId?: string | undefined, extraParams?: Record<string, unknown> | undefined,) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleLLMStart", // handle_name
       llm.id.slice(-1)[0],  // run_name
       runId,  // run_id
@@ -42,10 +36,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleLLMError(err: any, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleLLMError", // handle_name
       "", // run_name
       runId,  // run_id
@@ -59,10 +50,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleLLMEnd(output: LLMResult, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleLLMEnd", // handle_name
       "", // run_name
       runId,  // run_id
@@ -76,10 +64,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleChatModelStart(llm: Serialized, messages: BaseMessage[][], runId: string, parentRunId?: string | undefined, extraParams?: Record<string, unknown> | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleChatModelStart", // handle_name
       llm.id.slice(-1)[0],  // run_name
       runId,  // run_id
@@ -93,10 +78,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleChainStart(chain: Serialized, inputs: ChainValues, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleChainStart", // handle_name
       chain.id.slice(-1)[0],  // run_name
       runId,  // run_id
@@ -110,10 +92,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleChainError(err: any, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleChainError", // handle_name
       "", // run_name
       runId,  // run_id
@@ -130,10 +109,7 @@ export class CustomHandler extends BaseCallbackHandler {
 
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleChainEnd", // handle_name
       "", // run_name
       runId,  // run_id
@@ -147,10 +123,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleToolStart(tool: Serialized, input: string, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleToolStart",  // handle_name
       tool.id.slice(-1)[0], // run_name
       runId,  // run_id
@@ -164,10 +137,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleToolError(err: any, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleToolError",  // handle_name
       "", // run_name
       runId,  // run_id
@@ -181,10 +151,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleToolEnd(output: string, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleToolEnd",  // handle_name
       "", // run_name
       runId,  // run_id
@@ -198,10 +165,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleText(text: string, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleText", // handle_name
       "", // run_name
       runId,  // run_id
@@ -215,10 +179,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleAgentAction(action: AgentAction, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleAgentAction",  // handle_name
       "", // run_name
       runId,  // run_id
@@ -232,10 +193,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleAgentEnd(action: AgentFinish, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleAgentEnd", // handle_name
       "", // run_name
       runId,  // run_id
@@ -249,10 +207,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleRetrieverStart(retriever: Serialized, query: string, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleRetrieverStart", // handle_name
       retriever.id.slice(-1)[0],  // run_name
       runId,  // run_id
@@ -266,10 +221,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleRetrieverEnd(documents: Document<Record<string, any>>[], runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleRetrieverEnd", // handle_name
       "", // run_name
       runId,  // run_id
@@ -283,10 +235,7 @@ export class CustomHandler extends BaseCallbackHandler {
   handleRetrieverError(err: any, runId: string, parentRunId?: string | undefined) {
     // ログ登録
     langchainLogInsert(
-      this.appId, // app_id
-      this.userId,  // user_id
-      this.sessionId, // session_id
-      this.conversationId ? this.conversationId : "", // conversation_id
+      this.props,
       "handleRetrieverError", // handle_name
       "", // run_name
       runId,  // run_id
@@ -301,13 +250,22 @@ export class CustomHandler extends BaseCallbackHandler {
 
 /**
  * Langchainログ登録
+ * @param props 
+ * @param handleName 
+ * @param runName 
+ * @param runId 
+ * @param parentRunId 
+ * @param content 
+ * @param metadataLangChainParams 
+ * @param metadataExtraParams 
+ * @param tokens 
  */
-export const langchainLogInsert = (appId: number, userId: string, sessionId: string, conversationId: string, handleName: string, runName: string, runId: string, parentRunId: string, content: string, metadataLangChainParams: string, metadataExtraParams: string, tokens: number) => {
+export const langchainLogInsert = (props: LangchainLogsInsertCallbackHandlerProps, handleName: string, runName: string, runId: string, parentRunId: string, content: string, metadataLangChainParams: string, metadataExtraParams: string, tokens: number) => {
   const body = {
-    app_id: appId,
-    user_id: userId,
-    session_id: sessionId,
-    conversation_id: conversationId,
+    app_id: props.appId,
+    user_id: props.userId,
+    session_id: props.sessionId,
+    conversation_id: props.conversationId ? props.conversationId : "",
     handle_name: handleName,
     run_name: runName,
     run_id: runId,
