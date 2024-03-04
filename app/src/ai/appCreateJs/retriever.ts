@@ -7,14 +7,16 @@ import { LangchainLogsInsertCallbackHandler, LangchainLogsInsertCallbackHandlerP
 
 export class CodeTemplateRetriever extends BaseRetriever {
   LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps;
+  pluginId: string;
   conversationId: string;
 
   get lc_namespace() {
     return ["langchain", "retrievers", "base"];
   }
-  constructor(LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps, conversationId: string, fields?: BaseRetrieverInput) {
+  constructor(LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps, pluginId: string, conversationId: string, fields?: BaseRetrieverInput) {
     super(fields);
     this.LangchainLogsInsertProps = LangchainLogsInsertProps;
+    this.pluginId = pluginId;
     this.conversationId = conversationId;
   };
 
@@ -24,11 +26,11 @@ export class CodeTemplateRetriever extends BaseRetriever {
     const callbackManager_ = await CallbackManager.configure(parsedConfig.callbacks, this.callbacks, parsedConfig.tags, this.tags, parsedConfig.metadata, this.metadata, { verbose: this.verbose });
     const runManager = await callbackManager_?.handleRetrieverStart(this.toJSON(), query, undefined, undefined, undefined, undefined, parsedConfig.runName);
 
-    // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
-    const response = await kintone.proxy(
+    const response = await kintone.plugin.app.proxy(
+      this.pluginId,
       `${import.meta.env.VITE_API_ENDPOINT}/code_template/retrieve`,
       "POST",
-      { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+      {},
       {
         query: query,
         conversationId: this.conversationId,

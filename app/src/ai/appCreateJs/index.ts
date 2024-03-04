@@ -32,7 +32,7 @@ export class LlmError extends Error { }
 export const appCreateJs = async (conversation: Conversation): Promise<AiResponse> => {
   const callbackFuncs: Function[] = [];
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { appId, userId, conversationId, deviceDiv, isGuestSpace } = appCreateJsContext;
+  const { appId, userId, conversationId, deviceDiv, isGuestSpace, pluginId } = appCreateJsContext;
   const sessionId = uuidv4();
   try {
     // --------------------
@@ -68,7 +68,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     // --------------------
     // 回答メッセージと生成したコードの登録 (会話履歴TBL)
     // --------------------
-    insertConversation(appId, userId, deviceDiv, MessageType.ai, message, conversationId, messageComment, formattedCode)
+    insertConversation(pluginId, appId, userId, deviceDiv, MessageType.ai, message, conversationId, messageComment, formattedCode)
 
     // --------------------
     // コールバック関数設定(コード生成後の動作)
@@ -100,11 +100,11 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
   } catch (err) {
     if (err instanceof LlmError || err instanceof ContractExpiredError || err instanceof ContractStatusError) {
       const message = err.message;
-      insertConversation(appId, userId, deviceDiv, MessageType.error, message, conversationId)
+      insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message, } }
     } else {
       const message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
-      insertConversation(appId, userId, deviceDiv, MessageType.error, message, conversationId)
+      insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message } }
     }
   }
@@ -121,7 +121,7 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
 async function preGetResource(conversation: Conversation, sessionId: string) {
   const { message } = conversation;
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { appId, userId, conversationId, deviceDiv, isGuestSpace } = appCreateJsContext;
+  const { appId, userId, conversationId, deviceDiv, isGuestSpace, pluginId } = appCreateJsContext;
 
   // --------------------
   // フィールド情報の取得
@@ -135,7 +135,7 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   // --------------------
   // コードテンプレートの取得
   // --------------------
-  const codeTemplateRetriever = new CodeTemplateRetriever({ sessionId, appId, userId, conversationId }, conversationId);
+  const codeTemplateRetriever = new CodeTemplateRetriever({ pluginId, sessionId, appId, userId, conversationId }, pluginId, conversationId);
   const codeTemplate = await codeTemplateRetriever.getRelevantDocuments(message.content);
 
   // --------------------
@@ -152,11 +152,11 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   // --------------------
   // 最新JSの取得（from DB）
   // --------------------
-  // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
-  const res_jsCodeForDb = await kintone.proxy(
+  const res_jsCodeForDb = await kintone.plugin.app.proxy(
+    pluginId,
     `${import.meta.env.VITE_API_ENDPOINT}/generated_code/get-code`,
     "POST",
-    { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+    {},
     { appId: appId, userId: userId, deviceDiv: deviceDiv, },
   );
   const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]) as GeneratedCodeGetResponseBody;
@@ -199,7 +199,7 @@ async function createJs(
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { appId, userId, conversationId, contractStatus, systemSettings } = appCreateJsContext;
+  const { appId, userId, conversationId, contractStatus, systemSettings, pluginId } = appCreateJsContext;
   const codingGuideline = codingGuidelineList[0];
   const secureCodingGuideline = codingGuidelineList[1];
 
@@ -217,8 +217,8 @@ async function createJs(
     });
   }
   // 生成（LLM実行）
-  const handler = new LangchainLogsInsertCallbackHandler({ sessionId, appId, userId, conversationId });
-  const model = openAIModel(contractStatus);
+  const handler = new LangchainLogsInsertCallbackHandler({ pluginId, sessionId, appId, userId, conversationId });
+  const model = openAIModel(pluginId, contractStatus);
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", APP_CREATE_JS_SYSTEM_PROMPT],
     ...histories,
@@ -293,15 +293,15 @@ async function createJs(
  * @param conversationId 
  * @param code 
  */
-function insertConversation(appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, messageComment?: string, javascriptCode?: string) {
+function insertConversation(pluginId: string, appId: number, userId: string, deviceDiv: DeviceDiv, messageType: MessageType, message: string, conversationId: string, messageComment?: string, javascriptCode?: string) {
   const body = messageType == MessageType.ai ?
     { appId, userId, deviceDiv, messageType, message, conversationId, messageComment, javascriptCode } :
     { appId, userId, deviceDiv, messageType, message, conversationId }
-  // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
-  kintone.proxy(
+  kintone.plugin.app.proxy(
+    pluginId,
     `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
     "POST",
-    { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+    {},
     body,
   );
 }

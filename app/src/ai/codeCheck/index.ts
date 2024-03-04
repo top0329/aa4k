@@ -20,7 +20,7 @@ export class LlmError extends Error { }
  * @param contractStatus 
  * @returns AiResponse
  */
-export const codeCheck = async (code: string, contractStatus: ContractStatus, appId: number, userId: string): Promise<CodeCheckResponse> => {
+export const codeCheck = async (code: string, pluginId: string, contractStatus: ContractStatus, appId: number, userId: string): Promise<CodeCheckResponse> => {
 
   try {
     const sessionId = uuidv4();
@@ -32,8 +32,8 @@ export const codeCheck = async (code: string, contractStatus: ContractStatus, ap
     // --------------------
     // コードチェック
     // --------------------
-    const handler = new LangchainLogsInsertCallbackHandler({ sessionId, appId, userId });
-    const model = openAIModel(contractStatus);
+    const handler = new LangchainLogsInsertCallbackHandler({ pluginId, sessionId, appId, userId });
+    const model = openAIModel(pluginId, contractStatus);
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", CODE_CHECK_SYSTEM_PROMPT],
       ["human", "kintoneガイドラインに違反していないかチェックしてください"],
