@@ -10,7 +10,12 @@ import { vars } from '~/styles/theme.css';
 import { sVoiceInput, sVoiceInputActive } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
 
-const PromptForm = () => {
+type PromptFormProps = {
+  startLoading?: () => void;
+  stopLoading?: () => void;
+}
+
+const PromptForm: React.FC<PromptFormProps> = ({startLoading, stopLoading}) => {
   const {
     isVoiceInput,
     isPcViewMode,
@@ -25,7 +30,7 @@ const PromptForm = () => {
     voiceInputVisible,
     aiAnswerRef,
     finishAiAnswerRef,
-  } = usePromptFormLogic();
+  } = usePromptFormLogic(startLoading, stopLoading);
   const { isSpeech } = useTextSpeech(
     aiAnswerRef,
     finishAiAnswerRef,
@@ -103,6 +108,7 @@ const PromptForm = () => {
               }
               checked={!isPcViewMode}
               onCheckedChange={() => setIsPcViewMode(!isPcViewMode)}
+              disabled={isSubmitting}
             />
 
             {

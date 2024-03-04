@@ -6,11 +6,12 @@ import Dock from "~/components/feature/Dock/Dock.tsx";
 import "~/styles/scrollbar.css";
 import Chat from "../Chat/Chat.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
+import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
 import { DialogOverlay } from "./CornerDialog.css";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
 const CornerDialog = () => {
-  const { dockState, handleBannerClick, isBannerClicked } = useCornerDialogLogic();
+  const { dockState, handleBannerClick, isBannerClicked, isLoading, startLoading, stopLoading } = useCornerDialogLogic();
 
   return (
     <Dialog.Root open={dockState.dialogVisible}>
@@ -29,8 +30,9 @@ const CornerDialog = () => {
         )}
 
         {dockState.chatVisible && (
-          <Chat />
+          <Chat isLoading={isLoading} startLoading={startLoading} stopLoading={stopLoading} />
         )}
+        <BarLoading isLoading={isLoading} />
         <Dock />
       </Dialog.Content>
     </Dialog.Root>

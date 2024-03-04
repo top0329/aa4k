@@ -16,7 +16,7 @@ const BarLoading: React.FC<BarLoadingProps> = ({ isLoading }) => {
           exit={{ opacity: 0 }}
           animate={{ opacity: isLoading ? 1 : 0 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
-          style={{ width: '100%', padding: 0, position: 'absolute', bottom: 64, left: 0, right: 0, zIndex: 1000 }}
+          style={{ width: '100%', padding: 0, position: 'fixed', bottom: 52, left: 0, right: 0, zIndex: 1000 }}
         >
           <Box className={sBarContainer}>
             <Box className={sBar}></Box>

@@ -6,7 +6,13 @@ import AccordionHistory from "../AccordionHistory/AccordionHistory";
 import PromptForm from "../PromptForm/PromptForm";
 import { sChat, sChatInner } from './Chat.css';
 
-const Chat = () => {
+type ChatProps = {
+  isLoading: boolean;
+  startLoading?: () => void;
+  stopLoading?: () => void;
+}
+
+const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading}) => {
   return (
     <Box className={sChat} >
       <ScrollToBottom
@@ -20,10 +26,10 @@ const Chat = () => {
             display: 'flex',
             alignItems: 'flex-end',
           }}>
-          <AccordionHistory />
+          <AccordionHistory isLoading={isLoading} />
         </Box>
       </ScrollToBottom>
-      <PromptForm />
+      <PromptForm startLoading={startLoading} stopLoading={stopLoading} />
     </Box>
   );
 };

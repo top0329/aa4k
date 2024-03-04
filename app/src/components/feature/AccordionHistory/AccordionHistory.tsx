@@ -6,7 +6,11 @@ import AccordionTrigger from '~/components/ui/Accordion/AccordionTrigger';
 import { sChatHistory, sChatHistoryItem } from './AccordionHistory.css';
 import { useAccordionHistoryLogic } from './useAccordionHistoryLogic';
 
-export const AccordionHistory = () => {
+type AccordionHistoryProps = {
+  isLoading: boolean;
+}
+
+export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading }) => {
   const { chatHistoryItems, activeItem, setActiveItem, showAiOrErrorMessage } = useAccordionHistoryLogic();
 
   // 空の状態
@@ -30,7 +34,7 @@ export const AccordionHistory = () => {
               padding: '0 16px'
             }}
           >
-            {showAiOrErrorMessage(item, index)}
+            {showAiOrErrorMessage(item, index, isLoading)}
           </AccordionContent>
         </Accordion.Item>
       ))}

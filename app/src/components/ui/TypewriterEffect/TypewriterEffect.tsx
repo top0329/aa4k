@@ -1,23 +1,19 @@
 // src/components/ui/TypewriterEffect/TypewriterEffect.tsx
-import { Box } from "@radix-ui/themes";
-import clsx from "clsx";
+import { Box, Flex } from "@radix-ui/themes";
 import { useAtom } from "jotai";
 import React, { useEffect, useRef, useState } from 'react';
 import RatingToolbar from '~/components/feature/RatingToolbar/RatingToolbar';
+import DonutLoading from "~/components/ui/Loading/DonutLoading/DonutLoading";
 import { InTypeWriteState } from "~/state/inTypeWriteState.tsx";
-import { AnimatedBlinking } from "~/styles/animation.css.ts";
 import { ChatContentProps } from "~/types/chatContentTypes.ts";
 import { createClipboardContent } from "~/util/clipboardContent";
-import { TypewriterCursor } from "./TypewriterEffect.css.ts";
 
-export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem }) => {
+export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem, isLoading = false }) => {
   const [displayedText, setDisplayedText] = useState<string>("");
-  const [isCursorDisplay, setIsCursorDisplay] = useState<boolean>(false);
   const indexRef = useRef<number>(0);
   const [inTypeWrite, setInTypeWrite] = useAtom(InTypeWriteState);
 
   useEffect(() => {
-    setIsCursorDisplay(true);
     if (aiMessage.content.length === 0) return;
     if (indexRef.current < aiMessage.content.length) {
       const timeout = setTimeout(() => {
@@ -31,21 +27,29 @@ export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHi
       await new Promise((resolve) => setTimeout(resolve, 500));
       setInTypeWrite(false);
     }
-    setIsCursorDisplay(false);
     displayAdditional();
   }, [displayedText, aiMessage.content]);
 
   return (
     <>
+      <Flex
+        align={'center'}
+        justify={'center'}
+        direction={'column'}
+      >
+        <Box
+          pt={'4'}>
+          <DonutLoading
+            isLoading={isLoading}
+          />
+        </Box>
+      </Flex>
       <Box
         style={{
           whiteSpace: "pre-wrap"
         }}
       >
         {displayedText}
-        {isCursorDisplay && (
-          <span className={clsx(TypewriterCursor, AnimatedBlinking)}>●</span>
-        )}
       </Box>
       <Box
         style={{

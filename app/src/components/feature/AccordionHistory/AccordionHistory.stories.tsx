@@ -8,5 +8,5 @@ export default {
 } as Meta;
 
 export const Default = () => {
-  return (<AccordionHistory />);
+  return (<AccordionHistory isLoading={false} />);
 }

@@ -15,7 +15,10 @@ import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/ap
 import { preCheck } from '~/util/preCheck';
 import { callbackFuncsState, humanMessageState, voiceInputState, voiceInputVisibleState } from './PromptFormState';
 
-export const usePromptFormLogic = () => {
+export const usePromptFormLogic = (
+  startLoading?: () => void,
+  stopLoading?: () => void,
+) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
   const [humanMessage, setHumanMessage] = useAtom(humanMessageState);
@@ -61,6 +64,24 @@ export const usePromptFormLogic = () => {
     const isGuest = kintone.getLoginUser().isGuest;
     const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
 
+    const chatHistoryItem: ChatHistoryItem = {
+      human: {
+        role: MessageType.human,
+        content: humanMessage,
+      },
+      ai: {
+        role: MessageType.ai,
+        content: "",
+        comment: "",
+      },
+      conversationId: "",
+    };
+    setChatHistory([...chatHistoryItems, chatHistoryItem]);
+    setHumanMessage("");
+    setInTypeWrite(true);
+    setIsSubmitting(true);
+    startLoading?.();
+
     // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
     if (appId === null) {
       const errorMessage: ErrorMessage = {
@@ -80,6 +101,7 @@ export const usePromptFormLogic = () => {
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setInTypeWrite(true);
+      stopLoading?.();
       return;
     }
 
@@ -105,26 +127,11 @@ export const usePromptFormLogic = () => {
       setHumanMessage("");
       setInTypeWrite(true);
       setIsSubmitting(false);
+      stopLoading?.();
       return;
     }
     const contractStatus = preCheckResult.contractStatus;
     const systemSettings = preCheckResult.systemSettings;
-
-    const chatHistoryItem: ChatHistoryItem = {
-      human: {
-        role: MessageType.human,
-        content: humanMessage,
-      },
-      ai: {
-        role: MessageType.ai,
-        content: "",
-        comment: "",
-      },
-      conversationId: "",
-    };
-    setChatHistory([...chatHistoryItems, chatHistoryItem]);
-    setHumanMessage("");
-    setInTypeWrite(true);
 
     // ユーザ発話の登録
     const resInsertConversation = await kintone.plugin.app.proxy(
@@ -148,6 +155,7 @@ export const usePromptFormLogic = () => {
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setInTypeWrite(true);
       setIsSubmitting(false);
+      stopLoading?.();
       return;
     }
     const conversationId = resJsonInsertConversation.conversationId;
@@ -174,6 +182,8 @@ export const usePromptFormLogic = () => {
     );
     setCallbackFuncs(callbacks);
 
+    stopLoading?.();
+
     chatHistoryItem.conversationId = conversationId;
     if (message.role === MessageType.ai) {
       chatHistoryItem.ai = message;
@@ -186,6 +196,7 @@ export const usePromptFormLogic = () => {
     }
     finishAiAnswerRef.current = true;
     setChatHistory([...chatHistoryItems, chatHistoryItem]);
+    setIsSubmitting(false);
   };
 
   const execCallbacks = () => {

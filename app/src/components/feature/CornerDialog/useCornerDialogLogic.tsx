@@ -2,6 +2,7 @@
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
 import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
+import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useChatHistory } from "~/hooks/useChatHistory";
@@ -21,6 +22,10 @@ export const useCornerDialogLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
 
   const { showToast } = useToast();
+  const { isLoading,
+    startLoading,
+    stopLoading
+  } = useLoadingLogic(false);
 
   const handleBannerClick = async () => {
     // 会話履歴一覧の取得
@@ -143,5 +148,8 @@ export const useCornerDialogLogic = () => {
     isBannerClicked,
     chatHistoryItems,
     setChatHistory,
+    isLoading,
+    startLoading,
+    stopLoading,
   };
 };
