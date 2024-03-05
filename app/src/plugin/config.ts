@@ -12,6 +12,7 @@ interface KintoneConfig {
 ((PLUGIN_ID: string) => {
   const apiEndpoint: string = import.meta.env.VITE_API_ENDPOINT;
   const openaiProxyApiEndpoint: string = import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT;
+  const openaiApiEndpoint: string = "https://api.openai.com/v1"
 
   // プラグインの設定情報を取得する
   const config = kintone.plugin.app.getConfig(PLUGIN_ID) as KintoneConfig;
@@ -73,11 +74,17 @@ interface KintoneConfig {
       "aa4k-plugin-version": __NPM_PACKAGE_VERSION__,
       "aa4k-subscription-id": subscriptionId,
       "aa4k-api-key": openaiApiKey,
-    } ;
+    };
+    // トライアル時のOpenAI連携時に[authorization](API Key)を秘匿して連携するためsetProxyConfigに設定
+    const openAiHeader = {
+      authorization: `Bearer ${openaiApiKey}`
+    }
     kintone.plugin.app.setProxyConfig(apiEndpoint, 'POST', header, {}, () => {
       kintone.plugin.app.setProxyConfig(openaiProxyApiEndpoint, 'POST', header, {}, () => {
-        // 設定画面で入力された情報の保存
-        kintone.plugin.app.setConfig(config);
+        kintone.plugin.app.setProxyConfig(`${openaiApiEndpoint}/chat`, 'POST', openAiHeader, {}, () => {
+          // 設定画面で入力された情報の保存
+          kintone.plugin.app.setConfig(config);
+        });
       });
     });
   };
@@ -113,7 +120,7 @@ interface KintoneConfig {
   async function getModels() {
     // OpenAI APIでモデル一覧を取得
     const [resBody, resStatus,] = await kintone.proxy(
-      "https://api.openai.com/v1/models",
+      `${openaiApiEndpoint}/models`,
       "GET",
       { Authorization: `Bearer ${elmOpenaiApiKey.value}`, },
       {},
