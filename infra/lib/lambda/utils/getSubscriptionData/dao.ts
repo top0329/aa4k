@@ -21,7 +21,7 @@ export const selectSubscription = async (dbClient: Client, subscriptionId: strin
   sql += ` , to_char(contract_start_date, 'YYYY-MM-DD') as contract_start_date`;
   sql += ` , to_char(contract_end_date, 'YYYY-MM-DD') as contract_end_date`;
   sql += ` from`;
-  sql += ` subscription`;
+  sql += ` m_subscription`;
   sql += ` where`;
   sql += ` subscription_id = $1`;
 

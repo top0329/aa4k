@@ -13,7 +13,7 @@ export const deleteTemplateCode = async (dbClient: Client, id: string) => {
   let sql = "";
   sql += `delete`;
   sql += ` from`;
-  sql += ` template_code`;
+  sql += ` m_template_code`;
   sql += ` where`;
   sql += ` template_code_id = $1`;
 

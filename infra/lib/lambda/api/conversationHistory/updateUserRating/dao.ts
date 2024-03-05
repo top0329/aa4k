@@ -15,7 +15,7 @@ export const updateUserRating = async (dbClient: Client, reqBody: UpdateUserRati
 
   let sql = "";
   sql += `update`;
-  sql += ` conversation_history`;
+  sql += ` t_conversation_history`;
   sql += ` set`;
   sql += ` user_rating = $1`;
   sql += ` where`;
@@ -38,7 +38,7 @@ export const updateUserRatingComment = async (dbClient: Client, reqBody: UpdateU
 
   let sql = "";
   sql += `update`;
-  sql += ` conversation_history`;
+  sql += ` t_conversation_history`;
   sql += ` set`;
   sql += ` user_rating_comment = $1`;
   sql += ` where`;

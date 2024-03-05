@@ -50,7 +50,7 @@ export const updateHandler = async (req: Request, res: Response) => {
       // --------------------
       // テンプレートコードTBL更新
       await updateTemplateCode(dbClient, templateCode.templateCodeId, templateCode.templateCode)
-      // langChain_EmbeddingTBL削除
+      // m_langChain_EmbeddingTBL削除
       await pgvectorStore.delete({ filter: { templateCodeId: templateCode.templateCodeId } })
 
       // --------------------

@@ -16,7 +16,7 @@ export const selectPluginVersion = async (dbClient: Client) => {
   sql += ` , patch_version`;
   sql += ` , concat_ws('.', major_version, minor_version, patch_version) as version`;
   sql += ` from`;
-  sql += ` plugin_versions`;
+  sql += ` m_plugin_version`;
   sql += ` where`;
   sql += ` is_disabled = $1`;
 

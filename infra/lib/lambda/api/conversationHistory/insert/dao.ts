@@ -25,7 +25,7 @@ export const insertConversationHistory = async (dbClient: Client, reqBody: Inser
   ];
   let sql = "";
   sql += `insert into`;
-  sql += ` conversation_history`;
+  sql += ` t_conversation_history`;
   sql += ` (`;
   sql += ` app_id`;
   sql += ` , user_id`;
@@ -62,7 +62,7 @@ export const updateAiConversationHistory = async (dbClient: Client, reqBody: Ins
 
   let sql = "";
   sql += `update`;
-  sql += ` conversation_history`;
+  sql += ` t_conversation_history`;
   sql += ` set`;
   sql += ` ai_message = $1`;
   sql += ` , ai_message_comment = $2`;
@@ -88,7 +88,7 @@ export const updateErrorConversationHistory = async (dbClient: Client, reqBody: 
 
   let sql = "";
   sql += `update`;
-  sql += ` conversation_history`;
+  sql += ` t_conversation_history`;
   sql += ` set`;
   sql += ` error_message = $1`;
   sql += ` , error_message_at = now()`;
