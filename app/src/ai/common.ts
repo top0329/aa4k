@@ -10,21 +10,19 @@ export class ContractStatusError extends Error { }
 
 /**
  * openAIモデルのインスタンス生成
+ * @param pluginId
  * @param contractStatus 
  * @returns new ChatOpenAI
  */
-export function openAIModel(contractStatus: ContractStatus) {
+export function openAIModel(pluginId: string, contractStatus: ContractStatus) {
   if (contractStatus === ContractStatus.trial) {
-    // プラグイン設定情報からAPIキーを取得
-    // const openAiApiKey = kintone.plugin.app.getConfig(pluginId) // TODO: プラグイン開発としての準備が整っていないためコメントアウト
-    const openAiApiKey = process.env.OPENAI_API_KEY;
 
     // トライアル契約
     return new ChatOpenAI({
       temperature: 0,
       modelKwargs: { "seed": 0 },
-      openAIApiKey: openAiApiKey,
-      modelName: "gpt-4-1106-preview",
+      modelName: kintone.plugin.app.getConfig(pluginId).targetModel,
+      openAIApiKey: "dummy",
     });
 
   } else if (contractStatus === ContractStatus.active) {
