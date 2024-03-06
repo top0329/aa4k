@@ -13,12 +13,14 @@ export class Aa4kSecretsStack extends cdk.Stack {
     // Azure OpenAI service Secret
     this.azureSecret = new secretsmanager.Secret(this, 'AzureOpenAISecret', {
       generateSecretString: {
-        // TODO: AA4k用のAzureOpeAIへの切り替え
+        // AA4k用のAzureOpeAIへの切り替え
+        // 注意：[azureOpenAIEmbeddingApiDeploymentName]は以下のOpenAIのモデル名と同じ名前でデプロイを作成して使用すること
+        // https://platform.openai.com/docs/models/embeddings
         secretStringTemplate: JSON.stringify({
-          azureOpenAIApiInstanceName: "kintone-copilot-demo",
-          azureOpenAIApiDeploymentName: "chat-default",
-          azureOpenAIApiVersion: "2023-07-01-preview",
-          azureOpenAIEmbeddingApiDeploymentName: "embedding-default",
+          azureOpenAIApiInstanceName: "aa4k-dev-east-us",
+          azureOpenAIApiDeploymentName: "gpt-4-0125-preview",
+          azureOpenAIApiVersion: "2024-02-15-preview",
+          azureOpenAIEmbeddingApiDeploymentName: "text-embedding-3-large",
           azureOpenAIEmbeddingApiVersion: "2023-05-15",
         }),
         generateStringKey: 'azureOpenAIApiKey',

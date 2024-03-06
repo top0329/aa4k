@@ -21,7 +21,7 @@ export function openAIModel(pluginId: string, contractStatus: ContractStatus) {
     return new ChatOpenAI({
       temperature: 0,
       modelKwargs: { "seed": 0 },
-      modelName: "gpt-4-1106-preview",
+      modelName: kintone.plugin.app.getConfig(pluginId).targetModel,
       openAIApiKey: "dummy",
     }, {
       fetch: fetcherWrapper(pluginId),

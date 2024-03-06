@@ -4,7 +4,7 @@ import { PGVectorStore } from "langchain/vectorstores/pgvector";
 import { AzureSecretValue } from "../../utils";
 
 interface pgVectorInitializeOptions {
-  azureSecretValue?: AzureSecretValue,
+  azureSecretValue: AzureSecretValue,
   openAiApiKey?: string,
 }
 
@@ -18,12 +18,12 @@ export const pgVectorInitialize = async (dbConfig: ClientConfig, options: pgVect
   let embeddings;
   if (options.openAiApiKey) {
     embeddings = new OpenAIEmbeddings({
-      modelName: "text-embedding-ada-002",
+      modelName: options.azureSecretValue.azureOpenAIEmbeddingApiDeploymentName,
       openAIApiKey: options.openAiApiKey,
     });
   } else if (options.azureSecretValue) {
     embeddings = new OpenAIEmbeddings({
-      modelName: "text-embedding-ada-002",
+      modelName: "dummy", // 使用するモデルは[azureOpenAIApiDeploymentName]に依存するため不要だが、仕様上必須のためセットしている
       azureOpenAIApiKey: options.azureSecretValue.azureOpenAIApiKey,
       azureOpenAIApiVersion: options.azureSecretValue.azureOpenAIEmbeddingApiVersion,
       azureOpenAIApiInstanceName: options.azureSecretValue.azureOpenAIApiInstanceName,
