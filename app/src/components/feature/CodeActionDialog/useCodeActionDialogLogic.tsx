@@ -11,8 +11,6 @@ import { ViewModeState } from '~/state/viewModeState';
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
 import { preCheck } from '~/util/preCheck';
 import { codeActionDialogTypeState, codeCheckStatusState, codeViolationsState, isCodeActionDialogState } from './CodeActionDialogState';
-import CodeCheck from './CodeCheck';
-import CodeFix from './CodeFix';
 
 export const useCodeActionDialogLogic = () => {
   const [
@@ -142,17 +140,6 @@ export const useCodeActionDialogLogic = () => {
     }
   }, [isCodeActionDialog]);
 
-  const content = (
-    <CodeActionDialogContent
-      dialogType={dialogType}
-      isLoading={isLoading}
-      codeCheckStatus={codeCheckStatus}
-      setIsCodeActionDialog={setIsCodeActionDialog}
-      codeViolations={codeViolations}
-      handleReflectClick={handleReflectClick}
-    />
-  );
-
   return {
     isLoading,
     codeViolations,
@@ -162,37 +149,7 @@ export const useCodeActionDialogLogic = () => {
     setDialogType,
     isCodeActionDialog,
     setIsCodeActionDialog,
-    content,
     preventCloseOnEsc,
     handleReflectClick,
   };
 };
-
-type CodeActionDialogContentProps = {
-  dialogType: CodeActionDialogType;
-  isLoading: boolean;
-  codeCheckStatus: CodeCheckStatus;
-  setIsCodeActionDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  codeViolations: string[];
-  handleReflectClick: () => Promise<void>;
-};
-
-const CodeActionDialogContent = ({ dialogType, isLoading, codeCheckStatus, setIsCodeActionDialog, codeViolations, handleReflectClick }: CodeActionDialogContentProps) => {
-  switch (dialogType) {
-    case CodeActionDialogType.CodeCheck:
-      return (<CodeCheck
-        isLoading={isLoading}
-        codeCheckStatus={codeCheckStatus}
-        setIsCodeActionDialog={setIsCodeActionDialog}
-        codeViolations={codeViolations}
-      />);
-    case CodeActionDialogType.CodeFix:
-      return (<CodeFix
-        setIsCodeActionDialog={setIsCodeActionDialog}
-        handleReflectClick={handleReflectClick}
-      />);
-    default:
-      const unexpected: never = dialogType
-      throw Error("想定されていないdialogTypeです. dialogType=", unexpected)
-  }
-}
