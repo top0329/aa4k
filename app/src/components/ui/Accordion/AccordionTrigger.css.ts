@@ -14,8 +14,13 @@ export const sAccordionHeader = style({
 export const sAccordionChevron = style({
   width: 32,
   height: 32,
+  borderRadius: `100%`,
   color: vars.color.grayDark.gray8,
   transition: "transform 300ms cubic-bezier(0.87, 0, 0.13, 1)",
+  backgroundColor: vars.color.grayA.grayA1,
+  ":hover": {
+    backgroundColor: vars.color.grayA.grayA4,
+  },
   selectors: {
     '[data-state="open"] &': {
       transform: "rotate(-180deg)",

@@ -5,9 +5,9 @@ import AccordionContent from '~/components/ui/Accordion/AccordionContent';
 import AccordionTrigger from '~/components/ui/Accordion/AccordionTrigger';
 import { ChatContent } from "~/components/ui/ChatContent/ChatContent";
 import { TypewriterEffect } from "~/components/ui/TypewriterEffect/TypewriterEffect";
+import { AiMessage, ChatHistoryItem, ErrorMessage } from '~/types/ai';
 import { sChatHistory, sChatHistoryItem } from './AccordionHistory.css';
 import { useAccordionHistoryLogic } from './useAccordionHistoryLogic';
-import { ChatHistoryItem, AiMessage, ErrorMessage } from '~/types/ai';
 
 type AccordionHistoryProps = {
   isLoading: boolean;
@@ -55,19 +55,22 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading })
       onValueChange={setActiveItem}
       collapsible
     >
-      {chatHistoryItems.map((item, index) => (
-        <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
-          <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item.human.content} />
-          <AccordionContent
-            style={{
-              padding: '0 16px'
-            }}
-          >
-            {showAiOrErrorMessage(item, index)}
-          </AccordionContent>
-        </Accordion.Item>
-      ))}
-    </Accordion.Root>
+      <Box pt={'4'}>
+        {chatHistoryItems.map((item, index) => (
+          <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
+            <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item.human.content} />
+            <AccordionContent
+              style={{
+                padding: '0 16px'
+              }}
+            >
+              {showAiOrErrorMessage(item, index)}
+            </AccordionContent>
+          </Accordion.Item>
+        ))
+        }
+      </Box>
+    </Accordion.Root >
   )
 }
 

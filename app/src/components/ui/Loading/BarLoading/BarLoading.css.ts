@@ -17,7 +17,6 @@ export const sBarContainer = style({
   width: "100%",
   height: "8px",
   backgroundColor: "#e0e0e0",
-  borderRadius: "4px",
   overflow: "hidden",
 });
 

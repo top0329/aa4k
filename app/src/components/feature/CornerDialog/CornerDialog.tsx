@@ -3,10 +3,10 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Flex } from "@radix-ui/themes";
 import logoSVG from "~/assets/logo.svg";
 import Dock from "~/components/feature/Dock/Dock.tsx";
+import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
 import "~/styles/scrollbar.css";
 import Chat from "../Chat/Chat.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
-import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
 import { DialogOverlay } from "./CornerDialog.css";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 

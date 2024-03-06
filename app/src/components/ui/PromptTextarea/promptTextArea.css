@@ -1,0 +1,7 @@
+/* https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/components/text-area.css
+overrride radix-ui-themes/src/components/text-area.css
+*/
+
+.rt-TextAreaInput {
+  color: var(--gray-11);
+}

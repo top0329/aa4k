@@ -16,7 +16,7 @@ type PromptFormProps = {
   isChangeCodeRef?: React.MutableRefObject<boolean>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({startLoading, stopLoading, isChangeCodeRef}) => {
+const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isChangeCodeRef }) => {
   const {
     isVoiceInput,
     isPcViewMode,

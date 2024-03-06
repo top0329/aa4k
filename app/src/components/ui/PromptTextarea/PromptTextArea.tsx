@@ -2,7 +2,7 @@
 import { TextArea } from '@radix-ui/themes';
 import React from 'react';
 import { useAutoResizeTextArea } from '~/hooks/useAutoResizeTextArea';
-import { StyledItem } from './PromptTextArea.css';
+import './PromptTextArea.css';
 
 type PromptTextAreaProps = {
   name: string;
@@ -23,7 +23,6 @@ export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, req
   return (
     <TextArea
       color={isPcViewMode ? 'iris' : 'cyan'}
-      className={StyledItem}
       size={'3'}
       id={name}
       name={name}

@@ -1,5 +1,6 @@
 // src/components/ui/Accordion/AccordionContent.tsx
 import * as Accordion from '@radix-ui/react-accordion';
+import { Box } from '@radix-ui/themes';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from "react";
 import { sAccordionContent, sAccordionContentText } from './AccordionContent.css';
@@ -16,7 +17,7 @@ const AccordionContent = forwardRef<HTMLDivElement, AccordionContentProps>(
       {...props}
       ref={forwardedRef}
     >
-      <div className={sAccordionContentText}>{children}</div>
+      <Box className={sAccordionContentText}>{children}</Box>
     </Accordion.Content>
   )
 );

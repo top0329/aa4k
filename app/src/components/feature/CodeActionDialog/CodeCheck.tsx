@@ -101,54 +101,59 @@ const CodeCheck: React.FC<CodeCheckProps> = ({
   </>
 
   const CautionStatus = () => <>
-    <Flex
-      py={'4'}
-      align={'center'}
-    >
-      <Text size={'1'} color='tomato'>
-        次のガイドライン違反の可能性がありますのでご注意ください。
-      </Text>
-    </Flex>
-    <ScrollArea scrollbars="vertical" style={{ height: 380 }}>
-      <Box
-        py={'4'}
-        style={{
-          background: vars.color.slate.slate2,
-        }}
-      >
-        <Flex
-          px={'5'}
-          direction={'column'}
-          gap={'0'}
-        >
-          {codeViolations.map((violation, index) => (
-            <Box key={index}>
-              <Text size={'2'} color={'gray'}>
-                {violation}
-              </Text>
-            </Box>
-          ))}
-        </Flex>
-      </Box>
-    </ScrollArea>
-    <Flex
-      width={'100%'}
-      pt={'5'}
-      align={'center'}
-      justify={'end'}
+    <Box
       style={{
-        gap: 16
+        width: 720,
+        maxWidth: '100%',
       }}
     >
-      <IconTooltipButton
-        icon={faClose}
-        tooltip={"閉じる"}
-        onClick={() => setIsCodeActionDialog(false)}
-        pressedColor={vars.color.grayA.grayA12}
-        defaultColor={vars.color.gray.gray10}
-      />
-
-    </Flex>
+      <Flex
+        py={'4'}
+        align={'center'}
+      >
+        <Text size={'2'} color='tomato'>
+          次のガイドライン違反の可能性がありますのでご注意ください。
+        </Text>
+      </Flex>
+      <ScrollArea scrollbars="vertical" style={{ height: 380 }}>
+        <Box
+          py={'4'}
+          style={{
+            background: vars.color.slate.slate2,
+          }}
+        >
+          <Flex px={'5'} direction={'column'} gap={'0'}>
+            {codeViolations.map((violation, index) => (
+              <Flex key={index} align={'start'} mb={'2'}>
+                <Text size={'3'} color={'gray'} mr={'2'}>
+                  {index + 1}.
+                </Text>
+                <Text size={'3'} color={'gray'}>
+                  {violation}
+                </Text>
+              </Flex>
+            ))}
+          </Flex>
+        </Box>
+      </ScrollArea>
+      <Flex
+        width={'100%'}
+        pt={'5'}
+        align={'center'}
+        justify={'end'}
+        style={{
+          gap: 16
+        }}
+      >
+        <IconTooltipButton
+          icon={faClose}
+          tooltip={"閉じる"}
+          onClick={() => setIsCodeActionDialog(false)}
+          pressedColor={vars.color.grayA.grayA12}
+          defaultColor={vars.color.gray.gray10}
+        />
+      </Flex>
+    </Box>
   </>
 
   switch (codeCheckStatus) {

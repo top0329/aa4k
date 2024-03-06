@@ -34,6 +34,7 @@
     ]
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans-jp": "^5.0.18",
     "@fortawesome/fontawesome-pro": "^6.5.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/pro-duotone-svg-icons": "^6.5.1",
