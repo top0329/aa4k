@@ -13,7 +13,6 @@ import { ViewModeState } from '~/state/viewModeState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
-import { callbackFuncsState, humanMessageState, voiceInputState, voiceInputVisibleState } from './PromptFormState';
 
 export const usePromptFormLogic = (
   startLoading?: () => void,
@@ -21,14 +20,14 @@ export const usePromptFormLogic = (
 ) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
-  const [humanMessage, setHumanMessage] = useAtom(humanMessageState);
+  const [humanMessage, setHumanMessage] = useState("");
+  const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
+  const [isVoiceInput,
+    setVoiceInput] = useState(false);
+  const [voiceInputVisible, setVoiceInputVisible] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [pluginId] = useAtom(PluginIdState);
-  const [isVoiceInput,
-    setVoiceInput] = useAtom(voiceInputState);
-  const [callbackFuncs, setCallbackFuncs] = useAtom(callbackFuncsState);
-  const [voiceInputVisible, setVoiceInputVisible] = useAtom(voiceInputVisibleState);
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
   const aiAnswerRef = useRef<string>('');

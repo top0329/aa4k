@@ -2,10 +2,10 @@
 import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { CodeLatestState, CodeState, IsChangeCodeState } from "~/components/feature/CodeEditor/CodeEditorState";
-import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage, InfoMessage } from "~/constants";
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
+import { DockItemVisibleState } from '~/state/dockItemState';
 import { ViewModeState } from '~/state/viewModeState';
 import { getKintoneCustomizeJs } from "~/util/kintoneCustomize";
 import { codeActionDialogTypeState, isCodeActionDialogState } from '../CodeActionDialog/CodeActionDialogState';

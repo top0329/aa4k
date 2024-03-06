@@ -1,11 +1,9 @@
 // src/components/ui/ErrorToast/ToastContext.tsx
 import * as RadixToast from "@radix-ui/react-toast";
 import { AnimatePresence } from "framer-motion";
-import { useAtom } from 'jotai';
-import { ReactNode, createContext, useCallback, useContext, useRef } from 'react';
+import { ReactNode, createContext, useCallback, useContext, useRef, useState } from 'react';
 import ErrorToast from './ErrorToast';
 import { sToastViewport } from "./ErrorToast.css";
-import { ToastMessage, toastMessagesState } from './ErrorToastState';
 
 type ToastContextType = {
   showToast: (message: string, timeout?: number, isTimeout?: boolean) => void;
@@ -15,12 +13,19 @@ type ErrorToastProviderProps = {
   children: ReactNode;
 } & ToastMessage;
 
+type ToastMessage = {
+  id?: string;
+  message?: string;
+  timeout?: number;
+  isTimeout?: boolean;
+}
+
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 // ToastMessage
 export const ErrorToastProvider = ({ children, ...props }: ErrorToastProviderProps) => {
   const { timeout, isTimeout } = props;
-  const [messages, setMessages] = useAtom(toastMessagesState);
+  const [messages, setMessages] = useState<ToastMessage[]>([]);
   const toastElementsMapRef = useRef(new Map());
 
   const showToast = useCallback((message: string, timeout = 3000, isTimeout = true) => {
