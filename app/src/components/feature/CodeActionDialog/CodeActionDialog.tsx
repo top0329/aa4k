@@ -5,18 +5,23 @@ import CodeFix from './CodeFix';
 import { sCodeActionDialog, sCodeActionDialogOverlay } from "./CodeActionDialog.css";
 import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 import { CodeActionDialogType, CodeCheckStatus } from "~/constants";
+import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 
-const CodeActionDialog = () => {
+const CodeActionDialog: React.FC<CodeActionDialogProps> = (
+  props
+) => {
+  const {
+    isCodeActionDialog,
+    setIsCodeActionDialog,
+    dialogType,
+  } = props;
   const {
     isLoading,
     codeViolations,
     codeCheckStatus,
-    dialogType,
-    isCodeActionDialog,
-    setIsCodeActionDialog,
     preventCloseOnEsc,
     handleReflectClick,
-  } = useCodeActionDialogLogic();
+  } = useCodeActionDialogLogic(props);
 
   type CodeActionDialogContentProps = {
     dialogType: CodeActionDialogType;

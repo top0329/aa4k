@@ -1,33 +1,22 @@
 // src/components/feature/CodeActionDialog/useCodeActionDialogLogic.tsx
 import { useAtom } from 'jotai';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { codeCheck } from '~/ai/codeCheck';
-import { CodeLatestState, CodeState, IsChangeCodeState } from '~/components/feature/CodeEditor/CodeEditorState';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
 import { CodeActionDialogType, CodeCheckStatus, DeviceDiv, ErrorCode, ErrorMessage } from "~/constants";
 import { PluginIdState } from '~/state/pluginIdState';
 import { ViewModeState } from '~/state/viewModeState';
+import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
 import { preCheck } from '~/util/preCheck';
-import { codeActionDialogTypeState, codeCheckStatusState, codeViolationsState, isCodeActionDialogState } from './CodeActionDialogState';
 
-export const useCodeActionDialogLogic = () => {
-  const [
-    dialogType,
-    setDialogType,
-  ] = useAtom(codeActionDialogTypeState);
-  const [isCodeActionDialog, setIsCodeActionDialog] = useAtom(isCodeActionDialogState);
-  const [
-    codeCheckStatus,
-    setCodeCheckStatus,
-  ] = useAtom(codeCheckStatusState);
-  const [codeViolations, setCodeViolations] = useAtom(codeViolationsState);
+export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
+  const [codeCheckStatus, setCodeCheckStatus] = useState<CodeCheckStatus>(CodeCheckStatus.loading);
+  const [codeViolations, setCodeViolations] = useState<string[]>([]);
   const [isPcViewMode] = useAtom(ViewModeState);
   const [pluginId] = useAtom(PluginIdState);
-  const [code] = useAtom(CodeState);
-  const [, setCodeLatest] = useAtom(CodeLatestState);
-  const [, setIsChangeCode] = useAtom(IsChangeCodeState);
+
   const { isLoading,
     startLoading,
     stopLoading
@@ -50,7 +39,7 @@ export const useCodeActionDialogLogic = () => {
 
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
-        setIsCodeActionDialog(false);
+        props.setIsCodeActionDialog(false);
         // トーストでエラーメッセージ表示
         showToast(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`, 0, false);
         return;
@@ -64,16 +53,16 @@ export const useCodeActionDialogLogic = () => {
       // --------------------
       // kintoneカスタマイズへの反映
       // --------------------
-      await updateKintoneCustomizeJs(code, targetFileKey, kintoneCustomizeFiles, appId, deviceDiv, isGuestSpace);
+      await updateKintoneCustomizeJs(props.code, targetFileKey, kintoneCustomizeFiles, appId, deviceDiv, isGuestSpace);
 
-      setIsCodeActionDialog(false);
-      setCodeLatest(code);
-      setIsChangeCode(false);
+      props.setIsCodeActionDialog(false);
+      props.setCodeLatest(props.code);
+      props.setIsChangeCode(false);
 
       // テスト環境へ遷移
       location.href = `/k/admin/preview/${appId}/`;
     } catch (err) {
-      setIsCodeActionDialog(false);
+      props.setIsCodeActionDialog(false);
       // トーストでエラーメッセージ表示
       showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
     }
@@ -87,7 +76,7 @@ export const useCodeActionDialogLogic = () => {
       // 事前チェックの呼び出し
       const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
       if (resPreCheckStatus !== 200) {
-        setIsCodeActionDialog(false);
+        props.setIsCodeActionDialog(false);
         // トーストでエラーメッセージ表示
         const errorMessage = preCheckResult.errorCode === ErrorCode.A02002
           ? `${ErrorMessage.E_MSG002}（${preCheckResult.errorCode}）`
@@ -101,13 +90,13 @@ export const useCodeActionDialogLogic = () => {
 
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
-        setIsCodeActionDialog(false);
+        props.setIsCodeActionDialog(false);
         // トーストでエラーメッセージ表示
         showToast(`${ErrorMessage.E_MSG003}（${ErrorCode.E00001}）`, 0, false);
         return;
       }
       // コードチェックの呼び出し
-      const resCodeCheck = await codeCheck(code, pluginId, contractStatus, appId, userId);
+      const resCodeCheck = await codeCheck(props.code, pluginId, contractStatus, appId, userId);
 
       switch (resCodeCheck.result) {
         case CodeCheckStatus.safe:
@@ -126,7 +115,7 @@ export const useCodeActionDialogLogic = () => {
           throw Error(`想定されていないcodeCheckStatusです。codeCheckStatus=${unexpected}`);
       }
     } catch (err) {
-      setIsCodeActionDialog(false);
+      props.setIsCodeActionDialog(false);
       // トーストでエラーメッセージ表示
       showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
     }
@@ -134,21 +123,17 @@ export const useCodeActionDialogLogic = () => {
   }
 
   useEffect(() => {
-    if (isCodeActionDialog && dialogType === CodeActionDialogType.CodeCheck) {
+    if (props.isCodeActionDialog && props.dialogType === CodeActionDialogType.CodeCheck) {
       // コードチェック実行
       executeCodeCheck();
     }
-  }, [isCodeActionDialog]);
+  }, [props.isCodeActionDialog]);
 
   return {
     isLoading,
     codeViolations,
     codeCheckStatus,
     setCodeCheckStatus,
-    dialogType,
-    setDialogType,
-    isCodeActionDialog,
-    setIsCodeActionDialog,
     preventCloseOnEsc,
     handleReflectClick,
   };

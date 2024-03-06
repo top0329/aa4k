@@ -1,24 +1,22 @@
 // src/components/feature/CodeEditor/useCodeEditorLogic.tsx
 import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
-import { CodeLatestState, CodeState, IsChangeCodeState } from "~/components/feature/CodeEditor/CodeEditorState";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage, InfoMessage } from "~/constants";
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 import { DockItemVisibleState } from '~/state/dockItemState';
 import { ViewModeState } from '~/state/viewModeState';
 import { getKintoneCustomizeJs } from "~/util/kintoneCustomize";
-import { codeActionDialogTypeState, isCodeActionDialogState } from '../CodeActionDialog/CodeActionDialogState';
 
 export const useCodeEditorLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
-  const [code, setCode] = useAtom(CodeState);
+  const [codeLatest, setCodeLatest] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [isChangeCode, setIsChangeCode] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
-  const [, setIsCodeActionDialog] = useAtom(isCodeActionDialogState);
-  const [, setDialogType] = useAtom(codeActionDialogTypeState);
-  const [codeLatest, setCodeLatest] = useAtom(CodeLatestState);
-  const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
+  const [isCodeActionDialog, setIsCodeActionDialog] = useState(false);
+  const [dialogType, setDialogType] = useState<CodeActionDialogType>("codeCheck");
 
   const { copyToClipboard, copySuccess } = useCopyToClipboard();
   const { showToast } = useToast();
@@ -107,10 +105,15 @@ export const useCodeEditorLogic = () => {
   }, [dockState.codeEditorVisible]);
 
   return {
-    code,
     copySuccess,
     isFullScreen,
-    setCode,
+    code,
+    setCodeLatest,
+    setIsChangeCode,
+    isCodeActionDialog,
+    setIsCodeActionDialog,
+    dialogType,
+    setDialogType,
     handleCodeEditorClick,
     handleRunCodeAction,
     handleCodeChange,
