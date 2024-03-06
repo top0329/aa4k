@@ -27,9 +27,21 @@ export class LlmError extends Error { }
 /**
  * kintoneカスタマイズJavascript生成
  * @param conversation 
+ * @param codeEditorVisible 
+ * @param isChangeCode 
+ * @param setCode 
+ * @param setCodeLatest 
+ * @param isChangeCodeRef 
  * @returns AiResponse
  */
-export const appCreateJs = async (conversation: Conversation): Promise<AiResponse> => {
+export const appCreateJs = async (
+  conversation: Conversation,
+  codeEditorVisible: boolean,
+  isChangeCode: boolean,
+  setCode: React.Dispatch<React.SetStateAction<string>>,
+  setCodeLatest: React.Dispatch<React.SetStateAction<string>>,
+  isChangeCodeRef?: React.MutableRefObject<boolean>
+): Promise<AiResponse> => {
   const callbackFuncs: Function[] = [];
   const appCreateJsContext = conversation.context as AppCreateJsContext;
   const { appId, userId, conversationId, deviceDiv, isGuestSpace, pluginId } = appCreateJsContext;
@@ -77,14 +89,26 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
     const currentUrl = location.href;
     if (currentUrl.includes(redirectPath)) {
       // プレビュー画面の場合
-      callbackFuncs.push(() => { (location.href = redirectPath) });
+      callbackFuncs.push(createPreviewEnvCallbackFunc({
+        redirectPath,
+        codeEditorVisible,
+        isChangeCode,
+        formattedCode,
+        setCode,
+        setCodeLatest,
+        isChangeCodeRef
+      }));
     } else {
       // 本番画面の場合
-      callbackFuncs.push(() => {
-        if (window.confirm(`${InfoMessage.I_MSG001}`)) {
-          (location.href = redirectPath)
-        }
-      });
+      callbackFuncs.push(createProdEnvCallbackFunc({
+        redirectPath,
+        codeEditorVisible,
+        isChangeCode,
+        formattedCode,
+        setCode,
+        setCodeLatest,
+        isChangeCodeRef
+      }));
     }
 
     // 終了
@@ -108,6 +132,82 @@ export const appCreateJs = async (conversation: Conversation): Promise<AiRespons
       return { message: { role: MessageType.error, content: message } }
     }
   }
+}
+
+type CreateCallbackFuncProps = {
+  redirectPath: string;
+  codeEditorVisible: boolean;
+  isChangeCode: boolean;
+  formattedCode: string;
+  setCode: React.Dispatch<React.SetStateAction<string>>;
+  setCodeLatest: React.Dispatch<React.SetStateAction<string>>;
+  isChangeCodeRef?: React.MutableRefObject<boolean>;
+}
+
+/**
+ * プレビュー画面の場合のコールバック関数を作成
+ * @param redirectPath 
+ * @param codeEditorVisible 
+ * @param isChangeCode 
+ * @param isChangeCodeRef 
+ */
+const createPreviewEnvCallbackFunc = ({redirectPath, codeEditorVisible, isChangeCode, isChangeCodeRef}: CreateCallbackFuncProps) => {
+  const previewEnvCallbackFunc = () =>{
+    if (codeEditorVisible && isChangeCode) {
+      // コードエディタのコードが編集されていたら、確認モーダルを表示
+      if (window.confirm(`${InfoMessage.I_MSG002}`)) {
+        if (isChangeCodeRef) {
+          isChangeCodeRef.current = false;
+        }
+        // テスト環境画面に遷移する
+        (location.href = redirectPath)
+      }
+    } else {
+      // テスト環境画面に遷移する
+      (location.href = redirectPath)
+    }
+  }
+
+  return previewEnvCallbackFunc;
+}
+
+/**
+ * 本番画面の場合のコールバック関数を作成
+ * @param redirectPath 
+ * @param codeEditorVisible 
+ * @param isChangeCode 
+ * @param isChangeCodeRef 
+ */
+const createProdEnvCallbackFunc = ({redirectPath, codeEditorVisible, isChangeCode, formattedCode, setCode, setCodeLatest, isChangeCodeRef}: CreateCallbackFuncProps) => {
+  const prodEnvCallbackFunc = () => {
+    // 画面遷移の確認モーダルを表示
+    if (window.confirm(`${InfoMessage.I_MSG001}`)) {
+      if (codeEditorVisible && isChangeCode) {
+        // コードエディタのコードが編集されていたら、確認モーダルを表示
+        if (window.confirm(`${InfoMessage.I_MSG002}`)) {
+          if (isChangeCodeRef) {
+            isChangeCodeRef.current = false;
+          }
+          // テスト環境画面に遷移する
+          (location.href = redirectPath)
+        }
+      } else {
+        (location.href = redirectPath)
+      }
+    } else {
+      if (codeEditorVisible) {
+        // コードエディタ表示中の場合、、確認モーダルを表示
+        const infoMessage = isChangeCode ? `${InfoMessage.I_MSG007}` : `${InfoMessage.I_MSG006}`;
+        if (window.confirm(infoMessage)) {
+          // 作成したJavaScriptに置き換え
+          setCode(formattedCode);
+          setCodeLatest(formattedCode);
+        }
+      }
+    }
+  }
+
+  return prodEnvCallbackFunc;
 }
 
 

@@ -10,9 +10,10 @@ type ChatProps = {
   isLoading: boolean;
   startLoading?: () => void;
   stopLoading?: () => void;
+  isChangeCodeRef: React.MutableRefObject<boolean>;
 }
 
-const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading}) => {
+const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChangeCodeRef}) => {
   return (
     <Box className={sChat} >
       <ScrollToBottom
@@ -29,7 +30,7 @@ const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading}) => {
           <AccordionHistory isLoading={isLoading} />
         </Box>
       </ScrollToBottom>
-      <PromptForm startLoading={startLoading} stopLoading={stopLoading} />
+      <PromptForm startLoading={startLoading} stopLoading={stopLoading} isChangeCodeRef={isChangeCodeRef} />
     </Box>
   );
 };

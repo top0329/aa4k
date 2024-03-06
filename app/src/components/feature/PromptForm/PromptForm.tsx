@@ -13,24 +13,25 @@ import { usePromptFormLogic } from "./usePromptFormLogic";
 type PromptFormProps = {
   startLoading?: () => void;
   stopLoading?: () => void;
+  isChangeCodeRef?: React.MutableRefObject<boolean>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({startLoading, stopLoading}) => {
+const PromptForm: React.FC<PromptFormProps> = ({startLoading, stopLoading, isChangeCodeRef}) => {
   const {
     isVoiceInput,
     isPcViewMode,
-    setIsPcViewMode,
     humanMessage,
     handleSubmit,
     handleKeyDown,
     handleVoiceInput,
     handleHumanMessageChange,
+    handleViewModeChange,
     isSubmitting,
     execCallbacks,
     voiceInputVisible,
     aiAnswerRef,
     finishAiAnswerRef,
-  } = usePromptFormLogic(startLoading, stopLoading);
+  } = usePromptFormLogic(startLoading, stopLoading, isChangeCodeRef);
   const { isSpeech } = useTextSpeech(
     aiAnswerRef,
     finishAiAnswerRef,
@@ -107,7 +108,7 @@ const PromptForm: React.FC<PromptFormProps> = ({startLoading, stopLoading}) => {
                   : 'cyan'
               }
               checked={!isPcViewMode}
-              onCheckedChange={() => setIsPcViewMode(!isPcViewMode)}
+              onCheckedChange={handleViewModeChange}
               disabled={isSubmitting}
             />
 

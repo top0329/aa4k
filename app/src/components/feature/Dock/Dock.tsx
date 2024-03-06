@@ -14,7 +14,7 @@ const Dock = () => {
     isPcViewMode,
     activeChatMode,
     toggleChatVisibility,
-    initDockState,
+    handleDockClose,
   } = useDockLogic();
   const { handleCodeEditorClick } = useCodeEditorLogic();
 
@@ -45,7 +45,7 @@ const Dock = () => {
         <IconTooltipButton
           icon={faClose}
           tooltip={'閉じる'}
-          onClick={initDockState}
+          onClick={handleDockClose}
           className={DockItem} />
       </Flex>
     </Box>

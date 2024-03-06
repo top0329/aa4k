@@ -21,7 +21,11 @@ import { vars } from '~/styles/theme.css';
 import { sCodeEditor, sCodeEditorFullScreen } from './CodeEditor.css';
 import { useCodeEditorLogic } from './useCodeEditorLogic';
 
-const CodeEditor = () => {
+type CodeEditorProps = {
+  isChangeCodeRef: React.MutableRefObject<boolean>;
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef}) => {
   const {
     copySuccess,
     isFullScreen,
@@ -37,7 +41,7 @@ const CodeEditor = () => {
     copyToClipboard,
     handleRunCodeAction,
     handleRefreshClick
-  } = useCodeEditorLogic();
+  } = useCodeEditorLogic(isChangeCodeRef);
   const [isPcViewMode] = useAtom(ViewModeState);
 
   const codeActionDialogProps = {
@@ -166,8 +170,10 @@ const CodeEditor = () => {
               <Button variant='soft' color='crimson' size={'3'}
                 onClick={() => handleRunCodeAction(CodeActionDialogType.CodeCheck)}
                 style={{
-                  cursor: 'pointer',
-                }}>
+                  cursor: !code ? 'not-allowed' : 'pointer',
+                }}
+                disabled={!code}
+              >
                 チェック
               </Button>
               <Button variant='classic' color={
@@ -177,8 +183,10 @@ const CodeEditor = () => {
               } size={'3'}
                 onClick={() => handleRunCodeAction(CodeActionDialogType.CodeFix)}
                 style={{
-                  cursor: 'pointer',
-                }}>
+                  cursor: !code ? 'not-allowed' : 'pointer',
+                }}
+                disabled={!code}
+              >
                 反映
               </Button>
             </Flex>

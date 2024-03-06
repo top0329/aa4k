@@ -1,6 +1,6 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
@@ -20,6 +20,9 @@ export const useCornerDialogLogic = () => {
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
+
+  // Ref
+  const isChangeCodeRef = useRef<boolean>(false); // コード編集中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
 
   const { showToast } = useToast();
   const { isLoading,
@@ -151,5 +154,6 @@ export const useCornerDialogLogic = () => {
     isLoading,
     startLoading,
     stopLoading,
+    isChangeCodeRef,
   };
 };

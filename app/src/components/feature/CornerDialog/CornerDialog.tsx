@@ -11,7 +11,15 @@ import { DialogOverlay } from "./CornerDialog.css";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
 const CornerDialog = () => {
-  const { dockState, handleBannerClick, isBannerClicked, isLoading, startLoading, stopLoading } = useCornerDialogLogic();
+  const {
+    dockState,
+    handleBannerClick,
+    isBannerClicked,
+    isLoading,
+    startLoading,
+    stopLoading,
+    isChangeCodeRef
+  } = useCornerDialogLogic();
 
   return (
     <Dialog.Root open={dockState.dialogVisible}>
@@ -26,11 +34,11 @@ const CornerDialog = () => {
       <Dialog.Content onPointerDownOutside={(e) => e.preventDefault()}>
 
         {dockState.codeEditorVisible && (
-          <CodeEditor />
+          <CodeEditor isChangeCodeRef={isChangeCodeRef} />
         )}
 
         {dockState.chatVisible && (
-          <Chat isLoading={isLoading} startLoading={startLoading} stopLoading={stopLoading} />
+          <Chat isLoading={isLoading} startLoading={startLoading} stopLoading={stopLoading} isChangeCodeRef={isChangeCodeRef} />
         )}
         <BarLoading isLoading={isLoading} />
         <Dock />

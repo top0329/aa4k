@@ -7,6 +7,8 @@ import SpeechRecognition, {
 import { appCreateJs } from '~/ai/appCreateJs';
 import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
 import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
+import { CodeState, CodeLatestState, IsChangeCodeState } from '~/state/codeActionState';
+import { DockItemVisibleState } from "~/state/dockItemState";
 import { InTypeWriteState } from '~/state/inTypeWriteState';
 import { PluginIdState } from '~/state/pluginIdState';
 import { ViewModeState } from '~/state/viewModeState';
@@ -17,6 +19,7 @@ import { preCheck } from '~/util/preCheck';
 export const usePromptFormLogic = (
   startLoading?: () => void,
   stopLoading?: () => void,
+  isChangeCodeRef?: React.MutableRefObject<boolean>
 ) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
@@ -25,6 +28,10 @@ export const usePromptFormLogic = (
   const [isVoiceInput,
     setVoiceInput] = useState(false);
   const [voiceInputVisible, setVoiceInputVisible] = useState(true);
+  const [dockState, setDockState] = useAtom(DockItemVisibleState);
+  const [, setCode] = useAtom(CodeState);
+  const [, setCodeLatest] = useAtom(CodeLatestState);
+  const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [pluginId] = useAtom(PluginIdState);
@@ -178,7 +185,12 @@ export const usePromptFormLogic = (
           systemSettings: systemSettings,
           pluginId: pluginId,
         },
-      }
+      },
+      dockState.codeEditorVisible,
+      isChangeCode,
+      setCode,
+      setCodeLatest,
+      isChangeCodeRef
     );
     setCallbackFuncs(callbacks);
 
@@ -224,6 +236,23 @@ export const usePromptFormLogic = (
     setHumanMessage(e.target.value);
     // 現在のテキストエリアの文字列を保存
     setCurrentHumanMessage(e.target.value);
+  }
+
+  // PC/SP切り替え時の処理
+  const handleViewModeChange = () => {
+    if (dockState.codeEditorVisible && isChangeCode) {
+      // 編集中の編集モーダルを表示している場合、確認モーダルを表示
+      if (window.confirm(InfoMessage.I_MSG002)) {
+        setIsPcViewMode(!isPcViewMode);
+        setIsChangeCode(false);
+        setDockState(dockState => ({ ...dockState, codeEditorVisible: false }));
+      }
+    } else if (dockState.codeEditorVisible && !isChangeCode) {
+      setIsPcViewMode(!isPcViewMode);
+      setDockState(dockState => ({ ...dockState, codeEditorVisible: false }));
+    } else {
+      setIsPcViewMode(!isPcViewMode);
+    }
   }
 
   useEffect(() => {
@@ -287,6 +316,7 @@ export const usePromptFormLogic = (
     handleKeyDown,
     handleVoiceInput,
     handleHumanMessageChange,
+    handleViewModeChange,
     isSubmitting,
     execCallbacks,
     voiceInputVisible,
