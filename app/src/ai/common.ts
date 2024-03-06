@@ -10,21 +10,21 @@ export class ContractStatusError extends Error { }
 
 /**
  * openAIモデルのインスタンス生成
+ * @param pluginId
  * @param contractStatus 
  * @returns new ChatOpenAI
  */
-export function openAIModel(contractStatus: ContractStatus) {
+export function openAIModel(pluginId: string, contractStatus: ContractStatus) {
   if (contractStatus === ContractStatus.trial) {
-    // プラグイン設定情報からAPIキーを取得
-    // const openAiApiKey = kintone.plugin.app.getConfig(pluginId) // TODO: プラグイン開発としての準備が整っていないためコメントアウト
-    const openAiApiKey = process.env.OPENAI_API_KEY;
 
     // トライアル契約
     return new ChatOpenAI({
       temperature: 0,
       modelKwargs: { "seed": 0 },
-      openAIApiKey: openAiApiKey,
       modelName: "gpt-4-1106-preview",
+      openAIApiKey: "dummy",
+    }, {
+      fetch: fetcherWrapper(pluginId),
     });
 
   } else if (contractStatus === ContractStatus.active) {
@@ -36,7 +36,7 @@ export function openAIModel(contractStatus: ContractStatus) {
       openAIApiKey: "dummy",  // proxyに任せるのでこの値は不要だが、LangChainの仕様上必須のためセットしている
     }, {
       baseURL: `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/openai_proxy/`,
-      fetch: kintoneProxyFetcher,
+      fetch: fetcherWrapper(pluginId),
     });
   } else if (contractStatus === ContractStatus.expired) {
     throw new ContractExpiredError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00002}）`)
@@ -68,47 +68,56 @@ export async function getCodingGuidelines() {
 
 
 /**
- * Langchainで使用されるfetchのカスタム
- *     kintone.proxyを使用してLambda-openai-proxyにアクセス
- * @param url 
- * @param init 
- * @returns response
+ * カスタムFetcherのWrapper
+ *     pluginIdを渡すためWrapper
+ * @param pluginId 
+ * @returns kintoneProxyFetcher
  */
-const kintoneProxyFetcher: Fetch = async (url, init?) => {
+const fetcherWrapper = (pluginId: string) => {
+  /**
+   * Langchainで使用されるfetchのカスタム
+   *     kintone.plugin.app.proxyを使用してLambda-openai-proxyにアクセス
+   * @param url 
+   * @param init 
+   * @returns response
+   */
+  const kintoneProxyFetcher: Fetch = async (url, init?) => {
 
-  if (!init?.method) throw new Error(`OpenAIリクエストのmethodが指定されていません`)
+    if (!init?.method) throw new Error(`OpenAIリクエストのmethodが指定されていません`)
 
-  // headers設定
-  const reqHeaders: Record<string, string> = {};
-  // 既存のヘッダーを新しいheadersオブジェクトにコピー（content-lengthを除外）
-  for (const [key, value] of Object.entries(init?.headers || {})) {
-    // 下記のkintoneドキュメントより、「Content-Length」と「Transfer-Encoding」の除外が必要
-    // https://cybozu.dev/ja/kintone/docs/js-api/proxy/kintone-proxy/
-    if (key.toLowerCase() !== 'content-length') {
-      reqHeaders[key] = value;
+    // headers設定
+    const reqHeaders: Record<string, string> = {};
+    // 既存のヘッダーを新しいheadersオブジェクトにコピー（content-lengthを除外）
+    for (const [key, value] of Object.entries(init?.headers || {})) {
+      // 下記のkintoneドキュメントより、「Content-Length」と「Transfer-Encoding」の除外が必要
+      // https://cybozu.dev/ja/kintone/docs/js-api/proxy/kintone-proxy/
+      if (key.toLowerCase() !== 'content-length') {
+        reqHeaders[key] = value;
+      }
     }
+
+    // kintone.plugin.app.proxyにオブジェクトで渡すため、init.bodyをオブジェクト型に変換
+    const reqBody = JSON.parse(init?.body ? init.body.toString() : "{}");
+
+    // API連携
+    const resProxy = await kintone.plugin.app.proxy(
+      pluginId,
+      url.toString(),
+      init.method.toUpperCase(),
+      reqHeaders,
+      reqBody,
+    ) as KintoneProxyResponse;
+    const [resBody, resStatus, resHeaders] = resProxy;
+
+    // Fetchに合わせるため、Responseオブジェクトを設定
+    const response = new Response(resBody, {
+      status: resStatus,
+      headers: resHeaders
+    });
+
+    return response;
   }
-  // 新しいヘッダーを追加 TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
-  reqHeaders['aa4k-plugin-version'] = '1.0.0';
-  reqHeaders['aa4k-subscription-id'] = '2c2a93dc-4418-ba88-0f89-6249767be821';
-
-  // kintone.proxyにオブジェクトで渡すため、init.bodyをオブジェクト型に変換
-  const reqBody = JSON.parse(init?.body ? init.body.toString() : "{}");
-
-  // API連携
-  const resProxy = await kintone.proxy(
-    url.toString(),
-    init.method.toUpperCase(),
-    reqHeaders,
-    reqBody,
-  ) as KintoneProxyResponse;
-  const [resBody, resStatus, resHeaders] = resProxy;
-
-  // Fetchに合わせるため、Responseオブジェクトを設定
-  const response = new Response(resBody, {
-    status: resStatus,
-    headers: resHeaders
-  });
-
-  return response;
+  return kintoneProxyFetcher;
 }
+
+

@@ -176,6 +176,7 @@ export const usePromptFormLogic = (
           contractStatus: contractStatus,
           isGuestSpace: isGuest,
           systemSettings: systemSettings,
+          pluginId: pluginId,
         },
       }
     );

@@ -54,6 +54,7 @@ export interface AppCreateJsContext {
   contractStatus: ContractStatus;
   isGuestSpace: boolean;
   systemSettings: SystemSettings;
+  pluginId: string;
 }
 export interface Conversation {
   message: HumanMessage;
