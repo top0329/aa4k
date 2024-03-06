@@ -14,7 +14,7 @@ export const insertTemplateCode = async (dbClient: Client, id: string, code: str
   ]
   let sql = "";
   sql += `insert into`;
-  sql += ` template_code`;
+  sql += ` m_template_code`;
   sql += ` (`;
   sql += ` template_code_id`;
   sql += ` , template_code`;

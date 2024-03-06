@@ -38,9 +38,9 @@ export const pgVectorInitialize = async (dbConfig: ClientConfig, options: pgVect
     embeddings,
     {
       postgresConnectionOptions: dbConfig,
-      collectionTableName: "langchain_embedding_collection",
+      collectionTableName: "m_langchain_embedding_collection",
       collectionName: "kintone_codeTemplate",
-      tableName: "langchain_embedding",
+      tableName: "m_langchain_embedding",
       columns: {
         idColumnName: "id",
         vectorColumnName: "vector",

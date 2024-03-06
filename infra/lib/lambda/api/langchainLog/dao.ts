@@ -26,7 +26,7 @@ export const insertLangchainProcessLog = async (dbClient: Client, props: InsertL
   ]
   let sql = "";
   sql += `insert into`;
-  sql += ` langchain_process_logs`;
+  sql += ` t_langchain_process_logs`;
   sql += ` (`;
   sql += ` subscription_id`;
   sql += ` , app_id`

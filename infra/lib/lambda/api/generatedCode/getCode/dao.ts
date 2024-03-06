@@ -23,7 +23,7 @@ export const selectLatestJavascriptCode = async (dbClient: Client, reqBody: GetC
   sql += `select`;
   sql += ` javascript_code`;
   sql += ` from`;
-  sql += ` conversation_history`;
+  sql += ` t_conversation_history`;
   sql += ` where`;
   sql += ` app_id = $1`;
   sql += ` and user_id = $2`;
