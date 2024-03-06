@@ -1,12 +1,14 @@
 // src/components/feature/Dock/useDockLogic.tsx
 import { useAtom } from "jotai";
+import { useState } from "react";
 import { ChatMode } from "~/constants";
+import { DockItemVisibleState } from "~/state/dockItemState";
 import { ViewModeState } from "~/state/viewModeState";
-import { DockItemVisibleState, activeChatModeState } from "./DockState";
+
 
 export const useDockLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
-  const [activeChatMode, setActiveChatMode] = useAtom(activeChatModeState);
+  const [activeChatMode, setActiveChatMode] = useState<ChatMode>(ChatMode.desktopChat);
   const [isPcViewMode] = useAtom(ViewModeState);
 
   const toggleItemVisibility = (itemKey: keyof typeof dockState) => {

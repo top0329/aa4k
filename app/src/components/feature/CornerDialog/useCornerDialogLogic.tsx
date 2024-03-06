@@ -1,11 +1,11 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
-import { DockItemVisibleState } from '~/components/feature/Dock/DockState';
-import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
+import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useChatHistory } from "~/hooks/useChatHistory";
+import { DockItemVisibleState } from "~/state/dockItemState";
 import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
 import { PluginIdState } from "~/state/pluginIdState";
 import { ViewModeState } from "~/state/viewModeState";

@@ -14,7 +14,7 @@ export const updateTemplateCode = async (dbClient: Client, id: string, code: str
   ]
   let sql = "";
   sql += `update`;
-  sql += ` template_code`;
+  sql += ` m_template_code`;
   sql += ` set`;
   sql += ` template_code = $1`;
   sql += ` , update_at = now()`;

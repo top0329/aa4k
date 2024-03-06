@@ -25,8 +25,8 @@ const kintoneMocks = {
   }),
   plugin: {
     app: {
-      proxy: async (pluguinId: string, url: string) => {
-        console.log({ url })
+      proxy: async (_pluguinId: string, url: string) => {
+        console.log({ url });
         // Mock your response based on the request URL, method, headers, and body
         if (url.includes("/pre_check")) {
           const mockPreCheckResponse: PreCheckResponseBody = {
@@ -44,25 +44,26 @@ const kintoneMocks = {
           ];
         }
         if (url.includes("/conversation_history/list")) {
-          const mockConversationHistoryList: ConversationHistoryListResponseBody = {
-            message: "Success",
-            errorCode: "A01001",
-            desktopConversationHistoryList: [
-              {
-                id: "1",
-                user_message: "How can I reset my password?",
-                ai_message:
-                  "You can reset your password by clicking the 'Forgot Password' link on the login page.",
-                ai_message_comment: "Standard procedure for password reset.",
-                error_message: "",
-                user_rating: "good",
-              },
-              // Add more mock records as needed
-            ],
-            mobileConversationHistoryList: [
-              // Optionally, you can mock different data for mobile, or replicate desktop
-            ],
-          };
+          const mockConversationHistoryList: ConversationHistoryListResponseBody =
+            {
+              message: "Success",
+              errorCode: "A01001",
+              desktopConversationHistoryList: [
+                {
+                  id: "1",
+                  user_message: "How can I reset my password?",
+                  ai_message:
+                    "You can reset your password by clicking the 'Forgot Password' link on the login page.",
+                  ai_message_comment: "Standard procedure for password reset.",
+                  error_message: "",
+                  user_rating: "good",
+                },
+                // Add more mock records as needed
+              ],
+              mobileConversationHistoryList: [
+                // Optionally, you can mock different data for mobile, or replicate desktop
+              ],
+            };
 
           const resConversationHistory: KintoneProxyResponse = [
             JSON.stringify(mockConversationHistoryList), // Response body as a string
@@ -81,7 +82,7 @@ const kintoneMocks = {
         ];
         // You can add more conditions to mock different endpoints with different responses
       },
-    }
+    },
   },
   api: Object.assign(
     async (url: string) => {

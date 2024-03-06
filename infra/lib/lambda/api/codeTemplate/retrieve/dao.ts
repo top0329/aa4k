@@ -13,7 +13,7 @@ export const selectTemplateCode = async (dbClient: Client, id: string) => {
   let sql = "";
   sql += `select template_code`;
   sql += ` from`;
-  sql += ` template_code`;
+  sql += ` m_template_code`;
   sql += ` where`;
   sql += ` template_code_id = $1`;
 

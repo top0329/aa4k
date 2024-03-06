@@ -4,6 +4,7 @@ import { Document } from "langchain/document"
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 
 export interface LangchainLogsInsertCallbackHandlerProps {
+  pluginId: string;
   sessionId: string;
   appId: number;
   userId: string;
@@ -275,11 +276,12 @@ export const langchainLogInsert = (props: LangchainLogsInsertCallbackHandlerProp
     metadata_extra_params: metadataExtraParams,
     tokens: tokens,
   }
-  // TODO: 「kintone.plugin.app.proxy」でAPI連携する必要がある（プラグイン開発としての準備が整っていないため暫定的に「kintone.proxy」を使用
-  kintone.proxy(
+
+  kintone.plugin.app.proxy(
+    props.pluginId,
     `${import.meta.env.VITE_API_ENDPOINT}/langchain_log`,
     "POST",
-    { "aa4k-plugin-version": "1.0.0", "aa4k-subscription-id": "2c2a93dc-4418-ba88-0f89-6249767be821" }, // TODO: 暫定的に設定、本来はkintoneプラグインで自動的に設定される
+    {},
     body,
   );
 }

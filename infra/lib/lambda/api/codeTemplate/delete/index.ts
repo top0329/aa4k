@@ -48,7 +48,7 @@ export const deleteHandler = async (req: Request, res: Response) => {
       // --------------------
       // テンプレートコードTBL削除
       await deleteTemplateCode(dbClient, templateCodeId)
-      // langChain_EmbeddingTBL削除
+      // m_langChain_EmbeddingTBL削除
       await pgvectorStore.delete({ filter: { templateCodeId: templateCodeId } })
     }
 

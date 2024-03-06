@@ -1,15 +1,62 @@
 // src/components/feature/CodeActionDialog/CodeActionDialog.tsx
 import * as Dialog from "@radix-ui/react-dialog";
+import CodeCheck from './CodeCheck';
+import CodeFix from './CodeFix';
 import { sCodeActionDialog, sCodeActionDialogOverlay } from "./CodeActionDialog.css";
 import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
+import { CodeActionDialogType, CodeCheckStatus } from "~/constants";
 
 const CodeActionDialog = () => {
   const {
-    content,
+    isLoading,
+    codeViolations,
+    codeCheckStatus,
+    dialogType,
     isCodeActionDialog,
     setIsCodeActionDialog,
     preventCloseOnEsc,
+    handleReflectClick,
   } = useCodeActionDialogLogic();
+
+  type CodeActionDialogContentProps = {
+    dialogType: CodeActionDialogType;
+    isLoading: boolean;
+    codeCheckStatus: CodeCheckStatus;
+    setIsCodeActionDialog: React.Dispatch<React.SetStateAction<boolean>>;
+    codeViolations: string[];
+    handleReflectClick: () => Promise<void>;
+  };
+
+  const CodeActionDialogContent = ({ dialogType, isLoading, codeCheckStatus, setIsCodeActionDialog, codeViolations, handleReflectClick }: CodeActionDialogContentProps) => {
+    switch (dialogType) {
+      case CodeActionDialogType.CodeCheck:
+        return (<CodeCheck
+          isLoading={isLoading}
+          codeCheckStatus={codeCheckStatus}
+          setIsCodeActionDialog={setIsCodeActionDialog}
+          codeViolations={codeViolations}
+        />);
+      case CodeActionDialogType.CodeFix:
+        return (<CodeFix
+          setIsCodeActionDialog={setIsCodeActionDialog}
+          handleReflectClick={handleReflectClick}
+        />);
+      default:
+        const unexpected: never = dialogType
+        throw Error("想定されていないdialogTypeです. dialogType=", unexpected)
+    }
+  }
+
+  const content = (
+    <CodeActionDialogContent
+      dialogType={dialogType}
+      isLoading={isLoading}
+      codeCheckStatus={codeCheckStatus}
+      setIsCodeActionDialog={setIsCodeActionDialog}
+      codeViolations={codeViolations}
+      handleReflectClick={handleReflectClick}
+    />
+  );
 
   return (
     <Dialog.Root open={isCodeActionDialog} onOpenChange={setIsCodeActionDialog}>
