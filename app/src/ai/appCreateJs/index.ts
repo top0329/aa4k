@@ -151,8 +151,8 @@ type CreateCallbackFuncProps = {
  * @param isChangeCode 
  * @param isChangeCodeRef 
  */
-const createPreviewEnvCallbackFunc = ({redirectPath, codeEditorVisible, isChangeCode, isChangeCodeRef}: CreateCallbackFuncProps) => {
-  const previewEnvCallbackFunc = () =>{
+const createPreviewEnvCallbackFunc = ({ redirectPath, codeEditorVisible, isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
+  const previewEnvCallbackFunc = () => {
     if (codeEditorVisible && isChangeCode) {
       // コードエディタのコードが編集されていたら、確認モーダルを表示
       if (window.confirm(`${InfoMessage.I_MSG002}`)) {
@@ -178,7 +178,7 @@ const createPreviewEnvCallbackFunc = ({redirectPath, codeEditorVisible, isChange
  * @param isChangeCode 
  * @param isChangeCodeRef 
  */
-const createProdEnvCallbackFunc = ({redirectPath, codeEditorVisible, isChangeCode, formattedCode, setCode, setCodeLatest, isChangeCodeRef}: CreateCallbackFuncProps) => {
+const createProdEnvCallbackFunc = ({ redirectPath, codeEditorVisible, isChangeCode, formattedCode, setCode, setCodeLatest, isChangeCodeRef }: CreateCallbackFuncProps) => {
   const prodEnvCallbackFunc = () => {
     // 画面遷移の確認モーダルを表示
     if (window.confirm(`${InfoMessage.I_MSG001}`)) {
@@ -235,8 +235,13 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   // --------------------
   // コードテンプレートの取得
   // --------------------
-  const codeTemplateRetriever = new CodeTemplateRetriever({ pluginId, sessionId, appId, userId, conversationId }, pluginId, conversationId);
-  const codeTemplate = await codeTemplateRetriever.getRelevantDocuments(message.content);
+  const codeTemplateRetriever = new CodeTemplateRetriever({
+    LangchainLogsInsertProps: { pluginId, sessionId, appId, userId, conversationId },
+    pluginId,
+    conversationId
+  }
+  );
+  const codeTemplate = await codeTemplateRetriever.invoke(message.content);
 
   // --------------------
   // ガイドライン取得
