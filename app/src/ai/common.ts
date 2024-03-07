@@ -35,7 +35,7 @@ export function openAIModel(pluginId: string, contractStatus: ContractStatus) {
       modelName: "gpt-4-1106-preview",
       openAIApiKey: "dummy",  // proxyに任せるのでこの値は不要だが、LangChainの仕様上必須のためセットしている
     }, {
-      baseURL: `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/openai_proxy/`,
+      baseURL: `${import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT}/azure_openai_proxy/`,
       fetch: fetcherWrapper(pluginId),
     });
   } else if (contractStatus === ContractStatus.expired) {
