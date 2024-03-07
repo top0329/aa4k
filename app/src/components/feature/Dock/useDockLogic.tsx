@@ -1,6 +1,6 @@
 // src/components/feature/Dock/useDockLogic.tsx
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChatMode, InfoMessage } from "~/constants";
 import { IsChangeCodeState } from '~/state/codeActionState';
 import { DockItemVisibleState } from "~/state/dockItemState";
@@ -11,6 +11,15 @@ export const useDockLogic = () => {
   const [activeChatMode, setActiveChatMode] = useState<ChatMode>(ChatMode.desktopChat);
   const [isPcViewMode] = useAtom(ViewModeState);
   const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
+
+  useEffect(() => {
+    // Dockのみが表示されている場合は、kintoneを操作できるようにする
+    if (dockState.dialogVisible && !dockState.chatVisible && !dockState.spChatVisible && !dockState.codeEditorVisible) {
+      document.body.style.pointerEvents = 'auto'
+    } else {
+      document.body.style.pointerEvents = 'none'
+    }
+  }, [dockState]);
 
   const toggleItemVisibility = (itemKey: keyof typeof dockState) => {
     setDockState({ ...dockState, [itemKey]: !dockState[itemKey] });
