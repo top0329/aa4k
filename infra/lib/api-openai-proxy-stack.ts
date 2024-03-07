@@ -28,7 +28,7 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     })
 
     const restapi = new apigateway.RestApi(this, 'RestApi', {
-      restApiName: `Aa4k-${stageName}-OpenAI-Proxy-RestAPI`,
+      restApiName: `Aa4k-${stageName}-Azure-OpenAI-Proxy-RestAPI`,
       policy: accessPolicy,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
@@ -90,8 +90,8 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
 
 
     // // Proxy Lambda
-    const openaiProxyLambda = new nodelambda.NodejsFunction(this, "OpenAIProxyLambda", {
-      entry: __dirname + "/lambda/openaiProxy/index.ts",
+    const azureOpenaiProxyLambda = new nodelambda.NodejsFunction(this, "AzureOpenAIProxyLambda", {
+      entry: __dirname + "/lambda/azureOpenaiProxy/index.ts",
       handler: "handler",
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
@@ -99,9 +99,9 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       runtime: Runtime.NODEJS_20_X
     })
-    secretsStack.azureSecret.grantRead(openaiProxyLambda)
-    restapi.root.addResource("openai_proxy").addProxy({
-      defaultIntegration: new apigateway.LambdaIntegration(openaiProxyLambda),
+    secretsStack.azureSecret.grantRead(azureOpenaiProxyLambda)
+    restapi.root.addResource("azure_openai_proxy").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(azureOpenaiProxyLambda),
       anyMethod: true,
       defaultMethodOptions: {
         authorizationType: apigateway.AuthorizationType.CUSTOM,
