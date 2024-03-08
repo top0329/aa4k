@@ -1,7 +1,13 @@
 //@ts-check
 import { exec } from 'child_process';
 import { config } from 'dotenv';
-config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+// 使用するenvファイルを指定 (同じディレクトリ内の.env.developmentを使用)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ENV_PATH = path.join(__dirname, '.env.development');
+config({ path: ENV_PATH });
 
 const {
   KINTONE_BASE_URL,
