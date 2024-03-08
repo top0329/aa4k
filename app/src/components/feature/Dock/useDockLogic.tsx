@@ -13,26 +13,34 @@ export const useDockLogic = () => {
   const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
 
   useEffect(() => {
-    // Dockのみが表示されている場合は、kintoneを操作できるようにする
-    if (dockState.dialogVisible && !dockState.chatVisible && !dockState.spChatVisible && !dockState.codeEditorVisible) {
-      document.body.style.pointerEvents = 'auto'
-    } else {
-      document.body.style.pointerEvents = 'none'
-    }
+    const updateKintonePointerEvents = () => {
+      if (dockState.dialogVisible &&
+        dockState.chatVisible || dockState.dialogVisible &&
+        dockState.spChatVisible) {
+        document.body.style.pointerEvents = 'none';
+      } else if (dockState.codeEditorVisible) {
+        document.body.style.pointerEvents = 'none';
+      } else {
+        document.body.style.pointerEvents = '';
+      }
+    };
+
+    updateKintonePointerEvents();
   }, [dockState]);
 
   const toggleItemVisibility = (itemKey: keyof typeof dockState) => {
     setDockState({ ...dockState, [itemKey]: !dockState[itemKey] });
   };
 
-  const initDockState = () => {
-    setDockState({
+  const initDockState = async () => {
+    await setDockState({
       dialogVisible: false,
       chatVisible: true,
       codeEditorVisible: false,
       spChatVisible: false,
     });
-  }
+    document.body.style.pointerEvents = '';
+  };
 
   const toggleChatVisibility = () => {
     setDockState({
@@ -54,18 +62,17 @@ export const useDockLogic = () => {
 
   // Docを閉じる処理
   const handleDockClose = () => {
-    if (dockState.codeEditorVisible && isChangeCode) {
-      // 編集中の編集モーダルを表示している場合、確認モーダルを表示
-      if (window.confirm(InfoMessage.I_MSG002)) {
-        setIsChangeCode(false);
-        initDockState();
-      }
-    } else {
+    const shouldCloseDock = !dockState.codeEditorVisible || !isChangeCode || window.confirm(InfoMessage.I_MSG002);
+
+    if (shouldCloseDock) {
+      setIsChangeCode(false);
       initDockState();
     }
-  }
+  };
 
-  const deleteHistory = () => { }
+  const deleteHistory = () => {
+    // Implement the logic for deleting history if needed
+  };
 
   return {
     isPcViewMode,
@@ -75,8 +82,7 @@ export const useDockLogic = () => {
     toggleItemVisibility,
     toggleChatVisibility,
     toggleSpChatVisibility,
-    initDockState,
     deleteHistory,
     handleDockClose,
   };
-}
+};
