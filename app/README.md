@@ -46,7 +46,15 @@
     ```
     npm run init-dev
     ```
-2. kintone環境へアップロード
+2. アップロード用の環境変数の準備
+    `app/scripts/.env.development.sample` をコピーして、`app/scripts/.env.development` を作成
+    `app/scripts/.env.development` を自分のkintoneアカウント情報に修正
+    ```
+    KINTONE_BASE_URL=https://ai-showcase.cybozu.com/
+    KINTONE_USERNAME=xxxx
+    KINTONE_PASSWORD=xxxx
+    ```
+3. kintone環境へアップロード
     dist/src/desktop/desktop.jsが作成される
     dist/src/config/config.jsが作成される
     distにplugin-dev.zipが作成される
