@@ -34,15 +34,11 @@ export const handleKintoneEvent = (
   );
 };
 ((PLUGIN_ID: string) => {
-  kintone.events.on("portal.show", () =>
-    handleKintoneEvent("modal-dialog-fab", "corner-dialog-fab", PLUGIN_ID),
-  );
-
-  kintone.events.on("space.portal.show", () =>
+  kintone.events.on("app.record.index.show", () =>
     handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID),
   );
 
-  kintone.events.on("app.record.index.show", () =>
+  kintone.events.on("app.record.detail.show", () =>
     handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID),
   );
 })(`${kintone.$PLUGIN_ID}`);
