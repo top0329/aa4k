@@ -103,7 +103,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
           setCodeCheckStatus(resCodeCheck.result);
           break;
         case CodeCheckStatus.caution:
-          const violations = resCodeCheck.message.split('\n');
+          const violations = resCodeCheck.message;
           setCodeCheckStatus(resCodeCheck.result);
           setCodeViolations(violations);
           break;

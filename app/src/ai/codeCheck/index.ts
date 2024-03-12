@@ -42,7 +42,7 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
     // LLMの出力形式を設定
     const zodSchema = z.object({
       result: z.nativeEnum(CodeCheckStatus).describe("結果"),
-      message: z.string().describe("メッセージ"),
+      message: z.array(z.string().describe("メッセージ")).describe("メッセージ一覧"),
     }).describe("LLM問い合わせ結果"); type LLMResponse = z.infer<typeof zodSchema>;
     const functionCallingModel = model.bind({
       functions: [
@@ -70,6 +70,6 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
 
   } catch (err) {
     // エラーの場合は、ガイドライン違反なしとして扱う
-    return { result: CodeCheckStatus.safe, message: "" };
+    return { result: CodeCheckStatus.safe, message: [""] };
   }
 }
