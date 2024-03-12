@@ -6,6 +6,7 @@ export interface AA4KConstParameterValue {
   retrieveMaxCount: number,
   retrieveScoreThreshold: number,
   historyUseCount: number,
+  historyGetCount: number,
 }
 
 /**

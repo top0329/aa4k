@@ -264,7 +264,7 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
     `${import.meta.env.VITE_API_ENDPOINT}/generated_code/get-code`,
     "POST",
     {},
-    { appId: appId, userId: userId, deviceDiv: deviceDiv, },
+    { appId: appId, userId: userId, deviceDiv: deviceDiv, conversationId: conversationId },
   );
   const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]) as GeneratedCodeGetResponseBody;
   const jsCodeForDb = resJson_jsCodeForDb.javascriptCode;

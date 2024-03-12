@@ -9,5 +9,6 @@ export const GetCodeRequestBodySchema = z.object({
   appId: z.union([z.string(), z.number()]),
   userId: z.string(),
   deviceDiv: z.nativeEnum(DeviceDiv),
+  conversationId: z.string(),
 })
 export type GetCodeRequestBody = z.infer<typeof GetCodeRequestBodySchema>;

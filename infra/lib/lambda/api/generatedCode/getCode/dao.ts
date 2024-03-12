@@ -18,6 +18,7 @@ export const selectLatestJavascriptCode = async (dbClient: Client, reqBody: GetC
     reqBody.appId,
     reqBody.userId,
     reqBody.deviceDiv,
+    reqBody.conversationId,
   ];
   let sql = "";
   sql += `select`;
@@ -28,6 +29,7 @@ export const selectLatestJavascriptCode = async (dbClient: Client, reqBody: GetC
   sql += ` app_id = $1`;
   sql += ` and user_id = $2`;
   sql += ` and device_div = $3`;
+  sql += ` and id <> $4`;
   sql += ` order by`;
   sql += ` id desc`;
   sql += ` limit 1`;

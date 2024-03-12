@@ -173,8 +173,7 @@ export const usePromptFormLogic = (
           role: MessageType.human,
           content: humanMessage,
         },
-        // chatHistory: chatHistoryItems,
-        chatHistory: [],
+        chatHistory: chatHistoryItems,
         context: {
           appId: appId,
           userId: userId,
