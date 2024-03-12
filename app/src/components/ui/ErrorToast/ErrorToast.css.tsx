@@ -5,30 +5,22 @@ import { vars } from "~/styles/theme.css";
 
 export const sToastViewport = style({
   position: 'fixed',
-  top: 16,
+  top: 16, // 画面の下からのオフセット
+  left: 16, // 画面の右からのオフセット
   padding: 0,
   minWidth: 320,
   maxWidth: 480,
   minHeight: 88,
   display: 'flex',
   flexDirection: 'column-reverse',
-  gap: 12,
+  gap: 16,
+  zIndex: 2000,
 });
 
 export const sProgressBar = style({
   height: 8,
   backgroundColor: vars.color.tomato.tomato10,
   borderRadius: 8,
-});
-
-export const sToastViewPort = style({
-  position: 'fixed',
-  top: 16, // 画面の下からのオフセット
-  left: 16, // 画面の右からのオフセット
-  display: 'flex',
-  flexDirection: 'column', // トーストを上から下にスタック
-  gap: 16,
-  zIndex: 2000,
 });
 
 export const sToast = style({
