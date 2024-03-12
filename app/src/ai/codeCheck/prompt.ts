@@ -16,7 +16,7 @@ result: SAFE
 - 違反がある場合
 \`\`\`
 result: CAUTION
-message: 1. xxxx\n2. xxxx\n3. xxxx\n\n
+message: ["xxxx", "xxxx", "xxxx"]
 \`\`\`
 
 # チェック対象

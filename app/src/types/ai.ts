@@ -69,7 +69,7 @@ export interface AiResponse {
 
 export interface CodeCheckResponse {
   result: CodeCheckStatus;
-  message: string;
+  message: string[];
 }
 
 export interface kintoneFormFields {
