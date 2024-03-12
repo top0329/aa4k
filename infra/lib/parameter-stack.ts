@@ -35,8 +35,9 @@ export class Aa4kParameterStack extends cdk.Stack {
         "39.110.232.32/28",     // SC-VPNのIPアドレス
       ],
       "retrieveMaxCount": 30,
-      "retrieveScoreThreshold": 0.2,
+      "retrieveScoreThreshold": 0.7,
       "historyUseCount": 10,
+      "historyGetCount": 30,
     };
 
     // ParameterStore
