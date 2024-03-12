@@ -31,6 +31,7 @@ interface KintoneConfig {
   // [OpenAI APIキー]変更イベントの登録
   elmOpenaiApiKey.addEventListener("change", () => {
     toggleElementDisplay((elmOpenaiApiKey.value ? true : false), elmModelSelect);
+    elmModelList.value = "";
   });
   // [保存]ボタン押下イベントの登録
   elmSubmitBtn.addEventListener("click", submit);
