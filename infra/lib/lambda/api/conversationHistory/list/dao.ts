@@ -20,16 +20,26 @@ interface ConversationHistoryResultRow {
  * @param dbClient 
  * @param reqBody
  * @param deviceDiv
+ * @param limit
  * @returns クエリ実行結果
  */
-export const selectConversationHistory = async (dbClient: Client, reqBody: ListRequestBody, deviceDiv: DeviceDiv): Promise<QueryResult<ConversationHistoryResultRow>> => {
+export const selectConversationHistory = async (dbClient: Client, reqBody: ListRequestBody, deviceDiv: DeviceDiv, limit: number): Promise<QueryResult<ConversationHistoryResultRow>> => {
   const pram = [
     reqBody.appId,
     reqBody.userId,
     deviceDiv,
+    limit,
   ];
   let sql = "";
-  sql += `select`;
+  sql += ` select`;
+  sql += ` id`;
+  sql += ` , user_message`;
+  sql += ` , ai_message`;
+  sql += ` , ai_message_comment`;
+  sql += ` , error_message`;
+  sql += ` , user_rating`;
+  sql += ` from (`;
+  sql += ` select`;
   sql += ` id`;
   sql += ` , user_message`;
   sql += ` , ai_message`;
@@ -43,7 +53,10 @@ export const selectConversationHistory = async (dbClient: Client, reqBody: ListR
   sql += ` and user_id = $2`;
   sql += ` and device_div = $3`;
   sql += ` order by`;
-  sql += ` id asc`;
+  sql += ` id desc`;
+  sql += ` limit $4`;
+  sql += ` ) as sub`;
+  sql += ` order by id asc;`;
 
   return dbClient.query(sql, pram);
 };

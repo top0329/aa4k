@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ListRequestBody, ListRequestBodySchema } from "./schema";
 import { selectConversationHistory } from "./dao";
 import { ErrorCode } from "../constants";
-import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubscriptionData, changeSchemaSearchPath, DeviceDiv } from "../../../utils";
+import { getParameterValues, getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubscriptionData, changeSchemaSearchPath, DeviceDiv } from "../../../utils";
 
 export const listHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -30,8 +30,13 @@ export const listHandler = async (req: Request, res: Response) => {
     };
     console.info(startLog);
 
-    // Secret Manager情報の取得(DB_ACCESS_SECRET)
-    const { dbAccessSecretValue } = await getSecretValues();
+    // 並列でSecret Manager情報とParameter Store情報を取得させる
+    const [secret, parameter] = await Promise.all([
+      getSecretValues(),
+      getParameterValues(),
+    ]);
+    const dbAccessSecretValue = secret.dbAccessSecretValue;
+    const aa4kConstParameterValue = parameter.aa4kConstParameterValue;
 
     // サブスクリプション情報の取得
     const subscriptionData = await getSubscriptionData(subscriptionId, dbAccessSecretValue);
@@ -54,9 +59,10 @@ export const listHandler = async (req: Request, res: Response) => {
     await changeSchemaSearchPath(dbClient, schema);
 
     // 会話履歴一覧の取得
+    const limit = aa4kConstParameterValue.historyGetCount;
     const [desktop, mobile] = await Promise.all([
-      selectConversationHistory(dbClient, body, DeviceDiv.desktop),
-      selectConversationHistory(dbClient, body, DeviceDiv.mobile),
+      selectConversationHistory(dbClient, body, DeviceDiv.desktop, limit),
+      selectConversationHistory(dbClient, body, DeviceDiv.mobile, limit),
     ]);
     const desktopConversationHistoryList = desktop.rows;
     const mobileConversationHistoryList = mobile.rows;

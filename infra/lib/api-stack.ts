@@ -148,13 +148,14 @@ export class Aa4kApiStack extends cdk.Stack {
       entry: __dirname + "/lambda/api/conversationHistory/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
         DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
         RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
         REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
         REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
         SUGURES_ENDPOINT: contextProps.suguresEndpoint,
         SUGURES_CLIENT_ID: contextProps.suguresClientId,
       },
@@ -163,6 +164,7 @@ export class Aa4kApiStack extends cdk.Stack {
     });
     secretsStack.azureSecret.grantRead(conversationHistoryLambda);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(conversationHistoryLambda);
+    parameterStack.aa4kConstParameter.grantRead(conversationHistoryLambda);
     restapi.root.addResource("conversation_history").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(conversationHistoryLambda),
       anyMethod: true,
