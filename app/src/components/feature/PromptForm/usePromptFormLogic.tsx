@@ -199,7 +199,8 @@ export const usePromptFormLogic = (
     chatHistoryItem.conversationId = conversationId;
     if (message.role === MessageType.ai) {
       chatHistoryItem.ai = message;
-      aiAnswerRef.current = InfoMessage.I_MSG004;   // 成功時に音声出力するメッセージ
+      const speechMessage = (callbacks && callbacks.length) ? InfoMessage.I_MSG004 : message.content;
+      aiAnswerRef.current = speechMessage;   // 成功時に音声出力するメッセージ
     } else {
       // AIメッセージオブジェクトの削除
       delete chatHistoryItem.ai;

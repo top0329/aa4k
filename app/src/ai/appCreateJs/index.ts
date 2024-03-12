@@ -65,11 +65,6 @@ export const appCreateJs = async (
     const { llmResponse, formattedCode } = await createJs(conversation, fieldInfo, isLatestCode, codingGuidelineList, codeTemplate, originalCode, sessionId);
 
     // --------------------
-    // kintoneカスタマイズへの反映
-    // --------------------
-    await updateKintoneCustomizeJs(formattedCode, targetFileKey, kintoneCustomizeFiles, appId, deviceDiv, isGuestSpace);
-
-    // --------------------
     // レスポンス設定
     // --------------------
     let message = `${llmResponse.resultMessage}`;
@@ -82,35 +77,42 @@ export const appCreateJs = async (
     // --------------------
     insertConversation(pluginId, appId, userId, deviceDiv, MessageType.ai, message, conversationId, messageComment, formattedCode)
 
-    // --------------------
-    // コールバック関数設定(コード生成後の動作)
-    // --------------------
-    const redirectPath = `/k/admin/preview/${appId}/`;
-    const currentUrl = location.href;
-    if (currentUrl.includes(redirectPath)) {
-      // プレビュー画面の場合
-      callbackFuncs.push(createPreviewEnvCallbackFunc({
-        redirectPath,
-        codeEditorVisible,
-        isChangeCode,
-        formattedCode,
-        setCode,
-        setCodeLatest,
-        isChangeCodeRef
-      }));
-    } else {
-      // 本番画面の場合
-      callbackFuncs.push(createProdEnvCallbackFunc({
-        redirectPath,
-        codeEditorVisible,
-        isChangeCode,
-        formattedCode,
-        setCode,
-        setCodeLatest,
-        isChangeCodeRef
-      }));
-    }
+    // JS生成された場合のみ、kintoneへの反映と、コールバック関数の設定を行う
+    if (llmResponse.properties.length) {
+      // --------------------
+      // kintoneカスタマイズへの反映
+      // --------------------
+      await updateKintoneCustomizeJs(formattedCode, targetFileKey, kintoneCustomizeFiles, appId, deviceDiv, isGuestSpace);
 
+      // --------------------
+      // コールバック関数設定(コード生成後の動作)
+      // --------------------
+      const redirectPath = `/k/admin/preview/${appId}/`;
+      const currentUrl = location.href;
+      if (currentUrl.includes(redirectPath)) {
+        // プレビュー画面の場合
+        callbackFuncs.push(createPreviewEnvCallbackFunc({
+          redirectPath,
+          codeEditorVisible,
+          isChangeCode,
+          formattedCode,
+          setCode,
+          setCodeLatest,
+          isChangeCodeRef
+        }));
+      } else {
+        // 本番画面の場合
+        callbackFuncs.push(createProdEnvCallbackFunc({
+          redirectPath,
+          codeEditorVisible,
+          isChangeCode,
+          formattedCode,
+          setCode,
+          setCodeLatest,
+          isChangeCodeRef
+        }));
+      }
+    }
     // 終了
     return {
       message: {
@@ -368,24 +370,34 @@ async function createJs(
     codeTemplate: codeTemplate.map((template) => template.pageContent),
   }, { callbacks: [handler] }).catch(() => { throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`) })) as LLMResponse;
 
-  // 出力コード編集
-  const resProperties = llmResponse.properties;
-  let editedCode = originalCode;
-  resProperties.forEach((obj) => {
-    const method = obj.method;
-    if (method === CodeCreateMethod.create) {
-      editedCode = obj.javascriptCode;
-    } else {
-      editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
-    }
-  })
-  const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] });
+  if (llmResponse.properties.length) {
+    // JS生成された場合はコード編集して返却
+    // 出力コード編集
+    const resProperties = llmResponse.properties;
+    let editedCode = originalCode;
+    resProperties.forEach((obj) => {
+      const method = obj.method;
+      if (method === CodeCreateMethod.create) {
+        editedCode = obj.javascriptCode;
+      } else {
+        editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
+      }
+    })
+    const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] });
 
-  // 結果返却
-  return {
-    llmResponse,
-    formattedCode
-  };
+    // 結果返却
+    return {
+      llmResponse,
+      formattedCode
+    };
+  } else {
+    // JS生成されない場合はオリジナルコードを返却
+    // 結果返却
+    return {
+      llmResponse,
+      formattedCode: originalCode
+    };
+  }
 }
 
 
