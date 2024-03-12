@@ -1,6 +1,6 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
@@ -13,6 +13,14 @@ import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } fr
 import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse } from "~/types/apiResponse";
 import { preCheck } from "~/util/preCheck";
 
+type DragPosition = { x: number; y: number };
+
+// 起動バナーの位置を保存
+const getSavedPosition = (): DragPosition | null => {
+  const savedPosition = localStorage.getItem('dragButtonPosition');
+  return savedPosition ? JSON.parse(savedPosition) : null;
+};
+
 export const useCornerDialogLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
   const { chatHistoryItems, setChatHistory } = useChatHistory(isPcViewMode);
@@ -20,6 +28,11 @@ export const useCornerDialogLogic = () => {
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
+  const [initialPosition, setInitialPosition] = useState<DragPosition>(() => {
+    const savedPosition = getSavedPosition();
+    return savedPosition || { x: window.innerWidth - 120, y: window.innerHeight - 120 };
+  });
+
 
   // Ref
   const isChangeCodeRef = useRef<boolean>(false); // コード編集中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
@@ -145,15 +158,30 @@ export const useCornerDialogLogic = () => {
     }
   }, [dockState.chatVisible, chatHistoryItems.length]);
 
+  // 起動バナーの位置を保存
+  const savePosition = (position: DragPosition) => {
+    localStorage.setItem('dragButtonPosition', JSON.stringify(position));
+  };
+
+  useEffect(() => {
+    const savedPosition = getSavedPosition();
+    if (savedPosition) {
+      setInitialPosition(savedPosition);
+    } else {
+      savePosition(initialPosition);
+    }
+  }, [getSavedPosition]);
+
+
   return {
     dockState,
     handleBannerClick,
     isBannerClicked,
-    chatHistoryItems,
-    setChatHistory,
     isLoading,
     startLoading,
     stopLoading,
     isChangeCodeRef,
+    initialPosition,
+    savePosition,
   };
 };

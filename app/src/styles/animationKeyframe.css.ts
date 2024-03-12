@@ -80,14 +80,12 @@ export const fabGradient = keyframes({
     opacity: 0.6,
   },
   "50%": {
-    opacity: 1,
-    scale: 1.1,
+    opacity: 0.8,
     filter: "blur(12px)",
     backgroundPosition: "100% 50%",
   },
   "100%": {
     opacity: 0.6,
-    scale: 1,
     backgroundPosition: "0% 50%",
   },
 });
