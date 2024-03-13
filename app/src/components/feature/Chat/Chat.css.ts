@@ -23,5 +23,6 @@ export const sChat = style({
 });
 
 export const sChatInner = style({
-  height: `calc(100% - 100px)`,
+  paddingTop: 200,
+  height: `100%`,
 });
