@@ -128,8 +128,8 @@ export const useCornerDialogLogic = () => {
       } else {
         const aiMessage: AiMessage = {
           role: MessageType.ai,
-          content: conversationHistory.ai_message,
-          comment: conversationHistory.ai_message_comment,
+          content: conversationHistory.ai_message || `${ErrorMessageConst.E_MSG005}（${ErrorCode.E00006}）`,
+          comment: conversationHistory.ai_message_comment || '',
         };
         chatHistoryItem["ai"] = aiMessage;
       }
