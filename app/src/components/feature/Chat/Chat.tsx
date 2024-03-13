@@ -30,7 +30,7 @@ const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChan
           <AccordionHistory isLoading={isLoading} />
         </Box>
       </ScrollToBottom>
-      <PromptForm startLoading={startLoading} stopLoading={stopLoading} isChangeCodeRef={isChangeCodeRef} />
+      <PromptForm isLoading={isLoading} startLoading={startLoading} stopLoading={stopLoading} isChangeCodeRef={isChangeCodeRef} />
     </Box>
   );
 };

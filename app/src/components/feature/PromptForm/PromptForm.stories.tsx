@@ -7,4 +7,4 @@ export default {
   component: PromptForm,
 } as Meta;
 
-export const Default = () => <PromptForm />;
+export const Default = () => <PromptForm isLoading={false} />;

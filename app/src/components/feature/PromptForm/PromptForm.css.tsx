@@ -12,6 +12,14 @@ export const sVoiceInput = style({
   },
 });
 
+export const sVoiceInputDisabled = style({
+  boxSizing: "border-box",
+  opacity: 1,
+  borderRadius: `50%`,
+  transition: "opacity 0.2s",
+  cursor: "pointer",
+});
+
 export const boxShadowAnimation = keyframes({
   "0%": {
     boxShadow: `0px 0px 2px 4px ${vars.color.crimsonA.crimsonA1}`,

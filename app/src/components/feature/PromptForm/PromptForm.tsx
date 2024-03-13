@@ -7,16 +7,17 @@ import { useUpdateEffect } from "react-use";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
 import { vars } from '~/styles/theme.css';
-import { sVoiceInput, sVoiceInputActive } from './PromptForm.css';
+import { sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
 
 type PromptFormProps = {
+  isLoading: boolean;
   startLoading?: () => void;
   stopLoading?: () => void;
   isChangeCodeRef?: React.MutableRefObject<boolean>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isChangeCodeRef }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef }) => {
   const {
     isVoiceInput,
     isPcViewMode,
@@ -49,6 +50,17 @@ const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isCh
     enabled: { opacity: 1, scale: 1 },
     disabled: { opacity: 0.5, scale: 0.95 },
   };
+
+  // 音声入力ボタンのclassNameを決定
+  const getVoiceInputButtonClassName = () => {
+    if (isSubmitting || isLoading) {
+      return sVoiceInputDisabled
+    } else if (isVoiceInput) {
+      return sVoiceInputActive
+    } else {
+      return sVoiceInput
+    }
+  }
 
   return (
     <Box p={'5'}
@@ -92,7 +104,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isCh
             }
             onKeyDown={(e) => handleKeyDown(e)}
             label=""
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
           />
         </Flex>
 
@@ -109,7 +121,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isCh
               }
               checked={!isPcViewMode}
               onCheckedChange={handleViewModeChange}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
             />
 
             {
@@ -130,8 +142,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isCh
               }}
               variant={'ghost'}
               color={isVoiceInput ? 'crimson' : 'gray'}
-              className={isVoiceInput ? sVoiceInputActive : sVoiceInput}
+              className={getVoiceInputButtonClassName()}
               onClick={(e) => handleVoiceInput(e)}
+              disabled={isSubmitting || isLoading}
             >
               <FontAwesomeIcon size='lg' icon={faMicrophone} />
             </Button>
@@ -144,7 +157,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isCh
             >
               <Button
                 color={isPcViewMode ? 'iris' : 'cyan'}
-                type="submit" disabled={!humanMessage || isSubmitting}
+                type="submit" disabled={!humanMessage || isSubmitting || isLoading}
                 style={{
                   cursor: !humanMessage ? 'not-allowed' : 'pointer',
                   width: 32,
