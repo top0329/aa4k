@@ -71,6 +71,7 @@ const ErrorToast = forwardRef<ElementRef<typeof Toast.Root>, ErrorToastProps>(
     return (
       <Toast.Root
         ref={forwardedRef}
+        duration={Infinity}
         open={isOpen} onOpenChange={setOpen}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
