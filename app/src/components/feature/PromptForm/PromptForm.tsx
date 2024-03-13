@@ -79,7 +79,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ startLoading, stopLoading, isCh
                   transform: 'scale(0.8)',
                 }}
               >
-                Shift + Enterで送信
+                Ctrl + Enterで送信
               </Text>
             </motion.div>
           </Flex>

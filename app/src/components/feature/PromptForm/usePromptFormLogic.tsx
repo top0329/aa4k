@@ -7,7 +7,7 @@ import SpeechRecognition, {
 import { appCreateJs } from '~/ai/appCreateJs';
 import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
 import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
-import { CodeState, CodeLatestState, IsChangeCodeState } from '~/state/codeActionState';
+import { CodeLatestState, CodeState, IsChangeCodeState } from '~/state/codeActionState';
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { InTypeWriteState } from '~/state/inTypeWriteState';
 import { PluginIdState } from '~/state/pluginIdState';
@@ -44,8 +44,8 @@ export const usePromptFormLogic = (
   const { transcript, finalTranscript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const pressShiftEnter = e.key === 'Enter' && e.shiftKey
-    if (pressShiftEnter) {
+    const pressCtrlEnter = e.key === 'Enter' && e.ctrlKey
+    if (pressCtrlEnter) {
       e.preventDefault(); // Prevent the default action to avoid newline insertion
       handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>); // Cast the event type to match the form event type
     }
