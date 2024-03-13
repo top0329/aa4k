@@ -31,7 +31,7 @@ interface KintoneConfig {
   // [OpenAI APIキー]変更イベントの登録
   elmOpenaiApiKey.addEventListener("change", () => {
     toggleElementDisplay((elmOpenaiApiKey.value ? true : false), elmModelSelect);
-    elmModelList.value = "";
+    resetModels();
   });
   // [保存]ボタン押下イベントの登録
   elmSubmitBtn.addEventListener("click", submit);
@@ -153,6 +153,16 @@ interface KintoneConfig {
 
     // 保存済みの情報で表示
     elmModelList.value = config.targetModel;
+  }
+  /**
+   * モデル一覧のリセット
+   */
+  function resetModels() {
+    elmModelList.innerHTML = '';
+    const newOption = document.createElement('option');
+    newOption.text = "-----";
+    newOption.value = "";
+    elmModelList.add(newOption);
   }
 
   /**
