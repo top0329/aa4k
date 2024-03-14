@@ -1,5 +1,5 @@
 // src/components/ui/CodeEditor/CodeEditor.tsx
-import { faArrowsRetweet, faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
+import { faArrowsRetweet, faCompressAlt, faExpandAlt } from '@fortawesome/pro-duotone-svg-icons';
 import { Badge, Box, Button, Flex, Separator } from '@radix-ui/themes';
 import 'ace-builds/src-min-noconflict/ace';
 import "ace-builds/src-min-noconflict/ext-language_tools";
@@ -25,7 +25,7 @@ type CodeEditorProps = {
   isChangeCodeRef: React.MutableRefObject<boolean>;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef}) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef }) => {
   const {
     copySuccess,
     isFullScreen,
@@ -89,21 +89,39 @@ const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef}) => {
               cursor: 'pointer',
             }} />
           <CopyButton isCopied={copySuccess} onCopy={() => copyToClipboard(code)} />
-          <IconTooltipButton
-            icon={faExpandAlt}
-            tooltip={'FullScreen'}
-            onClick={toggleFullScreen}
-            style={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 8,
-              borderRadius: 8,
-              transition: 'all 0.2s ease-in-out',
-              cursor: 'pointer',
-            }} />
+          {isFullScreen ? (
+            <IconTooltipButton
+              icon={faCompressAlt}
+              tooltip={'元の大きさに戻す'}
+              onClick={toggleFullScreen}
+              style={{
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 8,
+                borderRadius: 8,
+                transition: 'all 0.2s ease-in-out',
+                cursor: 'pointer',
+              }} />
+          ) : (
+            <IconTooltipButton
+              icon={faExpandAlt}
+              tooltip={'最大化'}
+              onClick={toggleFullScreen}
+              style={{
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 8,
+                borderRadius: 8,
+                transition: 'all 0.2s ease-in-out',
+                cursor: 'pointer',
+              }} />
+          )}
         </Flex>
         <Box
           width={'100%'}
@@ -193,7 +211,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef}) => {
           </Flex>
         </Box>
       </Flex>
-      {isCodeActionDialog && 
+      {isCodeActionDialog &&
         <CodeActionDialog
           {...codeActionDialogProps}
         />}
