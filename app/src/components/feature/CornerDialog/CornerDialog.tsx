@@ -10,7 +10,6 @@ import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
 import "~/styles/scrollbar.css";
 import Chat from "../Chat/Chat.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
-import { DialogOverlay } from "./CornerDialog.css";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
 const CornerDialog = () => {
@@ -50,7 +49,7 @@ const CornerDialog = () => {
           </Dialog.Trigger>
         </DragButton>
       </motion.div>
-      <Dialog.Overlay className={DialogOverlay} />
+      <Dialog.Overlay />
       <Dialog.Content onPointerDownOutside={(e) => e.preventDefault()}>
         <motion.div
           initial={{ opacity: 0 }}
