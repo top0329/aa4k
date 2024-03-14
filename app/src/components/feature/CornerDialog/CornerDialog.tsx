@@ -33,6 +33,7 @@ const CornerDialog = () => {
           document.body.style.pointerEvents = '';
         }
       }}
+      modal={dockState.dialogVisible && (dockState.chatVisible || dockState.spChatVisible) || dockState.codeEditorVisible ? true : false}
     >
       <motion.div
         initial={{ opacity: 0 }}

@@ -1,4 +1,5 @@
 // src/App.tsx
+import { Box } from "@radix-ui/themes";
 import { useAtom } from "jotai";
 import CornerDialog from "./components/feature/CornerDialog/CornerDialog";
 import { ErrorToastProvider } from "./components/ui/ErrorToast/ErrorToastProvider";
@@ -10,7 +11,15 @@ const App = ({ pluginId }: { pluginId: string }) => {
 
   return (
     <ErrorToastProvider>
-      <CornerDialog />
+      <Box
+        style={{
+          width: '100vw',
+          height: '200vh',
+          position: 'relative',
+        }}
+      >
+        <CornerDialog />
+      </Box>
     </ErrorToastProvider>
   );
 }
