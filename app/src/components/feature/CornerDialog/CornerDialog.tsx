@@ -28,7 +28,6 @@ const CornerDialog = () => {
   return (
     <Dialog.Root open={dockState.dialogVisible}
       onOpenChange={async (open) => {
-        console.log('open', open);
         if (!open) {
           document.body.style.pointerEvents = '';
         }

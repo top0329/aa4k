@@ -12,19 +12,16 @@ export const useDockLogic = () => {
   const [isPcViewMode] = useAtom(ViewModeState);
   const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
 
-  useEffect(() => {
-    const updateKintonePointerEvents = () => {
-      if (dockState.dialogVisible &&
-        dockState.chatVisible || dockState.dialogVisible &&
-        dockState.spChatVisible) {
-        document.body.style.pointerEvents = 'none';
-      } else if (dockState.codeEditorVisible) {
-        document.body.style.pointerEvents = 'none';
-      } else {
-        document.body.style.pointerEvents = '';
-      }
-    };
+  const updateKintonePointerEvents = () => {
+    document.body.style.pointerEvents = dockState.dialogVisible && (dockState.chatVisible || dockState.spChatVisible) || dockState.codeEditorVisible ? 'none' : '';
+  };
 
+  // ページ遷移・リロードしてきた際に、pointerEvents判定をしたいので以下の処理を追加
+  useEffect(() => {
+    updateKintonePointerEvents();
+  }, []);
+
+  useEffect(() => {
     updateKintonePointerEvents();
   }, [dockState]);
 

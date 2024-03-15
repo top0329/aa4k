@@ -33,7 +33,6 @@ export const useCornerDialogLogic = () => {
     return savedPosition || { x: window.innerWidth - 120, y: window.innerHeight - 120 };
   });
 
-
   // Ref
   const isChangeCodeRef = useRef<boolean>(false); // コード編集中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
 
