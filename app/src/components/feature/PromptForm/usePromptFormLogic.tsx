@@ -57,7 +57,8 @@ export const usePromptFormLogic = (
 
     if (isVoiceInput) {
       // 音声入力中の場合は、音声識別を停止
-      SpeechRecognition.stopListening();
+      await SpeechRecognition.stopListening();
+      resetTranscript();
       isVoiceInputRef.current = false;
       setVoiceInput(false);
     }
@@ -215,12 +216,12 @@ export const usePromptFormLogic = (
     callbackFuncs?.forEach((fn) => fn());
   };
 
-  const handleVoiceInput = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleVoiceInput = async(e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (isVoiceInput) {
       // 音声識別を停止
-      SpeechRecognition.stopListening();
+      await SpeechRecognition.stopListening();
       resetTranscript();
     } else {
       // 常時音声識別状態で開始
