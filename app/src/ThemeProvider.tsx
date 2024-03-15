@@ -9,7 +9,15 @@ const ThemeProvider = (
   { children }: { children: React.ReactNode }
 ) => {
   return (
-    <Theme className={themeClass}>
+    <Theme className={themeClass}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        minWidth: '100vw',
+        minHeight: '100vh',
+      }}
+    >
       {children}
     </Theme>
   );

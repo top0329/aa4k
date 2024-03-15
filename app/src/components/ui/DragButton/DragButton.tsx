@@ -39,7 +39,7 @@ const DragButton: React.FC<DragButtonProps> = ({ initialPosition, onPositionChan
   const handleDragEnd = () => {
     const newPosition = { x: x.get(), y: y.get() };
     if (isOffScreen(newPosition)) {
-      confirm('ボタンがウィンドウ外に出ました。初期位置に戻します。');
+      alert('ボタンがウィンドウ外に出ました。初期位置に戻します。');
       resetToInitialPosition();
     } else {
       onPositionChange(newPosition);
