@@ -43,6 +43,22 @@ export const APP_CREATE_JS_SYSTEM_PROMPT = `あなたは優秀なプログラマ
 # 修正指示の注意点:
 - 背景色を変更の修正指示の場合は、明示的な色名（青色）で修正指示を出してください。
 
+# 生成するjavascriptコードの形式
+try catchは必ずつけて生成してください
+\`\`\`javascript
+(function () {{
+  "use strict";
+  kintone.events.on("app.record.index.show", function (event) {{
+    try {{
+      // ここに処理を追加
+    }} catch (e) {{
+      console.error(e);
+      alert('カスタムJavascriptが正しく実行されませんでした');
+    }}
+  }});
+}})();
+\`\`\`
+
 # kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン
 \`\`\`
 {codingGuideline}
