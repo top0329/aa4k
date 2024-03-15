@@ -14,8 +14,8 @@ const ThemeProvider = (
         position: 'fixed',
         top: 0,
         left: 0,
-        minWidth: '100vw',
-        minHeight: '100vh',
+        minWidth: 1,
+        minHeight: 1,
       }}
     >
       {children}
