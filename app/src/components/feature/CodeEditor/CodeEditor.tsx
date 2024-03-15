@@ -23,9 +23,10 @@ import { useCodeEditorLogic } from './useCodeEditorLogic';
 
 type CodeEditorProps = {
   isChangeCodeRef: React.MutableRefObject<boolean>;
+  isLoading: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef, isLoading}) => {
   const {
     copySuccess,
     isFullScreen,
@@ -190,7 +191,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef }) => {
                 style={{
                   cursor: !code ? 'not-allowed' : 'pointer',
                 }}
-                disabled={!code}
+                disabled={!code || isLoading}
               >
                 チェック
               </Button>
@@ -203,7 +204,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef }) => {
                 style={{
                   cursor: !code ? 'not-allowed' : 'pointer',
                 }}
-                disabled={!code}
+                disabled={!code || isLoading}
               >
                 反映
               </Button>

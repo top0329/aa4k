@@ -58,7 +58,7 @@ const CornerDialog = () => {
           exit={{ opacity: 0 }}
         >
           {dockState.codeEditorVisible && (
-            <CodeEditor isChangeCodeRef={isChangeCodeRef} />
+            <CodeEditor isChangeCodeRef={isChangeCodeRef} isLoading={isLoading} />
           )}
 
           {dockState.chatVisible && (
