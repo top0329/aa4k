@@ -11,7 +11,7 @@ interface KintoneConfig {
 
 ((PLUGIN_ID: string) => {
   const apiEndpoint: string = import.meta.env.VITE_API_ENDPOINT;
-  const openaiProxyApiEndpoint: string = import.meta.env.VITE_OPENAI_PROXY_API_ENDPOINT;
+  const openaiProxyApiCredentialEndpoint: string = import.meta.env.VITE_AZURE_OPENAI_PROXY_CREDENTIAL_ENDPOINT;
   const openaiApiEndpoint: string = "https://api.openai.com/v1"
 
   // プラグインの設定情報を取得する
@@ -81,7 +81,7 @@ interface KintoneConfig {
       authorization: `Bearer ${openaiApiKey}`
     }
     kintone.plugin.app.setProxyConfig(apiEndpoint, 'POST', header, {}, () => {
-      kintone.plugin.app.setProxyConfig(openaiProxyApiEndpoint, 'POST', header, {}, () => {
+      kintone.plugin.app.setProxyConfig(openaiProxyApiCredentialEndpoint, 'POST', header, {}, () => {
         kintone.plugin.app.setProxyConfig(`${openaiApiEndpoint}/chat`, 'POST', openAiHeader, {}, () => {
           // 設定画面で入力された情報の保存
           kintone.plugin.app.setConfig(config);

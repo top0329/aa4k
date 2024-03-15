@@ -33,7 +33,7 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
     // コードチェック
     // --------------------
     const handler = new LangchainLogsInsertCallbackHandler({ pluginId, sessionId, appId, userId });
-    const model = openAIModel(pluginId, contractStatus);
+    const model = openAIModel(pluginId, sessionId, contractStatus);
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", CODE_CHECK_SYSTEM_PROMPT],
       ["human", "kintoneガイドラインに違反していないかチェックしてください"],

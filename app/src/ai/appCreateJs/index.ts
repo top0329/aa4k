@@ -325,7 +325,7 @@ async function createJs(
   }
   // 生成（LLM実行）
   const handler = new LangchainLogsInsertCallbackHandler({ pluginId, sessionId, appId, userId, conversationId });
-  const model = openAIModel(pluginId, contractStatus);
+  const model = openAIModel(pluginId, sessionId, contractStatus);
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", APP_CREATE_JS_SYSTEM_PROMPT],
     ...histories,
