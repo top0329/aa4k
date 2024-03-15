@@ -52,6 +52,13 @@ export const ChatMode = {
 } as const;
 export type ChatMode = (typeof ChatMode)[keyof typeof ChatMode];
 
+// LLM種別
+export const LlmType = {
+  openai: "openai",
+  azure: "azure",
+} as const;
+export type LlmType = keyof typeof LlmType;
+
 // エラーコード
 export const ErrorCode = {
   // 認証チェック(A01)

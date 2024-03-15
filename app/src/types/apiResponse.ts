@@ -49,3 +49,10 @@ export interface SpeechResponseBody
   extends KintoneProxyResponseBody {
   data: string;
 }
+
+export interface AzureOpenAiProxyCredentialResponseBody
+  extends KintoneProxyResponseBody {
+  AccessKeyId: string
+  SecretAccessKey: string
+  SessionToken?: string
+}

@@ -4,7 +4,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as nodelambda from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime, FunctionUrlAuthType } from "aws-cdk-lib/aws-lambda";
 import { ContextProps } from './type';
 import { Aa4kSecretsStack } from './secret-stack'
 import { AuroraStack } from './aurora-stack'
@@ -87,26 +87,39 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction);
     parameterStack.aa4kConstParameter.grantRead(authorizerFunction);
 
+    // AWS Credential Provider Lambda
+    const credProviderLambda = new nodelambda.NodejsFunction(this, "AzureOpenAIProxyCredentialLambda", {
+      entry: __dirname + "/lambda/azureOpenaiProxy/credential/index.ts",
+      handler: "handler",
+      timeout: cdk.Duration.seconds(30),
+      runtime: Runtime.NODEJS_20_X
+    })
+    const proxyInvokeRole = new iam.Role(this, "AzureOpenAiProxyInvokeRole", {
+      assumedBy: new iam.ArnPrincipal(credProviderLambda.role!.roleArn),
+    })
+    credProviderLambda.addEnvironment("PROXY_INVOKE_ROLE_ARN", proxyInvokeRole.roleArn)
 
+    restapi.root.addResource("azure_openai_proxy_credential").addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(credProviderLambda),
+      {
+        authorizer: lambdaAuthorizer,
+      }
+    )
 
-    // // Proxy Lambda
+    // Proxy Lambda
     const azureOpenaiProxyLambda = new nodelambda.NodejsFunction(this, "AzureOpenAIProxyLambda", {
       entry: __dirname + "/lambda/azureOpenaiProxy/index.ts",
       handler: "handler",
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
       },
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(900),
       runtime: Runtime.NODEJS_20_X
     })
+    const proxyFuncUrl = azureOpenaiProxyLambda.addFunctionUrl({ authType: FunctionUrlAuthType.AWS_IAM })
+    azureOpenaiProxyLambda.grantInvokeUrl(proxyInvokeRole)
     secretsStack.azureSecret.grantRead(azureOpenaiProxyLambda)
-    restapi.root.addResource("azure_openai_proxy").addProxy({
-      defaultIntegration: new apigateway.LambdaIntegration(azureOpenaiProxyLambda),
-      anyMethod: true,
-      defaultMethodOptions: {
-        authorizationType: apigateway.AuthorizationType.CUSTOM,
-        authorizer: lambdaAuthorizer,
-      }
-    })
+    new cdk.CfnOutput(this, "AzureOpenAiProxyURL", { value: proxyFuncUrl.url })
   }
 }

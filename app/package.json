@@ -14,7 +14,7 @@
     "msw": "msw init ./public --no-save",
     "build": "tsc && vite build --mode development --config vite.config.ts",
     "build:prod": "tsc && vite build --mode production --config vite.config.ts",
-    "build-plugin": "tsc && vite build --config vite.plugin.config.ts",
+    "build-plugin": "tsc && vite build --mode development --config vite.plugin.config.ts",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "prepare": "cd ../ && husky install app/.husky",
@@ -35,6 +35,9 @@
     ]
   },
   "dependencies": {
+    "@aws-crypto/sha256-browser": "^5.2.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
     "@fontsource-variable/noto-sans-jp": "^5.0.18",
     "@fortawesome/fontawesome-pro": "^6.5.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
