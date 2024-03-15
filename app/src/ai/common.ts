@@ -1,5 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { ContractStatus, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
+import { LlmType, ContractStatus, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import * as cheerio from "cheerio"
 import { KintoneProxyResponse, AzureOpenAiProxyCredentialResponseBody } from "~/types/apiResponse"
 import { Fetch } from "openai/core"
@@ -29,7 +29,7 @@ export function openAIModel(pluginId: string, sessionId: string, contractStatus:
       modelName: kintone.plugin.app.getConfig(pluginId).targetModel,
       openAIApiKey: "dummy",
     }, {
-      fetch: fetcherWrapper(pluginId, "openai", sessionId),
+      fetch: fetcherWrapper(pluginId, LlmType.openai, sessionId),
     });
 
   } else if (contractStatus === ContractStatus.active) {
@@ -41,7 +41,7 @@ export function openAIModel(pluginId: string, sessionId: string, contractStatus:
       openAIApiKey: "dummy",  // proxyに任せるのでこの値は不要だが、LangChainの仕様上必須のためセットしている
     }, {
       baseURL: `${import.meta.env.VITE_AZURE_OPENAI_PROXY_ENDPOINT}/azure_openai_proxy/`,
-      fetch: fetcherWrapper(pluginId, "azure", sessionId),
+      fetch: fetcherWrapper(pluginId, LlmType.azure, sessionId),
     });
   } else if (contractStatus === ContractStatus.expired) {
     throw new ContractExpiredError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00002}）`)
@@ -80,7 +80,7 @@ export async function getCodingGuidelines() {
  * @param sessionId
  * @returns kintoneProxyFetcher
  */
-const fetcherWrapper = (pluginId: string, llmType: string, sessionId: string) => {
+const fetcherWrapper = (pluginId: string, llmType: LlmType, sessionId: string) => {
 
   /**
    * リクエストデータ設定
@@ -160,9 +160,9 @@ const fetcherWrapper = (pluginId: string, llmType: string, sessionId: string) =>
     return response;
   }
 
-  if (llmType == "openai") {
+  if (llmType == LlmType.openai) {
     return kintoneProxyFetcherOpenAi;
-  } else if (llmType === "azure") {
+  } else if (llmType === LlmType.azure) {
     return kintoneProxyFetcherAzure;
   }
 }
