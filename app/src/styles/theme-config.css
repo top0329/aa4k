@@ -1,4 +1,6 @@
 /* theme-config.css */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap");
+
 html {
   box-sizing: border-box;
   line-height: 1.65;
@@ -19,7 +21,7 @@ input {
 
 .radix-themes {
   --default-font-size: 18px;
-  --default-font-family: "Noto Sans JP Variable";
+  --default-font-family: "Noto Sans JP", sans-serif;
   --default-letter-spacing: 1.4;
 
   -line-height-1: calc(20px * var(--scaling));

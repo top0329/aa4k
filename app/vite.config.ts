@@ -1,4 +1,5 @@
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
+import replace from "rollup-plugin-replace";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import svgr from "vite-plugin-svgr";
@@ -29,5 +30,13 @@ export default defineConfig({
     // typescriptエラーで起動しないので一旦コメントアウト
     // https: true,
   },
-  plugins: [mkcert(), svgr(), vanillaExtractPlugin()],
+  plugins: [
+    mkcert(),
+    svgr(),
+    vanillaExtractPlugin(),
+    replace({
+      "use client": "",
+      delimiters: ["", ""],
+    }),
+  ],
 });
