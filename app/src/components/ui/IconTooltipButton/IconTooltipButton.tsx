@@ -24,8 +24,8 @@ const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
   style = {
     cursor: 'pointer',
   },
-  pressedColor = vars.color.grayA.grayA12,
-  defaultColor = vars.color.gray.gray9,
+  pressedColor = vars.color.gray.gray10,
+  defaultColor = vars.color.gray.gray10,
   className
 }, ref) => {
   return (

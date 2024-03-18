@@ -4,6 +4,18 @@ import { createTheme } from "@vanilla-extract/css";
 export const [themeClass, vars] = createTheme({
   color: {
     ...Color,
+    primary1: Color.iris.iris1,
+    primary2: Color.iris.iris2,
+    primary3: Color.iris.iris3,
+    primary4: Color.iris.iris4,
+    primary5: Color.iris.iris5,
+    primary6: Color.iris.iris6,
+    primary7: Color.iris.iris7,
+    primary8: Color.iris.iris8,
+    primary9: Color.iris.iris9,
+    primary10: Color.iris.iris10,
+    primary11: Color.iris.iris11,
+    primary12: Color.iris.iris12,
     primaryBg: Color.iris.iris1,
     primarySubBg: Color.iris.iris2,
     primaryEleBg: Color.iris.iris3,

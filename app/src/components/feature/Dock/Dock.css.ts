@@ -26,12 +26,19 @@ export const DockAction = style({
 });
 
 export const DockItem = style({
+  padding: 4,
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  width: 36,
-  height: 36,
+  width: 40,
+  height: 40,
+  borderRadius: `100%`,
+  transition: "all 0.2s",
   cursor: "pointer",
+  ":hover": {
+    opacity: 0.8,
+    backgroundColor: vars.color.gray.gray3,
+  },
 });
 
 export const DockIcon = style({
