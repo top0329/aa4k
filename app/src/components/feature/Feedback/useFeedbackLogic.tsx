@@ -1,4 +1,4 @@
-// src/components/feature/RatingToolbar/useRatingtoolbarLogic.tsx
+// src/components/feature/Feedback/useRatingtoolbarLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
@@ -9,8 +9,8 @@ import { ViewModeState } from "~/state/viewModeState";
 import { ChatHistoryItem } from "~/types/ai";
 import { KintoneProxyResponse, KintoneProxyResponseBody } from "~/types/apiResponse";
 
-// src/components/feature/RatingToolbar/useRatingtoolbar.tsx
-export const useRatingToolbarLogic = (chatHistoryItem: ChatHistoryItem) => {
+// src/components/feature/Feedback/useRatingtoolbar.tsx
+export const useFeedbackLogic = (chatHistoryItem: ChatHistoryItem) => {
   const [isPcViewMode] = useAtom(ViewModeState);
   const { chatHistoryItems, setChatHistory } = useChatHistory(isPcViewMode);
   const [thumbsUpPressed, setThumbsUpPressed] = useState(false);

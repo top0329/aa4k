@@ -2,7 +2,7 @@
 import { Box, Flex } from "@radix-ui/themes";
 import { useAtom } from "jotai";
 import React, { useEffect, useRef, useState } from 'react';
-import RatingToolbar from '~/components/feature/RatingToolbar/RatingToolbar';
+import Feedback from '~/components/feature/Feedback/Feedback';
 import DonutLoading from "~/components/ui/Loading/DonutLoading/DonutLoading";
 import { InTypeWriteState } from "~/state/inTypeWriteState.tsx";
 import { ChatContentProps } from "~/types/chatContentTypes.ts";
@@ -62,7 +62,7 @@ export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHi
         mt={'5'}
         width={'100%'}
       >
-        {!inTypeWrite && (<RatingToolbar content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />)}
+        {!inTypeWrite && (<Feedback content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />)}
       </Box>
     </>
   );

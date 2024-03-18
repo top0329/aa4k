@@ -1,21 +1,21 @@
-// src/components/feature/RatingToolbar/RatingToolbar.tsx
+// src/components/feature/Feedback/Feedback.tsx
 import { faClose, faThumbsDown, faThumbsUp } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as Toolbar from '@radix-ui/react-toolbar';
 import { Button, Flex, TextArea } from '@radix-ui/themes';
+import { useFeedbackLogic } from '~/components/feature/Feedback/useFeedbackLogic';
 import Copy from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 import { vars } from '~/styles/theme.css';
 import { ChatHistoryItem } from "~/types/ai";
-import { useRatingToolbarLogic } from './useRatingtoolbarLogic';
 
-type RatingToolbarProps = {
+
+type FeedbackProps = {
   content: string;
   chatHistoryItem: ChatHistoryItem;
 };
 
-const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
+const Feedback = ({ content, chatHistoryItem }: FeedbackProps) => {
   const { copySuccess, copyToClipboard } = useCopyToClipboard();
 
   const {
@@ -28,7 +28,7 @@ const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
     feedback,
     setFeedback,
     handleFeedbackSendClick,
-  } = useRatingToolbarLogic(chatHistoryItem);
+  } = useFeedbackLogic(chatHistoryItem);
 
   const buttonStyle = {
     width: 40,
@@ -44,40 +44,32 @@ const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
 
   return (
     <>
-      <Toolbar.Root aria-label="Formatting options">
-        <Toolbar.ToggleGroup type="multiple" aria-label="" style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16
-        }}>
-          {!thumbsDownPressed && <IconTooltipButton
-            icon={faThumbsUp}
-            tooltip={"いい回答でした"}
-            onClick={handleThumbsUpClick}
-            pressed={thumbsUpPressed}
-            style={buttonStyle}
-            pressedColor={vars.color.grayA.grayA12}
-            defaultColor={vars.color.gray.gray9}
-          />}
-          {!thumbsUpPressed && <IconTooltipButton
-            icon={faThumbsDown}
-            tooltip={"いまいちでした"}
-            onClick={handleThumbsDownClick}
-            pressed={thumbsDownPressed}
-            style={buttonStyle}
-            pressedColor={vars.color.grayA.grayA12}
-            defaultColor={vars.color.gray.gray9}
-          />}
-          {
-            <Copy
-              isCopied={copySuccess}
-              onCopy={() => copyToClipboard(content)}
-            />
-          }
-
-        </Toolbar.ToggleGroup>
-        <Toolbar.Separator />
-      </Toolbar.Root >
+      <Flex aria-label="Formatting options" style={{ alignItems: 'center', gap: 16 }}>
+        {!thumbsDownPressed && <IconTooltipButton
+          icon={faThumbsUp}
+          tooltip={"いい回答でした"}
+          onClick={handleThumbsUpClick}
+          pressed={thumbsUpPressed}
+          style={buttonStyle}
+          pressedColor={vars.color.grayA.grayA12}
+          defaultColor={vars.color.gray.gray9}
+        />}
+        {!thumbsUpPressed && <IconTooltipButton
+          icon={faThumbsDown}
+          tooltip={"いまいちでした"}
+          onClick={handleThumbsDownClick}
+          pressed={thumbsDownPressed}
+          style={buttonStyle}
+          pressedColor={vars.color.grayA.grayA12}
+          defaultColor={vars.color.gray.gray9}
+        />}
+        {
+          <Copy
+            isCopied={copySuccess}
+            onCopy={() => copyToClipboard(content)}
+          />
+        }
+      </Flex>
       {
         showDetailedFeedback &&
         <Flex
@@ -117,4 +109,4 @@ const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
   )
 };
 
-export default RatingToolbar;
+export default Feedback;

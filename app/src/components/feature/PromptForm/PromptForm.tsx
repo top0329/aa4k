@@ -115,10 +115,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
           justify={'between'}
         >
           <Flex gap="2" align={'center'}>
-            <ToggleSwitch
-              isOn={isPcViewMode}
-              onToggle={handleViewModeChange}
-            />
+            <ToggleSwitch isOn={isPcViewMode} onToggle={handleViewModeChange} disabled={isLoading} />
             {
               isPcViewMode ? <Badge color='iris'>スマートフォン用アプリのカスタマイズに切り替える</Badge> : <Badge color='cyan'>PC用アプリのカスタマイズに切り替える</Badge>
             }

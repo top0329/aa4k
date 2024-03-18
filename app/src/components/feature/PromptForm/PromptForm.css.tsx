@@ -2,19 +2,16 @@ import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "~/styles/theme.css";
 
 export const sVoiceInput = style({
-  boxSizing: "border-box",
-  opacity: 0.5,
   borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
   ":hover": {
-    opacity: 1,
+    opacity: 0.8,
   },
 });
 
 export const sVoiceInputDisabled = style({
-  boxSizing: "border-box",
-  opacity: 1,
+  opacity: 0.5,
   borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
@@ -30,7 +27,6 @@ export const boxShadowAnimation = keyframes({
 });
 
 export const sVoiceInputActive = style({
-  boxSizing: "border-box",
   opacity: 1,
   transition: "opacity 0.2s",
   cursor: "pointer",

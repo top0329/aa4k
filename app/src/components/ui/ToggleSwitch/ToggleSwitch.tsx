@@ -1,3 +1,4 @@
+// src/components/ui/ToggleSwitch/ToggleSwitch.tsx
 import { Flex } from '@radix-ui/themes';
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -6,16 +7,22 @@ import { vars } from '~/styles/theme.css';
 interface SwitchProps {
   isOn: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }
 
-const ToggleSwitch: React.FC<SwitchProps> = ({ isOn, onToggle }) => {
+const ToggleSwitch: React.FC<SwitchProps> = ({ isOn, onToggle, disabled = false }) => {
   return (
     <Flex
       align={'center'}
       style={{
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
       }}
-      onClick={onToggle}>
+      onClick={() => {
+        if (!disabled) {
+          onToggle();
+        }
+      }}>
       <motion.div
         style={{
           width: '44px',
