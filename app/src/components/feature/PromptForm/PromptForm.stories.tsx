@@ -1,5 +1,6 @@
 // src/components/feature/PromptForm/PromptForm.stories.tsx
 import { Meta } from '@storybook/react';
+import { useState } from 'react';
 import PromptForm from './PromptForm';
 
 export default {
@@ -7,4 +8,10 @@ export default {
   component: PromptForm,
 } as Meta;
 
-export const Default = () => <PromptForm isLoading={false} />;
+export const Default = () => {
+  const [humanMessage, setHumanMessage] = useState("");
+
+  return (
+    <PromptForm isLoading={false} humanMessage={humanMessage} setHumanMessage={setHumanMessage} />
+  )
+};

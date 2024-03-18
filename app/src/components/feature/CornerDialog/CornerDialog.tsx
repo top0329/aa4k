@@ -23,6 +23,8 @@ const CornerDialog = () => {
     isChangeCodeRef,
     initialPosition,
     savePosition,
+    humanMessage,
+    setHumanMessage,
   } = useCornerDialogLogic();
 
   return (
@@ -61,7 +63,14 @@ const CornerDialog = () => {
           )}
 
           {dockState.chatVisible && (
-            <Chat isLoading={isLoading} startLoading={startLoading} stopLoading={stopLoading} isChangeCodeRef={isChangeCodeRef} />
+            <Chat
+              isLoading={isLoading}
+              startLoading={startLoading}
+              stopLoading={stopLoading}
+              isChangeCodeRef={isChangeCodeRef}
+              humanMessage={humanMessage}
+              setHumanMessage={setHumanMessage}
+            />
           )}
           <BarLoading isLoading={isLoading} />
           <Dock />

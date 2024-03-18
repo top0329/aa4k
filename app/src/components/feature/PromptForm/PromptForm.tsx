@@ -16,13 +16,14 @@ type PromptFormProps = {
   startLoading?: () => void;
   stopLoading?: () => void;
   isChangeCodeRef?: React.MutableRefObject<boolean>;
+  humanMessage: string;
+  setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage }) => {
   const {
     isVoiceInput,
     isPcViewMode,
-    humanMessage,
     handleSubmit,
     handleKeyDown,
     handleVoiceInput,
@@ -33,7 +34,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
     voiceInputVisible,
     aiAnswerRef,
     finishAiAnswerRef,
-  } = usePromptFormLogic(startLoading, stopLoading, isChangeCodeRef);
+  } = usePromptFormLogic(humanMessage, setHumanMessage, startLoading, stopLoading, isChangeCodeRef);
   const { isSpeech } = useTextSpeech(
     aiAnswerRef,
     finishAiAnswerRef,

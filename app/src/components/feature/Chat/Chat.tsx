@@ -11,9 +11,11 @@ type ChatProps = {
   startLoading?: () => void;
   stopLoading?: () => void;
   isChangeCodeRef: React.MutableRefObject<boolean>;
+  humanMessage: string;
+  setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChangeCodeRef}) => {
+const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage}) => {
   return (
     <Box className={sChat} >
       <ScrollToBottom
@@ -30,7 +32,14 @@ const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChan
           <AccordionHistory isLoading={isLoading} />
         </Box>
       </ScrollToBottom>
-      <PromptForm isLoading={isLoading} startLoading={startLoading} stopLoading={stopLoading} isChangeCodeRef={isChangeCodeRef} />
+      <PromptForm
+        isLoading={isLoading}
+        startLoading={startLoading}
+        stopLoading={stopLoading}
+        isChangeCodeRef={isChangeCodeRef}
+        humanMessage={humanMessage}
+        setHumanMessage={setHumanMessage}
+      />
     </Box>
   );
 };

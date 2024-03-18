@@ -17,13 +17,14 @@ import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/ap
 import { preCheck } from '~/util/preCheck';
 
 export const usePromptFormLogic = (
+  humanMessage: string,
+  setHumanMessage: React.Dispatch<React.SetStateAction<string>>,
   startLoading?: () => void,
   stopLoading?: () => void,
   isChangeCodeRef?: React.MutableRefObject<boolean>
 ) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
-  const [humanMessage, setHumanMessage] = useState("");
   const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
   const [isVoiceInput,
     setVoiceInput] = useState(false);

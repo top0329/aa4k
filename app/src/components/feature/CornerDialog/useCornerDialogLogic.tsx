@@ -32,6 +32,7 @@ export const useCornerDialogLogic = () => {
     const savedPosition = getSavedPosition();
     return savedPosition || { x: window.innerWidth - 120, y: window.innerHeight - 120 };
   });
+  const [humanMessage, setHumanMessage] = useState("");
 
   // Ref
   const isChangeCodeRef = useRef<boolean>(false); // コード編集中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
@@ -182,5 +183,7 @@ export const useCornerDialogLogic = () => {
     isChangeCodeRef,
     initialPosition,
     savePosition,
+    humanMessage,
+    setHumanMessage,
   };
 };
