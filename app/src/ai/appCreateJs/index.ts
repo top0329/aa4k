@@ -68,9 +68,12 @@ export const appCreateJs = async (
     // レスポンス設定
     // --------------------
     let message = `${llmResponse.resultMessage}`;
-    let messageComment = `${llmResponse.autoComplete ? `■自動補完説明\n${llmResponse.autoComplete}` : ""}`;
-    messageComment += `${llmResponse.correctionInstructions ? `\n■修正指示例\n${llmResponse.correctionInstructions}` : ""}`;
-    messageComment += `${llmResponse.guideMessage ? `\n■ガイドライン違反\n${llmResponse.guideMessage}` : ""}`;
+    const autoComplete = llmResponse.autoComplete ? `補足：\n${llmResponse.autoComplete}\n\n` : '';
+    const correctionInstructions = llmResponse.correctionInstructions ? `変更例：\n${llmResponse.correctionInstructions}\n\n` : '';
+    const guideMessage = llmResponse.guideMessage ? `ガイドライン違反：\n${llmResponse.guideMessage}\n` : '';
+
+    // テンプレートリテラルを使用して、最終的なメッセージを組み立てる。
+    const messageComment = `${autoComplete}${correctionInstructions}${guideMessage}`.trim();
 
     // --------------------
     // 回答メッセージと生成したコードの登録 (会話履歴TBL)
@@ -124,6 +127,7 @@ export const appCreateJs = async (
     };
 
   } catch (err) {
+    console.log(err)
     if (err instanceof LlmError || err instanceof ContractExpiredError || err instanceof ContractStatusError) {
       const message = err.message;
       insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
