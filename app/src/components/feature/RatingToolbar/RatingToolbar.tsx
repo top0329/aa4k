@@ -7,8 +7,8 @@ import Copy from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 import { vars } from '~/styles/theme.css';
-import { useRatingToolbarLogic } from './useRatingtoolbarLogic';
 import { ChatHistoryItem } from "~/types/ai";
+import { useRatingToolbarLogic } from './useRatingtoolbarLogic';
 
 type RatingToolbarProps = {
   content: string;
@@ -103,7 +103,11 @@ const RatingToolbar = ({ content, chatHistoryItem }: RatingToolbarProps) => {
             }
           />
           <Flex>
-            <Button size="2" variant='ghost' onClick={handleFeedbackSendClick} disabled={!feedback}>
+            <Button size="2" variant='ghost' onClick={handleFeedbackSendClick} disabled={!feedback}
+              style={{
+                cursor: 'pointer',
+              }}
+            >
               フィードバック送信
             </Button>
           </Flex>

@@ -1,10 +1,11 @@
 // src/components/feature/PromptForm/PromptForm.tsx
 import { faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Badge, Box, Button, Flex, Switch, Text } from '@radix-ui/themes';
+import { Badge, Box, Button, Flex, Text } from '@radix-ui/themes';
 import { motion } from "framer-motion";
 import { useUpdateEffect } from "react-use";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
+import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
 import { useTextSpeech } from "~/hooks/useTextSpeech";
 import { vars } from '~/styles/theme.css';
 import { sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
@@ -113,17 +114,10 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
           justify={'between'}
         >
           <Flex gap="2" align={'center'}>
-            <Switch
-              color={
-                isPcViewMode
-                  ? 'iris'
-                  : 'cyan'
-              }
-              checked={!isPcViewMode}
-              onCheckedChange={handleViewModeChange}
-              disabled={isSubmitting || isLoading}
+            <ToggleSwitch
+              isOn={isPcViewMode}
+              onToggle={handleViewModeChange}
             />
-
             {
               isPcViewMode ? <Badge color='iris'>スマートフォン用アプリのカスタマイズに切り替える</Badge> : <Badge color='cyan'>PC用アプリのカスタマイズに切り替える</Badge>
             }
@@ -139,6 +133,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
                 height: 32,
                 borderRadius: `50%`,
                 padding: 0,
+                cursor: 'pointer',
               }}
               variant={'ghost'}
               color={isVoiceInput ? 'crimson' : 'gray'}

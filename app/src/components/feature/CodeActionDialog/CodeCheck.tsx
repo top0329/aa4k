@@ -55,6 +55,9 @@ const CodeCheck: React.FC<CodeCheckProps> = ({
         color={'crimson'}
         size={'2'}
         onClick={() => setIsCodeActionDialog(false)}
+        style={{
+          cursor: 'pointer',
+        }}
       >
         <Text weight={'bold'}>
           キャンセル

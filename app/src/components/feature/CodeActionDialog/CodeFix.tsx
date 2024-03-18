@@ -46,6 +46,9 @@ const CodeFix: React.FC<CodeFixProps> = ({
         color={'gray'}
         size={'2'}
         onClick={() => setIsCodeActionDialog(false)}
+        style={{
+          cursor: 'pointer',
+        }}
       >
         <Text weight={'bold'}>
           キャンセル
@@ -55,6 +58,9 @@ const CodeFix: React.FC<CodeFixProps> = ({
         variant="soft"
         size={'3'}
         onClick={handleReflectClick}
+        style={{
+          cursor: 'pointer',
+        }}
       >
         <Text weight={'bold'}>
           反映
