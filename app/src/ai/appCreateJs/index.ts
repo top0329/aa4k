@@ -127,7 +127,6 @@ export const appCreateJs = async (
     };
 
   } catch (err) {
-    console.log(err)
     if (err instanceof LlmError || err instanceof ContractExpiredError || err instanceof ContractStatusError) {
       const message = err.message;
       insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
