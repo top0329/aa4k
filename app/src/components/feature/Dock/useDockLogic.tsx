@@ -32,7 +32,7 @@ export const useDockLogic = () => {
   const initDockState = async () => {
     await setDockState({
       dialogVisible: false,
-      chatVisible: true,
+      chatVisible: false,
       codeEditorVisible: false,
       spChatVisible: false,
     });
