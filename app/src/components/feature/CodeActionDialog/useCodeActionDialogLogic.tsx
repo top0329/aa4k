@@ -11,6 +11,7 @@ import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
 import { preCheck } from '~/util/preCheck';
 import { getApiErrorMessage } from '~/util/getErrorMessage';
+import { KintoneError } from "~/util/customErrors"
 
 export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
   const [codeCheckStatus, setCodeCheckStatus] = useState<CodeCheckStatus>(CodeCheckStatus.loading);
@@ -64,8 +65,13 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
       location.href = `/k/admin/preview/${appId}/`;
     } catch (err) {
       props.setIsCodeActionDialog(false);
-      // トーストでエラーメッセージ表示
-      showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
+      if (err instanceof KintoneError) {
+        // トーストでエラーメッセージ表示
+        showToast(err.message, 0, false)
+      } else {
+        // トーストでエラーメッセージ表示
+        showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
+      }
     }
   }
 
@@ -106,6 +112,10 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
           const violations = resCodeCheck.message;
           setCodeCheckStatus(resCodeCheck.result);
           setCodeViolations(violations);
+          break;
+        case CodeCheckStatus.error:
+          // トーストでエラーメッセージ表示
+          showToast(resCodeCheck.message[0], 0, false);
           break;
         case CodeCheckStatus.loading:
           // コードチェック結果としてはloadingは返却されない想定の為、エラーとする

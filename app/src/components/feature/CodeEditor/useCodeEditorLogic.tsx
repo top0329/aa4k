@@ -9,6 +9,7 @@ import { CodeState, CodeLatestState, IsChangeCodeState } from '~/state/codeActio
 import { DockItemVisibleState } from '~/state/dockItemState';
 import { ViewModeState } from '~/state/viewModeState';
 import { getKintoneCustomizeJs } from "~/util/kintoneCustomize";
+import { KintoneError } from "~/util/customErrors"
 
 export const useCodeEditorLogic = (
   isChangeCodeRef?: React.MutableRefObject<boolean>
@@ -96,8 +97,13 @@ export const useCodeEditorLogic = (
       setIsChangeCode(false);
       setDockState(dockState => ({ ...dockState, codeEditorVisible: true }));
     } catch (err) {
-      // トーストでエラーメッセージ表示
-      showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
+      if (err instanceof KintoneError) {
+        // トーストでエラーメッセージ表示
+        showToast(err.message, 0, false)
+      } else {
+        // トーストでエラーメッセージ表示
+        showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
+      }
     }
   }
 

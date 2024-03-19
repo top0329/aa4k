@@ -11,18 +11,18 @@ import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
-import { openAIModel, ContractExpiredError, ContractStatusError, getCodingGuidelines } from "../common"
+import { openAIModel, getCodingGuidelines } from "../common"
 import { DeviceDiv, CodeCreateMethod, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
-import { GeneratedCodeGetResponseBody } from "~/types/apiResponse";
+import { GeneratedCodeGetResponseBody, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
+import { getApiErrorMessage } from "~/util/getErrorMessage"
+
+import { LlmError, KintoneError, ApiError, GuidelineError, RetrieveError, ContractExpiredError, ContractStatusError } from "~/util/customErrors"
 
 import * as prettier from "prettier/standalone"
 import parserBabel from "prettier/plugins/babel";
 import * as prettierPluginEstree from "prettier/plugins/estree";
-
-// カスタムエラーオブジェクト
-export class LlmError extends Error { }
 
 /**
  * kintoneカスタマイズJavascript生成
@@ -127,7 +127,14 @@ export const appCreateJs = async (
     };
 
   } catch (err) {
-    if (err instanceof LlmError || err instanceof ContractExpiredError || err instanceof ContractStatusError) {
+    if (err instanceof LlmError
+      || err instanceof KintoneError
+      || err instanceof ApiError
+      || err instanceof GuidelineError
+      || err instanceof RetrieveError
+      || err instanceof ContractExpiredError
+      || err instanceof ContractStatusError
+    ) {
       const message = err.message;
       insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message, } }
@@ -234,7 +241,10 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   const getField_res = await kintone.api(
     kintone.api.url("/k/v1/app/form/fields", isGuestSpace),
     "GET", { app: appId },
-  ) as kintoneFormFields;
+  ).catch((e: KintoneRestAPiError) => {
+    throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+  }) as kintoneFormFields;
+
   const fieldInfo = getField_res.properties;
 
   // --------------------
@@ -256,7 +266,7 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   // --------------------
   // 最新JSの取得（from kintone）
   // --------------------
-  const { kintoneCustomizeFiles, targetFileKey, jsCodeForKintone } = await getKintoneCustomizeJs(appId, deviceDiv, isGuestSpace)
+  const { kintoneCustomizeFiles, targetFileKey, jsCodeForKintone } = await getKintoneCustomizeJs(appId, deviceDiv, isGuestSpace);
 
 
   // --------------------
@@ -268,8 +278,14 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
     "POST",
     {},
     { appId: appId, userId: userId, deviceDiv: deviceDiv, conversationId: conversationId },
-  );
-  const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDb[0]) as GeneratedCodeGetResponseBody;
+  ) as KintoneProxyResponse;
+  const [res_jsCodeForDbBody, res_jsCodeForDbStatus] = res_jsCodeForDb;
+  const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDbBody) as GeneratedCodeGetResponseBody;
+  if (res_jsCodeForDbStatus !== 200) {
+    const errorMessage = getApiErrorMessage(res_jsCodeForDbStatus, resJson_jsCodeForDb.errorCode)
+    throw new ApiError(errorMessage)
+  }
+
   const jsCodeForDb = resJson_jsCodeForDb.javascriptCode;
 
   // 最新コード比較
@@ -371,7 +387,13 @@ async function createJs(
     fieldInfo: JSON.stringify(fieldInfo),
     originalCode: addLineNumbersToCode(originalCode),
     codeTemplate: codeTemplate.map((template) => template.pageContent),
-  }, { callbacks: [handler] }).catch(() => { throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`) })) as LLMResponse;
+  }, { callbacks: [handler] }).catch((err) => {
+    if (err.code == "invalid_api_key") {
+      throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
+    } else {
+      throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`)
+    }
+  })) as LLMResponse;
 
   if (llmResponse.properties.length) {
     // JS生成された場合はコード編集して返却

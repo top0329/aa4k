@@ -166,6 +166,8 @@ const CodeCheck: React.FC<CodeCheckProps> = ({
       return <LoadingStatus />;
     case CodeCheckStatus.caution:
       return <CautionStatus />;
+    case CodeCheckStatus.error:
+      throw Error(`想定されていないcodeCheckStatusです。codeCheckStatus=${codeCheckStatus}`)
     default:
       const unexpected: never = codeCheckStatus
       throw Error("想定されていないcodeCheckStatusです. codeCheckStatus=", unexpected)
