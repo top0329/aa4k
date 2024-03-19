@@ -2,12 +2,13 @@
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
-import { ErrorMessage, UserRating } from '~/constants';
+import { UserRating } from '~/constants';
 import { useChatHistory } from "~/hooks/useChatHistory";
 import { PluginIdState } from "~/state/pluginIdState";
 import { ViewModeState } from "~/state/viewModeState";
 import { ChatHistoryItem } from "~/types/ai";
 import { KintoneProxyResponse, KintoneProxyResponseBody } from "~/types/apiResponse";
+import { getApiErrorMessage } from '~/util/getErrorMessage';
 
 // src/components/feature/Feedback/useRatingtoolbar.tsx
 export const useFeedbackLogic = (chatHistoryItem: ChatHistoryItem) => {
@@ -82,8 +83,10 @@ export const useFeedbackLogic = (chatHistoryItem: ChatHistoryItem) => {
     const [resBody, resStatus] = resUpdateUserRating;
     const resBodyUpdateUserRating = JSON.parse(resBody) as KintoneProxyResponseBody;
     if (resStatus !== 200) {
+      // APIエラー時のエラーメッセージを取得
+      const errorMessage = getApiErrorMessage(resStatus, resBodyUpdateUserRating.errorCode);
       // トーストでエラーメッセージ表示
-      showToast(`${ErrorMessage.E_MSG001}（${resBodyUpdateUserRating.errorCode}）`, 3000, true);
+      showToast(errorMessage, 3000, true);
       return false;
     }
 

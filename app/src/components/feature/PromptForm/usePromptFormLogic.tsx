@@ -15,6 +15,7 @@ import { ViewModeState } from '~/state/viewModeState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
 import { preCheck } from '~/util/preCheck';
+import { getApiErrorMessage } from '~/util/getErrorMessage';
 
 export const usePromptFormLogic = (
   humanMessage: string,
@@ -116,10 +117,12 @@ export const usePromptFormLogic = (
     // 事前チェックの呼び出し
     const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
     if (resPreCheckStatus !== 200) {
+      // APIエラー時のエラーメッセージを取得
+      const errMsgStr = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
+
       const errorMessage: ErrorMessage = {
         role: MessageType.error,
-        content: preCheckResult.errorCode === ErrorCode.A02002 ? `${ErrorMessageConst.E_MSG002}（${preCheckResult.errorCode}）`
-          : `${ErrorMessageConst.E_MSG001}（${preCheckResult.errorCode}）`
+        content: errMsgStr
       };
       const chatHistoryItem: ChatHistoryItem = {
         human: {
@@ -152,11 +155,14 @@ export const usePromptFormLogic = (
     const [resBody, resInsertConversationStatus] = resInsertConversation;
     const resJsonInsertConversation = JSON.parse(resBody) as InsertConversationResponseBody;
     if (resInsertConversationStatus !== 200) {
+      // APIエラー時のエラーメッセージを取得
+      const errMsgStr = getApiErrorMessage(resInsertConversationStatus, resJsonInsertConversation.errorCode);
+
       // AIメッセージオブジェクトの削除
       delete chatHistoryItem.ai;
       chatHistoryItem.error = {
         role: MessageType.error,
-        content: `${ErrorMessageConst.E_MSG001}（${resJsonInsertConversation.errorCode}）`,
+        content: errMsgStr,
       };
       aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
       finishAiAnswerRef.current = true;

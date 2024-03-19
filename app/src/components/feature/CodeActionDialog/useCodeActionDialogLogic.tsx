@@ -10,6 +10,7 @@ import { ViewModeState } from '~/state/viewModeState';
 import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
 import { preCheck } from '~/util/preCheck';
+import { getApiErrorMessage } from '~/util/getErrorMessage';
 
 export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
   const [codeCheckStatus, setCodeCheckStatus] = useState<CodeCheckStatus>(CodeCheckStatus.loading);
@@ -77,10 +78,9 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
       const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
       if (resPreCheckStatus !== 200) {
         props.setIsCodeActionDialog(false);
+        // APIエラー時のエラーメッセージを取得
+        const errorMessage = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
         // トーストでエラーメッセージ表示
-        const errorMessage = preCheckResult.errorCode === ErrorCode.A02002
-          ? `${ErrorMessage.E_MSG002}（${preCheckResult.errorCode}）`
-          : `${ErrorMessage.E_MSG001}（${preCheckResult.errorCode}）`;
         showToast(errorMessage, 0, false);
         return;
       }
