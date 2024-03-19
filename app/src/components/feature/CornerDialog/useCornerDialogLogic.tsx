@@ -110,7 +110,7 @@ export const useCornerDialogLogic = () => {
   // 取得した会話履歴一覧をChatHistory型に変換
   const convertChatHistory = (conversationHistoryList: ConversationHistory): ChatHistory => {
     let chatHistoryItemList: ChatHistory = [];
-    conversationHistoryList.forEach((conversationHistory: ConversationHistoryRow) => {
+    conversationHistoryList.forEach((conversationHistory: ConversationHistoryRow, index) => {
       const chatHistoryItem: ChatHistoryItem = {
         human: {
           role: MessageType.human,
@@ -126,10 +126,17 @@ export const useCornerDialogLogic = () => {
         };
         chatHistoryItem["error"] = errorMessage;
       } else {
+        let aiMessageContent = conversationHistory.ai_message || `${ErrorMessageConst.E_MSG005}（${ErrorCode.E00006}）`;
+        let aiMessageComment = conversationHistory.ai_message_comment || '';
+        if (isLoading && index === conversationHistoryList.length - 1) {
+          // AI回答待ち中の場合、AI回答にはエラーメッセージを表示しない
+          aiMessageContent = '';
+          aiMessageComment = '';
+        } 
         const aiMessage: AiMessage = {
           role: MessageType.ai,
-          content: conversationHistory.ai_message || `${ErrorMessageConst.E_MSG005}（${ErrorCode.E00006}）`,
-          comment: conversationHistory.ai_message_comment || '',
+          content: aiMessageContent,
+          comment: aiMessageComment,
         };
         chatHistoryItem["ai"] = aiMessage;
       }
