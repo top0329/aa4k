@@ -7,12 +7,14 @@ import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useChatHistory } from "~/hooks/useChatHistory";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
+import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
 import { PluginIdState } from "~/state/pluginIdState";
 import { ViewModeState } from "~/state/viewModeState";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse } from "~/types/apiResponse";
+import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from "~/util/preCheck";
 
 type DragPosition = { x: number; y: number };
@@ -24,11 +26,14 @@ const getSavedPosition = (): DragPosition | null => {
 };
 
 export const useCornerDialogLogic = () => {
-  const [isPcViewMode] = useAtom(ViewModeState);
-  const { chatHistoryItems, setChatHistory } = useChatHistory(isPcViewMode);
+  const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
+  const { chatHistoryItems } = useChatHistory(isPcViewMode);
+  const [, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
+  const [, setMobileChatHistory] = useAtom(MobileChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
+  const [isInitialChatHistory, setIsInitialChatHistory] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [initialPosition, setInitialPosition] = useState<DragPosition>(() => {
     const savedPosition = getSavedPosition();
@@ -52,11 +57,49 @@ export const useCornerDialogLogic = () => {
     finishAiAnswerRef,
   );
 
-  const handleBannerClick = async () => {
-    // 会話履歴一覧の取得
-    await getChatHistoryItemList();
+  // 起動バナーを押下
+  const handleBannerClick = () => {
+    setDockState(dockState => ({ ...dockState, dialogVisible: true }));
+    // 二重押下防止
+    setIsBannerClicked(true);
+    // 事前チェックを行う
+    execPreCheck();
   }
 
+  // 事前チェックを実行
+  const execPreCheck = async () => {
+    try {
+      const appId = kintone.app.getId();
+
+      // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
+      if (appId === null) {
+        setIsBannerClicked(false);
+        setDockState(dockState => ({ ...dockState, dialogVisible: false }));
+        showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
+        return;
+      }
+
+      // 事前チェックの呼び出し
+      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
+      if (resPreCheckStatus !== 200) {
+        setIsBannerClicked(false);
+        setDockState(dockState => ({ ...dockState, dialogVisible: false }));
+        // APIエラー時のエラーメッセージを取得
+        const errorMessage = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
+        // APIエラーの場合、エラーメッセージ表示
+        showErrorToast(errorMessage);
+        return;
+      }
+
+      setIsBannerClicked(false);
+    } catch (err) {
+      setIsBannerClicked(false);
+      setDockState(dockState => ({ ...dockState, dialogVisible: false }));
+      showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）`);
+    }
+  }
+
+  // 会話履歴一覧の取得
   const getChatHistoryItemList = async () => {
     try {
       const appId = kintone.app.getId();
@@ -64,23 +107,8 @@ export const useCornerDialogLogic = () => {
 
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
+        setDockState(dockState => ({ ...dockState, chatVisible: false }));
         showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
-        return;
-      }
-
-      // 二重押下防止
-      setIsBannerClicked(true);
-
-      // 事前チェックの呼び出し
-      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
-      if (resPreCheckStatus !== 200) {
-        setIsBannerClicked(false);
-        // APIエラーの場合、エラーメッセージ表示
-        if (preCheckResult.errorCode === ErrorCode.A02002) {
-          showErrorToast(`${ErrorMessageConst.E_MSG002}（${preCheckResult.errorCode}）`);
-        } else {
-          showErrorToast(`${ErrorMessageConst.E_MSG001}（${preCheckResult.errorCode}）`);
-        }
         return;
       }
 
@@ -95,23 +123,25 @@ export const useCornerDialogLogic = () => {
       const [resBody, resStatus] = resConversationHistory;
       const resBodyConversationHistoryList = JSON.parse(resBody) as ConversationHistoryListResponseBody;
       if (resStatus !== 200) {
-        setIsBannerClicked(false);
-        showErrorToast(`${ErrorMessageConst.E_MSG001}（${resBodyConversationHistoryList.errorCode}）`);
+        setDockState(dockState => ({ ...dockState, chatVisible: false }));
+        // APIエラー時のエラーメッセージを取得
+        const errorMessage = getApiErrorMessage(resStatus, resBodyConversationHistoryList.errorCode);
+        // APIエラーの場合、エラーメッセージ表示
+        showErrorToast(errorMessage);
         return;
       }
 
       // チャット履歴の変換
-      const chatHistoryItemList = isPcViewMode
-        ? convertChatHistory(resBodyConversationHistoryList.desktopConversationHistoryList)
-        : convertChatHistory(resBodyConversationHistoryList.mobileConversationHistoryList);
+      const desktopChatHistoryItemList = convertChatHistory(resBodyConversationHistoryList.desktopConversationHistoryList);
+      const mobileChatHistoryItemList = convertChatHistory(resBodyConversationHistoryList.mobileConversationHistoryList);
 
       // チャット履歴の更新
-      setChatHistory(chatHistoryItemList);
+      setDesktopChatHistory(desktopChatHistoryItemList);
+      setMobileChatHistory(mobileChatHistoryItemList);
 
-      setIsBannerClicked(false);
-      setDockState(dockState => ({ ...dockState, dialogVisible: true, chatVisible: true }));
+      setIsInitialChatHistory(true);
     } catch (err) {
-      setIsBannerClicked(false);
+      setDockState(dockState => ({ ...dockState, chatVisible: false }));
       showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）`);
     }
   }
@@ -168,11 +198,11 @@ export const useCornerDialogLogic = () => {
   }, [chatHistoryItems]);
 
   useEffect(() => {
-    if (dockState.chatVisible && chatHistoryItems.length === 0) {
-      // 会話履歴一覧が未取得の場合、取得して表示
+    if (dockState.chatVisible && !isInitialChatHistory) {
+      // 会話モーダル初回表示の場合、会話履歴一覧を取得する
       getChatHistoryItemList();
     }
-  }, [dockState.chatVisible, chatHistoryItems.length]);
+  }, [dockState.chatVisible, isInitialChatHistory]);
 
   // 起動バナーの位置を保存
   const savePosition = (position: DragPosition) => {
@@ -198,6 +228,25 @@ export const useCornerDialogLogic = () => {
       execCallbacks();
     }
   }, [isLoading, isSpeech]);
+
+  useEffect(() => {
+    const appId = kintone.app.getId();
+    const previewPath = `/k/admin/preview/${appId}/`;
+    const currentUrl = location.href;
+    if (!currentUrl.includes(previewPath)) {
+      // 本番画面の場合、起動バナーのみ表示
+      const initDockState = async () => {
+        await setDockState({
+          dialogVisible: false,
+          chatVisible: false,
+          codeEditorVisible: false,
+          spChatVisible: false,
+        });
+        await setIsPcViewMode(true);
+      }
+      initDockState();
+    }
+  }, []);
 
   return {
     dockState,
