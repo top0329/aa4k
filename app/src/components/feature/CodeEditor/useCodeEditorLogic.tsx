@@ -54,11 +54,6 @@ export const useCodeEditorLogic = (
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
-    if (!isFullScreen) {
-      setDockState(dockState => ({ ...dockState, chatVisible: false }));
-    } else {
-      setDockState(dockState => ({ ...dockState, chatVisible: true }));
-    }
   };
 
   // リフレッシュボタン押下

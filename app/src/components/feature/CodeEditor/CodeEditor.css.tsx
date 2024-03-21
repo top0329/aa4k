@@ -12,7 +12,7 @@ export const sCodeEditor = style({
   width: `calc(100vw - 680px)`,
   overflowY: `auto`,
   msOverflowY: `auto`,
-  zIndex: 101,
+  zIndex: 201,
   ":focus": {
     outline: `none`,
   },
@@ -25,7 +25,7 @@ export const sCodeEditorFullScreen = style({
   transform: 'translate(-50%, -50%)',
   width: `98vw`,
   height: `calc(98vh - 60px)`,
-  zIndex: 101,
+  zIndex: 201,
   background: vars.color.gray.gray1,
   borderRadius: 0,
   display: `flex`,
