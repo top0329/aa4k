@@ -114,6 +114,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
           setCodeViolations(violations);
           break;
         case CodeCheckStatus.error:
+          props.setIsCodeActionDialog(false);
           // トーストでエラーメッセージ表示
           showToast(resCodeCheck.message[0], 0, false);
           break;
