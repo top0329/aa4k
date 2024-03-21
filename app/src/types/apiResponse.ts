@@ -4,7 +4,11 @@ import { SystemSettings } from "./ai";
 
 export type ResponseHeaders = Record<string, any>;
 export type KintoneProxyResponse = [string, number, ResponseHeaders];
-
+export interface KintoneRestAPiError {
+  id: string;
+  code: string;
+  message: string;
+}
 export interface KintoneProxyResponseBody {
   message: string;
   errorCode: ErrorCode;

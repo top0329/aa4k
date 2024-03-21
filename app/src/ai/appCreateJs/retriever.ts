@@ -5,10 +5,12 @@ import {
 } from "@langchain/core/retrievers";
 import type { CallbackManagerForRetrieverRun } from "@langchain/core/callbacks/manager";
 
-import { CodeTemplateRetrieverResponseBody } from "~/types/apiResponse"
+import { KintoneProxyResponse, CodeTemplateRetrieverResponseBody } from "~/types/apiResponse"
 import { CallbackManager, parseCallbackConfigArg, } from "@langchain/core/callbacks/manager";
 import { patchConfig } from "@langchain/core/runnables"
 import { LangchainLogsInsertCallbackHandler, LangchainLogsInsertCallbackHandlerProps } from "../langchainLogsInsertCallbackHandler";
+import { getApiErrorMessage } from "~/util/getErrorMessage"
+import { RetrieveError } from "~/util/customErrors"
 
 export interface CodeTemplateRetrieverInput extends BaseRetrieverInput {
   LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps;
@@ -49,8 +51,13 @@ export class CodeTemplateRetriever extends BaseRetriever {
         query: query,
         conversationId: this.conversationId,
       },
-    );
-    const resJson = JSON.parse(response[0]) as CodeTemplateRetrieverResponseBody;
+    ) as KintoneProxyResponse;
+    const [resBody, resStatus] = response;
+    const resJson = JSON.parse(resBody) as CodeTemplateRetrieverResponseBody;
+    if (resStatus !== 200) {
+      const errorMessage = getApiErrorMessage(resStatus, resJson.errorCode)
+      throw new RetrieveError(errorMessage)
+    }
     await runManager?.handleRetrieverEnd(resJson.documents);
     return resJson.documents
   }

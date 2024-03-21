@@ -25,7 +25,8 @@ export const CodeCreateMethod = {
 export const CodeCheckStatus = {
   caution: "CAUTION",
   safe: "SAFE",
-  loading: "LOADING"
+  loading: "LOADING",
+  error: "ERROR",
 } as const;
 export type CodeCheckStatus =
   (typeof CodeCheckStatus)[keyof typeof CodeCheckStatus];
@@ -108,6 +109,9 @@ export const ErrorCode = {
   E00004: "E00004", // JS生成のLLM連携エラー
   E00005: "E00005", // コードチェックのLLM連携エラー
   E00006: "E00006", // メッセージ送信中に画面操作(画面遷移等)で処理中断
+  E00007: "E00007", // kintone REST APIのエラー
+  E00008: "E00008", // kintoneガイドライン取得エラー
+  E00009: "E00009", // OpenAI API Key不正
   E99999: "E99999", // その他例外エラー
 } as const;
 export type ErrorCode = keyof typeof ErrorCode;
@@ -130,4 +134,5 @@ export const ErrorMessage = {
   E_MSG003: "現在ご利用することができません。管理者にお問い合わせください。",
   E_MSG004: "JavaScriptの生成に失敗しました。",
   E_MSG005: "メッセージ送信中に画面操作されたため正しく処理できませんでした。",
+  E_MSG006: "現在ご利用することができません。",
 } as const;

@@ -7,11 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { CODE_CHECK_SYSTEM_PROMPT } from "./prompt"
 import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
 import { openAIModel, getCodingGuidelines } from "../common"
-import { ContractStatus, CodeCheckStatus } from "../../constants"
+import { ContractStatus, CodeCheckStatus, ErrorCode, ErrorMessage as ErrorMessageConst } from "../../constants"
 import { CodeCheckResponse } from "../../types/ai";
-
-// カスタムエラーオブジェクト
-export class LlmError extends Error { }
+import { LlmError, GuidelineError } from "~/util/customErrors"
 
 /**
  * コードチェック
@@ -60,7 +58,13 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
       targetCode: code,
       codingGuideline: codingGuideline,
       secureCodingGuideline: secureCodingGuideline,
-    }, { callbacks: [handler] })) as LLMResponse;
+    }, { callbacks: [handler] }).catch((err) => {
+      if (err.code === "invalid_api_key") {
+        throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
+      } else {
+        throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`)
+      }
+    })) as LLMResponse;
 
     // 終了
     return {
@@ -69,7 +73,11 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
     };
 
   } catch (err) {
-    // エラーの場合は、ガイドライン違反なしとして扱う
-    return { result: CodeCheckStatus.safe, message: [""] };
+    if (err instanceof LlmError || err instanceof GuidelineError) {
+      return { result: CodeCheckStatus.error, message: [err.message] }
+    } else {
+      const message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      return { result: CodeCheckStatus.error, message: [message] }
+    }
   }
 }

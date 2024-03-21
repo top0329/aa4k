@@ -2,16 +2,13 @@ import { ChatOpenAI } from "@langchain/openai";
 import { LlmType, ContractStatus, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import * as cheerio from "cheerio"
 import { KintoneProxyResponse, AzureOpenAiProxyCredentialResponseBody } from "~/types/apiResponse"
+import { ContractExpiredError, ContractStatusError, GuidelineError } from "~/util/customErrors"
 import { Fetch } from "openai/core"
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { Sha256 } from '@aws-crypto/sha256-browser';
 
 import { RequestInit } from "openai/_shims/index"
-
-// カスタムエラーオブジェクト
-export class ContractExpiredError extends Error { }
-export class ContractStatusError extends Error { }
 
 /**
  * openAIモデルのインスタンス生成
@@ -61,11 +58,19 @@ export function openAIModel(pluginId: string, sessionId: string, contractStatus:
 export async function getCodingGuidelines() {
   const urls = [
     "https://cybozu.dev/ja/kintone/docs/guideline/coding-guideline/",
-    "https://cybozu.dev/ja/kintone/docs/guideline/secure-coding-guideline/"
+    "https://cybozu.dev/ja/kintone/docs/guideline/secure-coding-guideline/",
   ]
-  const [codingGuidelineHtml, secureCodingGuidelineHtml] = await Promise.all(urls.map(url => kintone.proxy(url, "GET", {}, {})));
-  const $1 = cheerio.load(codingGuidelineHtml[0]);
-  const $2 = cheerio.load(secureCodingGuidelineHtml[0]);
+  const [
+    codingGuidelineHtmlResponse,
+    secureCodingGuidelineHtmlResponse
+  ] = await Promise.all(urls.map(url => kintone.proxy(url, "GET", {}, {}))) as KintoneProxyResponse[];
+  const [codingGuidelineResBody, codingGuidelineResStatus] = codingGuidelineHtmlResponse;
+  const [secureCodingGuidelineResBody, secureCodingGuidelineResStatus] = secureCodingGuidelineHtmlResponse;
+  if (codingGuidelineResStatus !== 200 || secureCodingGuidelineResStatus !== 200) {
+    throw new GuidelineError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00008}）`)
+  }
+  const $1 = cheerio.load(codingGuidelineResBody);
+  const $2 = cheerio.load(secureCodingGuidelineResBody);
   const codingGuideline = $1("article.main--content--article").text();
   const secureCodingGuideline = $2("article.main--content--article").text();
   return { codingGuideline, secureCodingGuideline }
