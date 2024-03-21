@@ -17,16 +17,29 @@ import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/ap
 import { preCheck } from '~/util/preCheck';
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 
-export const usePromptFormLogic = (
-  humanMessage: string,
-  setHumanMessage: React.Dispatch<React.SetStateAction<string>>,
-  startLoading?: () => void,
-  stopLoading?: () => void,
-  isChangeCodeRef?: React.MutableRefObject<boolean>
-) => {
+type PromptFormProps = {
+  startLoading?: () => void;
+  stopLoading?: () => void;
+  isChangeCodeRef?: React.MutableRefObject<boolean>;
+  humanMessage: string;
+  setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
+  aiAnswerRef: React.MutableRefObject<string>;
+  finishAiAnswerRef: React.MutableRefObject<boolean>;
+}
+
+export const usePromptFormLogic = ({
+  humanMessage,
+  setHumanMessage,
+  startLoading,
+  stopLoading,
+  isChangeCodeRef,
+  setCallbackFuncs,
+  aiAnswerRef,
+  finishAiAnswerRef,
+}: PromptFormProps) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
-  const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
   const [isVoiceInput,
     setVoiceInput] = useState(false);
   const [voiceInputVisible, setVoiceInputVisible] = useState(true);
@@ -39,8 +52,6 @@ export const usePromptFormLogic = (
   const [pluginId] = useAtom(PluginIdState);
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
-  const aiAnswerRef = useRef<string>('');
-  const finishAiAnswerRef = useRef<boolean>(false);
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
 
   const { transcript, finalTranscript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
@@ -219,10 +230,6 @@ export const usePromptFormLogic = (
     setIsSubmitting(false);
   };
 
-  const execCallbacks = () => {
-    callbackFuncs?.forEach((fn) => fn());
-  };
-
   const handleVoiceInput = async(e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
@@ -326,9 +333,6 @@ export const usePromptFormLogic = (
     handleHumanMessageChange,
     handleViewModeChange,
     isSubmitting,
-    execCallbacks,
     voiceInputVisible,
-    aiAnswerRef,
-    finishAiAnswerRef,
   };
 };

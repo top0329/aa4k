@@ -1,10 +1,12 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from 'react';
+import { useUpdateEffect } from "react-use";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useChatHistory } from "~/hooks/useChatHistory";
+import { useTextSpeech } from "~/hooks/useTextSpeech";
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
 import { PluginIdState } from "~/state/pluginIdState";
@@ -33,15 +35,22 @@ export const useCornerDialogLogic = () => {
     return savedPosition || { x: window.innerWidth - 120, y: window.innerHeight - 120 };
   });
   const [humanMessage, setHumanMessage] = useState("");
+  const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
 
   // Ref
   const isChangeCodeRef = useRef<boolean>(false); // コード編集中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
+  const aiAnswerRef = useRef<string>('');
+  const finishAiAnswerRef = useRef<boolean>(false);
 
   const { showToast } = useToast();
   const { isLoading,
     startLoading,
     stopLoading
   } = useLoadingLogic(false);
+  const { isSpeech } = useTextSpeech(
+    aiAnswerRef,
+    finishAiAnswerRef,
+  );
 
   const handleBannerClick = async () => {
     // 会話履歴一覧の取得
@@ -179,6 +188,16 @@ export const useCornerDialogLogic = () => {
     }
   }, [getSavedPosition]);
 
+  const execCallbacks = () => {
+    callbackFuncs?.forEach((fn) => fn());
+  };
+
+  // JS生成AI機能の呼び出し後、音声出力が完了したのを確認したのちにJS生成AI機能からのcallbacksを実行する
+  useUpdateEffect(() => {
+    if (!isLoading && !isSpeech) {
+      execCallbacks();
+    }
+  }, [isLoading, isSpeech]);
 
   return {
     dockState,
@@ -192,5 +211,9 @@ export const useCornerDialogLogic = () => {
     savePosition,
     humanMessage,
     setHumanMessage,
+    setCallbackFuncs,
+    execCallbacks,
+    aiAnswerRef,
+    finishAiAnswerRef,
   };
 };

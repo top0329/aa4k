@@ -25,6 +25,9 @@ const CornerDialog = () => {
     savePosition,
     humanMessage,
     setHumanMessage,
+    setCallbackFuncs,
+    aiAnswerRef,
+    finishAiAnswerRef,
   } = useCornerDialogLogic();
 
   return (
@@ -70,6 +73,9 @@ const CornerDialog = () => {
               isChangeCodeRef={isChangeCodeRef}
               humanMessage={humanMessage}
               setHumanMessage={setHumanMessage}
+              setCallbackFuncs={setCallbackFuncs}
+              aiAnswerRef={aiAnswerRef}
+              finishAiAnswerRef={finishAiAnswerRef}
             />
           )}
           <BarLoading isLoading={isLoading} />

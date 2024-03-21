@@ -13,9 +13,12 @@ type ChatProps = {
   isChangeCodeRef: React.MutableRefObject<boolean>;
   humanMessage: string;
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
+  aiAnswerRef: React.MutableRefObject<string>;
+  finishAiAnswerRef: React.MutableRefObject<boolean>;
 }
 
-const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage}) => {
+const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef}) => {
   return (
     <Box className={sChat} >
       <ScrollToBottom
@@ -39,6 +42,9 @@ const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChan
         isChangeCodeRef={isChangeCodeRef}
         humanMessage={humanMessage}
         setHumanMessage={setHumanMessage}
+        setCallbackFuncs={setCallbackFuncs}
+        aiAnswerRef={aiAnswerRef}
+        finishAiAnswerRef={finishAiAnswerRef}
       />
     </Box>
   );

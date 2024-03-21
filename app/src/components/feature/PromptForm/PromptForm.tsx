@@ -3,10 +3,8 @@ import { faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Badge, Box, Button, Flex, Text } from '@radix-ui/themes';
 import { motion } from "framer-motion";
-import { useUpdateEffect } from "react-use";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
 import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
-import { useTextSpeech } from "~/hooks/useTextSpeech";
 import { vars } from '~/styles/theme.css';
 import { sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
@@ -18,9 +16,12 @@ type PromptFormProps = {
   isChangeCodeRef?: React.MutableRefObject<boolean>;
   humanMessage: string;
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
+  aiAnswerRef: React.MutableRefObject<string>;
+  finishAiAnswerRef: React.MutableRefObject<boolean>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef }) => {
   const {
     isVoiceInput,
     isPcViewMode,
@@ -30,22 +31,8 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
     handleHumanMessageChange,
     handleViewModeChange,
     isSubmitting,
-    execCallbacks,
     voiceInputVisible,
-    aiAnswerRef,
-    finishAiAnswerRef,
-  } = usePromptFormLogic(humanMessage, setHumanMessage, startLoading, stopLoading, isChangeCodeRef);
-  const { isSpeech } = useTextSpeech(
-    aiAnswerRef,
-    finishAiAnswerRef,
-  );
-
-  // JS生成AI機能の呼び出し後、音声出力が完了したのを確認したのちにJS生成AI機能からのcallbacksを実行する
-  useUpdateEffect(() => {
-    if (!isSpeech) {
-      execCallbacks();
-    }
-  }, [isSpeech]);
+  } = usePromptFormLogic({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, startLoading, stopLoading, isChangeCodeRef });
 
   // Define animation variants for the submit button
   const buttonVariants = {
