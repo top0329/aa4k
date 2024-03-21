@@ -185,7 +185,13 @@ export class SuguresRetriever extends BaseRetriever {
         return [];
       }
     } catch (err) {
-      return [];
+      // エラーログの出力
+      const errorMessage = ({
+        subscriptionId: subscriptionId,
+        error: err,
+      });
+      console.error(errorMessage);
+      throw err;
     }
   }
 

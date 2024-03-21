@@ -10,6 +10,7 @@ import { selectTemplateCode } from "./dao";
 import { pgVectorInitialize } from "../common";
 import { ErrorCode } from "../constants";
 import { getDbConfig, getSecretValues, getParameterValues, ValidationError, RequestHeaderName, getSubscriptionData, getContractStatus, ContractStatus } from "../../../utils";
+import { InvalidOpenAiApiKeyError } from "./errors"
 
 export const retrieveHandler = async (req: Request, res: Response) => {
   let subscriptionId;
@@ -61,12 +62,21 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     await dbClient.connect();
 
     // pgvectorStoreの初期設定 契約ステータスが契約中(trial)の場合のみヘッダのOpenAI API_KEYを渡す
-    const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey: contractStatus === ContractStatus.trial ? openAiApiKey : undefined })
+    const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey: contractStatus === ContractStatus.trial ? openAiApiKey : undefined });
 
-    const pgvectorRetriever = new PgVectorRetriever(pgvectorStore, aa4kConstParameterValue.retrieveScoreThreshold, aa4kConstParameterValue.retrieveMaxCount);
+    const pgvectorRetriever = new PgVectorRetriever(pgvectorStore, subscriptionId, aa4kConstParameterValue.retrieveScoreThreshold, aa4kConstParameterValue.retrieveMaxCount);
     const suguresRetriever = new SuguresRetriever(subscriptionId, body.conversationId);
     const ensemble = new EnsembleRetriever({ retrievers: [suguresRetriever, pgvectorRetriever], weights: [0.5, 0.5] })
-    const documents = await ensemble.getRelevantDocuments(body.query);
+    const documents = await ensemble.getRelevantDocuments(body.query)
+      .catch(err => {
+        if (err instanceof InvalidOpenAiApiKeyError) {
+          retErrorStatus = 401;
+          retErrorMessage = "Invalid OpenAI Api Key";
+          retErrorCode = ErrorCode.A05003;
+        }
+        throw err
+      })
+
 
     // コードテンプレートの取得
     for (const doc of documents) {
