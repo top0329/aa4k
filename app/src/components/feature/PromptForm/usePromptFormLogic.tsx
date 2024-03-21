@@ -14,8 +14,8 @@ import { PluginIdState } from '~/state/pluginIdState';
 import { ViewModeState } from '~/state/viewModeState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
-import { preCheck } from '~/util/preCheck';
 import { getApiErrorMessage } from '~/util/getErrorMessage';
+import { preCheck } from '~/util/preCheck';
 
 type PromptFormProps = {
   startLoading?: () => void;
@@ -230,7 +230,7 @@ export const usePromptFormLogic = ({
     setIsSubmitting(false);
   };
 
-  const handleVoiceInput = async(e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleVoiceInput = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (isVoiceInput) {

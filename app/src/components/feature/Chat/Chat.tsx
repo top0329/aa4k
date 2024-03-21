@@ -18,7 +18,7 @@ type ChatProps = {
   finishAiAnswerRef: React.MutableRefObject<boolean>;
 }
 
-const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef}) => {
+const Chat: React.FC<ChatProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef }) => {
   return (
     <Box className={sChat} >
       <ScrollToBottom
@@ -32,7 +32,7 @@ const Chat: React.FC<ChatProps> = ({isLoading, startLoading, stopLoading, isChan
             display: 'flex',
             alignItems: 'flex-end',
           }}>
-          <AccordionHistory isLoading={isLoading} />
+          <AccordionHistory isLoading={isLoading} setHumanMessage={setHumanMessage} />
         </Box>
       </ScrollToBottom>
       <PromptForm

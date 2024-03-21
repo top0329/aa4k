@@ -48,20 +48,7 @@ const kintoneMocks = {
             {
               message: "Success",
               errorCode: "A01001",
-              desktopConversationHistoryList: [
-                {
-                  id: "1",
-                  user_message:
-                    "対応予定日が最も過去のレコードの色を変える機能を作ってください。",
-                  ai_message:
-                    "対応予定日が最も過去のレコードの色を変える機能を作成しました。",
-                  ai_message_comment:
-                    "■自動補完説明作成したJavaScriptカスタマイズでは、以下の点を自動で補完しています。1. 背景色は金色（#FFD700）に設定しています。■修正指示例1. 背景色を変更したい場合は、「背景色を青色に変更してください」と指示してください。■ガイドライン違反1. 大量のリクエスト送信を避けるべきですが、オリジナルコードでは500回のAPIリクエストを行っています。これはサービスのレスポンス悪化やアクセス制限の原因になる可能性があります。2. エラーハンドリングが不十分です。`catch`ブロックでエラーをキャッチしていますが、その後の処理が適切ではありません。エラーが発生した場合には、ユーザーにわかりやすいメッセージを表示するなどの対応が必要です。",
-                  error_message: "",
-                  user_rating: "good",
-                },
-                // Add more mock records as needed
-              ],
+              desktopConversationHistoryList: [],
               mobileConversationHistoryList: [
                 // Optionally, you can mock different data for mobile, or replicate desktop
               ],

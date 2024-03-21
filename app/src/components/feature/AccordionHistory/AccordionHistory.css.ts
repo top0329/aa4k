@@ -6,6 +6,11 @@ export const sChatHistory = style({
   width: "100%",
   height: "100%",
   backgroundColor: "white",
+
+  display: `flex`,
+  justifyContent: "flex-end",
+  alignItems: "flex-end",
+  flexDirection: "column",
 });
 
 export const sChatHistoryItem = style({
@@ -26,4 +31,11 @@ export const sChatHistoryItem = style({
     position: "relative",
     zIndex: 1,
   },
+});
+
+export const sChatHistorySuggest = style({
+  width: 180,
+  height: "100%",
+  padding: 16,
+  borderRadius: 8,
 });

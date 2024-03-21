@@ -8,5 +8,7 @@ export default {
 } as Meta;
 
 export const Default = () => {
-  return (<AccordionHistory isLoading={false} />);
+  return (<AccordionHistory
+    setHumanMessage={() => { }}
+    isLoading={false} />);
 }
