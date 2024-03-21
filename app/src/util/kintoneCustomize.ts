@@ -173,9 +173,12 @@ export async function updateKintoneCustomizeJs(
       "PUT",
       body,
     ).catch((e: KintoneRestAPiError) => {
-      throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}（${e.code} ${e.id}）`)
+      throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
     });
   } catch (e) {
+    if (e instanceof KintoneError) {
+      throw new KintoneError(e.message)
+    }
     throw new KintoneError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00007}）`)
   }
 }
