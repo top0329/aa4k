@@ -13,7 +13,8 @@ import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
 import { PluginIdState } from "~/state/pluginIdState";
 import { ViewModeState } from "~/state/viewModeState";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
-import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse } from "~/types/apiResponse";
+import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
+import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from "~/util/preCheck";
 
@@ -93,9 +94,15 @@ export const useCornerDialogLogic = () => {
 
       setIsBannerClicked(false);
     } catch (err) {
+      let message: string = '';
+      if (err instanceof KintoneError) {
+        message = err.message;
+      } else {
+        message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      }
       setIsBannerClicked(false);
       setDockState(dockState => ({ ...dockState, dialogVisible: false }));
-      showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）`);
+      showErrorToast(message);
     }
   }
 
@@ -119,7 +126,10 @@ export const useCornerDialogLogic = () => {
         "POST",
         {},
         { appId: appId, userId: userId },
-      ) as KintoneProxyResponse;
+      ).catch((resBody: string) => {
+        const e = JSON.parse(resBody) as KintoneRestAPiError;
+        throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
+      }) as KintoneProxyResponse;
       const [resBody, resStatus] = resConversationHistory;
       const resBodyConversationHistoryList = JSON.parse(resBody) as ConversationHistoryListResponseBody;
       if (resStatus !== 200) {
@@ -141,8 +151,14 @@ export const useCornerDialogLogic = () => {
 
       setIsInitialChatHistory(true);
     } catch (err) {
+      let message: string = '';
+      if (err instanceof KintoneError) {
+        message = err.message;
+      } else {
+        message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      }
       setDockState(dockState => ({ ...dockState, chatVisible: false }));
-      showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）`);
+      showErrorToast(message);
     }
   }
 

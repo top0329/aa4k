@@ -2,12 +2,13 @@
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
-import { UserRating } from '~/constants';
+import { ErrorCode, ErrorMessage, UserRating } from '~/constants';
 import { useChatHistory } from "~/hooks/useChatHistory";
 import { PluginIdState } from "~/state/pluginIdState";
 import { ViewModeState } from "~/state/viewModeState";
 import { ChatHistoryItem } from "~/types/ai";
-import { KintoneProxyResponse, KintoneProxyResponseBody } from "~/types/apiResponse";
+import { KintoneProxyResponse, KintoneProxyResponseBody, KintoneRestAPiError } from "~/types/apiResponse";
+import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 
 // src/components/feature/Feedback/useRatingtoolbar.tsx
@@ -73,25 +74,40 @@ export const useFeedbackLogic = (chatHistoryItem: ChatHistoryItem) => {
 
   // ユーザー評価更新
   const updateUserRating = async (userRating: UserRating): Promise<boolean> => {
-    const resUpdateUserRating = await kintone.plugin.app.proxy(
-      pluginId,
-      `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/update-user-rating`,
-      "POST",
-      {},
-      { conversationId: activeConversationId, userRating: userRating },
-    ) as KintoneProxyResponse;
-    const [resBody, resStatus] = resUpdateUserRating;
-    const resBodyUpdateUserRating = JSON.parse(resBody) as KintoneProxyResponseBody;
-    if (resStatus !== 200) {
-      // APIエラー時のエラーメッセージを取得
-      const errorMessage = getApiErrorMessage(resStatus, resBodyUpdateUserRating.errorCode);
+    try {
+      const resUpdateUserRating = await kintone.plugin.app.proxy(
+        pluginId,
+        `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/update-user-rating`,
+        "POST",
+        {},
+        { conversationId: activeConversationId, userRating: userRating },
+      ).catch((resBody: string) => {
+        const e = JSON.parse(resBody) as KintoneRestAPiError;
+        throw new KintoneError(`${ErrorMessage.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
+      }) as KintoneProxyResponse;
+      const [resBody, resStatus] = resUpdateUserRating;
+      const resBodyUpdateUserRating = JSON.parse(resBody) as KintoneProxyResponseBody;
+      if (resStatus !== 200) {
+        // APIエラー時のエラーメッセージを取得
+        const errorMessage = getApiErrorMessage(resStatus, resBodyUpdateUserRating.errorCode);
+        // トーストでエラーメッセージ表示
+        showToast(errorMessage, 3000, true);
+        return false;
+      }
+  
+      updateConversationRating(userRating);
+      return true;
+    } catch (err) {
+      let message: string = '';
+      if (err instanceof KintoneError) {
+        message = err.message;
+      } else {
+        message = `${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`;
+      }
       // トーストでエラーメッセージ表示
-      showToast(errorMessage, 3000, true);
+      showToast(message, 3000, true);
       return false;
     }
-
-    updateConversationRating(userRating);
-    return true;
   }
 
   // 会話履歴Stateの更新(ユーザー評価)
