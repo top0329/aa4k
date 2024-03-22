@@ -11,6 +11,7 @@ import { patchConfig } from "@langchain/core/runnables"
 import { LangchainLogsInsertCallbackHandler, LangchainLogsInsertCallbackHandlerProps } from "../langchainLogsInsertCallbackHandler";
 import { getApiErrorMessage } from "~/util/getErrorMessage"
 import { RetrieveError } from "~/util/customErrors"
+import { ErrorCode, ErrorMessage } from "~/constants"
 
 export interface CodeTemplateRetrieverInput extends BaseRetrieverInput {
   LangchainLogsInsertProps: LangchainLogsInsertCallbackHandlerProps;
@@ -55,7 +56,7 @@ export class CodeTemplateRetriever extends BaseRetriever {
     const [resBody, resStatus] = response;
     const resJson = JSON.parse(resBody) as CodeTemplateRetrieverResponseBody;
     if (resStatus !== 200) {
-      const errorMessage = getApiErrorMessage(resStatus, resJson.errorCode)
+      const errorMessage = resJson.errorCode === ErrorCode.A05003 ? `${ErrorMessage.E_MSG003}（${resJson.errorCode}）` : getApiErrorMessage(resStatus, resJson.errorCode)
       throw new RetrieveError(errorMessage)
     }
     await runManager?.handleRetrieverEnd(resJson.documents);

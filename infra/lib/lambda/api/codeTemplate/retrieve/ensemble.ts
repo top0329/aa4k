@@ -1,6 +1,7 @@
 import { BaseRetrieverInterface, BaseRetriever, BaseRetrieverInput } from "@langchain/core/retrievers";
 import { Document } from "@langchain/core/documents";
 import { CallbackManagerForRetrieverRun } from "langchain/callbacks";
+import { InvalidOpenAiApiKeyError } from "./errors"
 
 /**
  * Interface for configuring an EnsembleRetriever instance.
@@ -50,8 +51,15 @@ export class EnsembleRetriever extends BaseRetriever {
 
   private async rankFusion(query: string, runManager?: CallbackManagerForRetrieverRun): Promise<Document[]> {
     // Asynchronously invoke all retrievers with the query and collect their results.
+    let errCount = 0;
     const retrieverResults = await Promise.all(this.retrievers.map((retriever, index) =>
       retriever.getRelevantDocuments(query, runManager?.getChild(`retriever_${index + 1}`))
+        .catch((err) => {
+          errCount++;
+          if (err instanceof InvalidOpenAiApiKeyError) throw err;
+          if (this.retrievers.length == errCount) throw err
+          return []
+        })
     ));
 
     // Enforce that retrieved docs are Documents for each list in retriever_docs
