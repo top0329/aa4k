@@ -14,8 +14,10 @@ export const ContractStatus = {
 export type ContractStatus = keyof typeof ContractStatus;
 
 // コード生成メソッド
-export const CodeCreateMethod = {
+export const CodeCreateMethodCreate = {
   create: "CREATE",
+} as const;
+export const CodeCreateMethodEdit = {
   add: "ADD",
   update: "UPDATE",
   delete: "DELETE",

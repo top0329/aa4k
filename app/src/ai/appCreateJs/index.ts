@@ -12,7 +12,7 @@ import { addLineNumbersToCode, modifyCode } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
 import { openAIModel, getCodingGuidelines } from "../common"
-import { DeviceDiv, CodeCreateMethod, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
+import { DeviceDiv, CodeCreateMethodCreate, CodeCreateMethodEdit, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
 import { GeneratedCodeGetResponseBody, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
@@ -68,12 +68,12 @@ export const appCreateJs = async (
     // レスポンス設定
     // --------------------
     let message = `${llmResponse.resultMessage}`;
-    const autoComplete = llmResponse.autoComplete ? `補足：\n${llmResponse.autoComplete}\n\n` : '';
-    const correctionInstructions = llmResponse.correctionInstructions ? `変更例：\n${llmResponse.correctionInstructions}\n\n` : '';
+    const comment = llmResponse.comment ? `補足：\n${llmResponse.comment}\n\n` : '';
+    const exampleOfChange = llmResponse.exampleOfChange ? `変更例：\n${llmResponse.exampleOfChange}\n\n` : '';
     const guideMessage = llmResponse.guideMessage ? `ガイドライン違反：\n${llmResponse.guideMessage}\n` : '';
 
     // テンプレートリテラルを使用して、最終的なメッセージを組み立てる。
-    const messageComment = `${autoComplete}${correctionInstructions}${guideMessage}`.trim();
+    const messageComment = `${comment}${exampleOfChange}${guideMessage}`.trim();
 
     // --------------------
     // 回答メッセージと生成したコードの登録 (会話履歴TBL)
@@ -325,7 +325,7 @@ async function createJs(
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { appId, userId, conversationId, contractStatus, systemSettings, pluginId } = appCreateJsContext;
+  const { appId, userId, conversationId, deviceDiv, contractStatus, systemSettings, pluginId } = appCreateJsContext;
   const codingGuideline = codingGuidelineList[0];
   const secureCodingGuideline = codingGuidelineList[1];
 
@@ -352,15 +352,17 @@ async function createJs(
   ]);
 
   // LLMの出力形式を設定
+  const createMethod = z.nativeEnum(CodeCreateMethodCreate).describe("'CREATE'を設定");
+  const editMethod = z.nativeEnum(CodeCreateMethodEdit).describe("'ADD','UPDATE','DELETE'のいずれかを設定");
   const zodSchema = z.object({
     resultMessage: z.string().describe("質問に対する結果メッセージ"),
-    autoComplete: z.string().describe("自動補完説明"),
-    correctionInstructions: z.string().describe("修正指示"),
+    comment: z.string().describe("補足"),
+    exampleOfChange: z.string().describe("変更例"),
     violationOfGuidelines: z.string().describe("オリジナルコードのガイドライン違反"),
     guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
     properties: z.array(
       z.object({
-        method: z.nativeEnum(CodeCreateMethod).describe("メソッド"),
+        method: originalCode ? editMethod : createMethod,
         startAt: z.number().describe("開始位置"),
         endAt: z.number().describe("終了位置"),
         linesCount: z.number().describe("行数"),
@@ -387,6 +389,7 @@ async function createJs(
     fieldInfo: JSON.stringify(fieldInfo),
     originalCode: addLineNumbersToCode(originalCode),
     codeTemplate: codeTemplate.map((template) => template.pageContent),
+    deviceDiv: deviceDiv,
   }, { callbacks: [handler] }).catch((err) => {
     if (err.code === "invalid_api_key") {
       throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
@@ -402,7 +405,7 @@ async function createJs(
     let editedCode = originalCode;
     resProperties.forEach((obj) => {
       const method = obj.method;
-      if (method === CodeCreateMethod.create) {
+      if (method === CodeCreateMethodCreate.create) {
         editedCode = obj.javascriptCode;
       } else {
         editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
