@@ -74,11 +74,11 @@ interface KintoneConfig {
       // @ts-ignore __NPM_PACKAGE_VERSION__はvite.plugin.config.tsで定義
       "aa4k-plugin-version": __NPM_PACKAGE_VERSION__,
       "aa4k-subscription-id": subscriptionId,
-      "aa4k-api-key": openaiApiKey,
+      "aa4k-api-key": openaiApiKey ? openaiApiKey : "dummy",
     };
     // トライアル時のOpenAI連携時に[authorization](API Key)を秘匿して連携するためsetProxyConfigに設定
     const openAiHeader = {
-      authorization: `Bearer ${openaiApiKey}`
+      authorization: openaiApiKey ? `Bearer ${openaiApiKey}` : "Bearer dummy"
     }
     kintone.plugin.app.setProxyConfig(apiEndpoint, 'POST', header, {}, () => {
       kintone.plugin.app.setProxyConfig(openaiProxyApiCredentialEndpoint, 'POST', header, {}, () => {

@@ -62,7 +62,7 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
       if (err.code === "invalid_api_key") {
         throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
       } else {
-        throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`)
+        throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00005}）`)
       }
     })) as LLMResponse;
 
