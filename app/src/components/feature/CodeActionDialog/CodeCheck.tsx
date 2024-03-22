@@ -118,7 +118,7 @@ const CodeCheck: React.FC<CodeCheckProps> = ({
           次のガイドライン違反の可能性がありますのでご注意ください。
         </Text>
       </Flex>
-      <ScrollArea scrollbars="vertical" style={{ height: 380 }}>
+      <ScrollArea type='auto' scrollbars="vertical" style={{ height: 380 }}>
         <Box
           py={'4'}
           style={{

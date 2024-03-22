@@ -40,8 +40,6 @@ export const sCodeActionDialog = style({
   minWidth: `480px`,
   maxWidth: `80vw`,
   maxHeight: `85vh`,
-  overflowY: `auto`,
-  msOverflowY: `auto`,
   zIndex: 1001,
   ":focus": {
     outline: `none`,
