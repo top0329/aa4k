@@ -39,7 +39,7 @@ export class PgVectorRetriever extends BaseRetriever {
       // pgvectorStoreを使用して検索
       const documents = await pgvectorStore.similaritySearchWithScore(query, k)
         .catch(err => {
-          if (err.code == "invalid_api_key") throw new InvalidOpenAiApiKeyError(err)
+          if (err.code === "invalid_api_key") throw new InvalidOpenAiApiKeyError(err)
           throw err;
         });
 
