@@ -127,8 +127,13 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
       }
     } catch (err) {
       props.setIsCodeActionDialog(false);
-      // トーストでエラーメッセージ表示
-      showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
+      if (err instanceof KintoneError) {
+        // トーストでエラーメッセージ表示
+        showToast(err.message, 0, false)
+      } else {
+        // トーストでエラーメッセージ表示
+        showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
+      }
     }
     await stopLoading();
   }
