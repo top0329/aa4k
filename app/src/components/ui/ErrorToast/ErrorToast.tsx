@@ -116,6 +116,9 @@ const ErrorToast = forwardRef<ElementRef<typeof Toast.Root>, ErrorToastProps>(
               <Text
                 as="p"
                 size={'3'}
+                style={{
+                  whiteSpace: "pre-wrap"
+                }}
               >
                 {children}
               </Text>
