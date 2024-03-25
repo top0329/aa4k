@@ -2,6 +2,10 @@ import { Serialized } from "@langchain/core/load/serializable";
 import { AgentAction, AgentFinish, ChainValues, LLMResult, BaseMessage } from "langchain/schema";
 import { Document } from "langchain/document"
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
+import { getEncoding } from "js-tiktoken";
+
+const tokenizer = "cl100k_base"
+const enc = getEncoding(tokenizer);
 
 export interface LangchainLogsInsertCallbackHandlerProps {
   pluginId: string;
@@ -63,6 +67,13 @@ export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
     )
   }
   handleChatModelStart(llm: Serialized, messages: BaseMessage[][], runId: string, parentRunId?: string | undefined, extraParams?: Record<string, unknown> | undefined) {
+    // トークン計算(入力)
+    let tokens = 0
+    messages.map((parentMessage) => {
+      parentMessage.map((message) => {
+        tokens += (typeof message.content === "string") ? enc.encode(message.content).length : 0;
+      })
+    })
     // ログ登録
     langchainLogInsert(
       this.props,
@@ -73,7 +84,7 @@ export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
       JSON.stringify(messages), // content
       JSON.stringify(llm),  // metadata_langchain_params
       JSON.stringify(extraParams),  // metadata_extra_params
-      0  // tokens
+      tokens  // tokens
     )
   }
   handleChainStart(chain: Serialized, inputs: ChainValues, runId: string, parentRunId?: string | undefined) {
@@ -106,7 +117,7 @@ export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
   }
   handleChainEnd(outputs: ChainValues, runId: string, parentRunId?: string | undefined) {
     // トークン計算(出力)
-
+    const tokens = !parentRunId ? enc.encode(JSON.stringify(outputs)).length : 0
 
     // ログ登録
     langchainLogInsert(
@@ -118,7 +129,7 @@ export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
       JSON.stringify(outputs),  // content
       "", // metadata_langchain_params
       "", // metadata_extra_params
-      0  // tokens
+      tokens  // tokens
     )
   }
   handleToolStart(tool: Serialized, input: string, runId: string, parentRunId?: string | undefined) {
