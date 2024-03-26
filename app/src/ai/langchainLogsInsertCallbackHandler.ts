@@ -4,9 +4,6 @@ import { Document } from "langchain/document"
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { getEncoding } from "js-tiktoken";
 
-const tokenizer = "cl100k_base"
-const enc = getEncoding(tokenizer);
-
 export interface LangchainLogsInsertCallbackHandlerProps {
   pluginId: string;
   sessionId: string;
@@ -303,5 +300,7 @@ export const langchainLogInsert = (props: LangchainLogsInsertCallbackHandlerProp
  * @returns tokens
  */
 const calculateToken = (content: string) => {
+  const tokenizer = "cl100k_base"
+  const enc = getEncoding(tokenizer);
   return enc.encode(content).length
 }
