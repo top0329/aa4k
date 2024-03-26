@@ -14,28 +14,55 @@ export default {
       </ErrorToastProvider>
     ),
   ],
-} as Meta; // Add Meta type for clarity
+} as Meta;
+
+const positions = [
+  'top-left',
+  'top-center',
+  'top-right',
+  'bottom-right',
+  'bottom-center',
+  'bottom-left',
+] as const;
 
 export const Default = () => {
   const { showToast } = useToast();
+
   return (
-    <Flex
-      align={'center'}
-      justify={'center'}
-      gap={'6'}
-      direction={'column'}
-    >
-      <Button
-        onClick={() => showToast(' 現在のバージョンでは利用できません。管理者にお問い合わせください。', 0, false)}
-        color='tomato'
-      >
-        Timeout false
-      </Button>
-      <Button
-        onClick={() => showToast(' 現在のバージョンでは利用できません。管理者にお問い合わせください。')}
-        color='tomato'
-      >
-        timeout 3000
-      </Button>
-    </Flex>)
+    <Flex align={'center'} justify={'center'} gap={'6'} wrap={'wrap'}>
+      {positions.map((position) => (
+        <Button
+          key={position}
+          onClick={() =>
+            showToast(
+              `現在のバージョンでは利用できません。管理者にお問い合わせください。`,
+              3000,
+              true,
+              position
+            )
+          }
+          color="tomato"
+        >
+          {position}
+        </Button>
+      ))}
+      {positions.map((position) => (
+        <Button
+          key={position}
+          onClick={() =>
+            showToast(
+              `現在のバージョンでは利用できません。管理者にお問い合わせください。`,
+              3000,
+              false,
+              position
+            )
+          }
+          color="tomato"
+          variant='outline'
+        >
+          {position} timeout: false
+        </Button>
+      ))}
+    </Flex>
+  );
 };
