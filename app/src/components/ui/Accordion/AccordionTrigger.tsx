@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { forwardRef, useEffect, useState } from "react";
 import { vars } from '~/styles/theme.css';
 import LineClamp from '../LineClamp/LineClamp';
-import { sAccordionChevron, sAccordionHeader, sAccordionTrigger, sAccordionTriggerInner, sAccordionTriggerText } from './AccordionTrigger.css';
+import { sAccordionChevron, sAccordionHeader, sAccordionHumenMessage, sAccordionTrigger, sAccordionTriggerText } from './AccordionTrigger.css';
 
 type AccordionTriggerProps = Accordion.AccordionTriggerProps & {
   text: string
@@ -32,6 +32,27 @@ const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
 
     return (
       <Accordion.Header className={sAccordionHeader}>
+        <Box
+          className={sAccordionHumenMessage}
+        >{isOpen ?
+          <Text
+            size={'3'}
+            className={sAccordionTriggerText}
+          >
+            {text}
+          </Text>
+          : <LineClamp
+            lines={1}
+            size={'2'}
+            className={sAccordionTriggerText}
+            style={{
+              color: vars.color.grayDark.gray8,
+              fontWeight: 400,
+            }}
+            text={text}
+          />
+          }
+        </Box>
         <Accordion.Trigger
           className={clsx(sAccordionTrigger, className)}
           {...props}
@@ -39,27 +60,6 @@ const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <Box
-            className={sAccordionTriggerInner}
-          >{isOpen ?
-            <Text
-              size={'3'}
-              className={sAccordionTriggerText}
-            >
-              {text}
-            </Text>
-            : <LineClamp
-              lines={1}
-              size={'2'}
-              className={sAccordionTriggerText}
-              style={{
-                color: vars.color.grayDark.gray8,
-                fontWeight: 400,
-              }}
-              text={text}
-            />
-            }
-          </Box>
           <Tooltip content={isOpen ? '閉じる' : '開く'}
             delayDuration={0}
             open={isHovered || tooltipOpen || !isMounted}

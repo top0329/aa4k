@@ -42,7 +42,7 @@ export const sAccordionTrigger = style({
   border: "none",
 });
 
-export const sAccordionTriggerInner = style({
+export const sAccordionHumenMessage = style({
   padding: 20,
   width: "100%",
   height: "100%",
@@ -52,6 +52,7 @@ export const sAccordionTriggerInner = style({
   color: vars.color.grayDark.gray4,
   backgroundColor: vars.color.grayA.grayA2,
   borderRadius: `2px 16px 16px 16px`,
+  cursor: "auto",
   ":hover": {
     backgroundColor: vars.color.mauve.mauve2,
   },

@@ -14,7 +14,6 @@ export const sChat = style({
   flexDirection: "column",
   width: 640,
   height: `90vh`,
-  overflowY: `auto`,
   msOverflowY: `auto`,
   zIndex: 101,
   ":focus": {

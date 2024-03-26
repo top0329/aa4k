@@ -1,10 +1,8 @@
 // src/components/feature/Chat/Chat.tsx
 import { Box } from "@radix-ui/themes";
-import clsx from "clsx";
-import ScrollToBottom from "react-scroll-to-bottom";
 import AccordionHistory from "../AccordionHistory/AccordionHistory";
 import PromptForm from "../PromptForm/PromptForm";
-import { sChat, sChatInner } from './Chat.css';
+import { sChat } from './Chat.css';
 
 type ChatProps = {
   isLoading: boolean;
@@ -21,20 +19,7 @@ type ChatProps = {
 const Chat: React.FC<ChatProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef }) => {
   return (
     <Box className={sChat} >
-      <ScrollToBottom
-        className={clsx(sChatInner, 'w-100')}
-        scrollViewClassName="scrollbar"
-      >
-        <Box
-          style={{
-            background: 'white',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'flex-end',
-          }}>
-          <AccordionHistory isLoading={isLoading} setHumanMessage={setHumanMessage} />
-        </Box>
-      </ScrollToBottom>
+      <AccordionHistory isLoading={isLoading} setHumanMessage={setHumanMessage} />
       <PromptForm
         isLoading={isLoading}
         startLoading={startLoading}

@@ -4,13 +4,21 @@ import { style } from "@vanilla-extract/css";
 export const sChatHistory = style({
   borderRadius: 6,
   width: "100%",
-  height: "100%",
+  height: `70vh`,
   backgroundColor: "white",
-
   display: `flex`,
   justifyContent: "flex-end",
   alignItems: "flex-end",
   flexDirection: "column",
+});
+
+export const sChatScroll = style({
+  overflowY: "auto",
+  height: `100%`,
+});
+
+export const sChatScrollInner = style({
+  paddingTop: 16,
 });
 
 export const sChatHistoryItem = style({

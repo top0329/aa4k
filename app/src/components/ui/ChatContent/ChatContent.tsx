@@ -1,5 +1,5 @@
 // src/components/ui/ChatContent/ChatContent.tsx
-import { Box } from "@radix-ui/themes";
+import { Box, Flex } from "@radix-ui/themes";
 import React from 'react';
 import Feedback from '~/components/feature/Feedback/Feedback';
 import { ChatContentProps } from "~/types/chatContentTypes";
@@ -9,20 +9,25 @@ export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistory
 
   return (
     <>
-      <Box
-        style={{
-          whiteSpace: "pre-wrap"
-        }}
+      <Flex
+        direction={'column'}
+        gap={'2'}
       >
-        {aiMessage.content}
-      </Box>
-      <Box
-        style={{
-          whiteSpace: "pre-wrap"
-        }}
-      >
-        {aiMessage.role === "ai" ? aiMessage.comment : ""}
-      </Box>
+        <Box
+          style={{
+            whiteSpace: "pre-wrap"
+          }}
+        >
+          {aiMessage.content}
+        </Box>
+        <Box
+          style={{
+            whiteSpace: "pre-wrap"
+          }}
+        >
+          {aiMessage.role === "ai" ? aiMessage.comment : ""}
+        </Box>
+      </Flex>
       <Box
         mt={'5'}
         width={'100%'}

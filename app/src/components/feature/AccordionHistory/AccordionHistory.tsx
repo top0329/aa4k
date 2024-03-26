@@ -1,14 +1,17 @@
 // src/components/feature/AccordionHistory/AccordionHistory.tsx
 import * as Accordion from '@radix-ui/react-accordion';
 import { Box, Card, Flex, ScrollArea, Text } from '@radix-ui/themes';
+import clsx from 'clsx';
 import { motion } from "framer-motion";
+import ScrollToBottom from "react-scroll-to-bottom";
 import AccordionContent from '~/components/ui/Accordion/AccordionContent';
 import AccordionTrigger from '~/components/ui/Accordion/AccordionTrigger';
 import { ChatContent } from "~/components/ui/ChatContent/ChatContent";
 import { TypewriterEffect } from "~/components/ui/TypewriterEffect/TypewriterEffect";
+import "~/styles/scrollbar.css";
 import { vars } from '~/styles/theme.css';
 import { AiMessage, ChatHistoryItem, ErrorMessage } from '~/types/ai';
-import { sChatHistory, sChatHistoryItem, sChatHistorySuggest } from './AccordionHistory.css';
+import { sChatHistory, sChatHistoryItem, sChatHistorySuggest, sChatScroll, sChatScrollInner } from './AccordionHistory.css';
 import { useAccordionHistoryLogic } from './useAccordionHistoryLogic';
 
 type AccordionHistoryProps = {
@@ -155,8 +158,9 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
       onValueChange={setActiveItem}
       collapsible
     >
-      <Box pt={'4'}
-        width={'100%'}
+      <ScrollToBottom
+        className={clsx(sChatScroll)}
+        scrollViewClassName={clsx(sChatScrollInner, 'scrollbar')}
       >
         {chatHistoryItems.map((item, index) => (
           <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
@@ -170,7 +174,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
             </AccordionContent>
           </Accordion.Item>
         ))}
-      </Box>
+      </ScrollToBottom>
     </Accordion.Root>
   );
 };
