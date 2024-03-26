@@ -68,12 +68,12 @@ export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
   }
   handleChatModelStart(llm: Serialized, messages: BaseMessage[][], runId: string, parentRunId?: string | undefined, extraParams?: Record<string, unknown> | undefined) {
     // トークン計算(入力)
-    let tokens = 0
-    messages.map((parentMessage) => {
-      parentMessage.map((message) => {
-        tokens += (typeof message.content === "string") ? enc.encode(message.content).length : 0;
-      })
-    })
+    const tokens = messages.reduce((acc, parentMessage) => {
+      return acc + parentMessage.reduce((innerAcc, message) => {
+        return innerAcc + ((typeof message.content === "string") ? calculateToken(message.content) : 0);
+      }, 0);
+    }, 0);
+
     // ログ登録
     langchainLogInsert(
       this.props,
@@ -117,7 +117,7 @@ export class LangchainLogsInsertCallbackHandler extends BaseCallbackHandler {
   }
   handleChainEnd(outputs: ChainValues, runId: string, parentRunId?: string | undefined) {
     // トークン計算(出力)
-    const tokens = !parentRunId ? enc.encode(JSON.stringify(outputs)).length : 0
+    const tokens = !parentRunId ? calculateToken(JSON.stringify(outputs)) : 0
 
     // ログ登録
     langchainLogInsert(
@@ -295,4 +295,13 @@ export const langchainLogInsert = (props: LangchainLogsInsertCallbackHandlerProp
     {},
     body,
   );
+}
+
+/**
+ * トークン計算
+ * @param content 
+ * @returns tokens
+ */
+const calculateToken = (content: string) => {
+  return enc.encode(content).length
 }
