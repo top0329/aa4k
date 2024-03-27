@@ -79,6 +79,13 @@ const CornerDialog = () => {
             />
           )}
           <BarLoading isLoading={isLoading} />
+
+          {/*
+            実装例・初期ロードフラグで切り替える
+            {isInitVisible ? <DockSkeleton /> :
+              <Dock />
+            }
+          */}
           <Dock />
         </motion.div>
       </Dialog.Content>

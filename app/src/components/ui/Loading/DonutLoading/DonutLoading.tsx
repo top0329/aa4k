@@ -9,7 +9,7 @@ type DonutLoadingProps = {
   isLoading: boolean;
 };
 
-const DonutLoading: React.FC<DonutLoadingProps> = ({ borderColor: borderColor = `${vars.color.indigo.indigo10} ${vars.color.indigo.indigo6} ${vars.color.indigo.indigo6}`, isLoading }) => {
+const DonutLoading: React.FC<DonutLoadingProps> = ({ borderColor: borderColor = `${vars.color.iris.iris10} ${vars.color.iris.iris6} ${vars.color.iris.iris6}`, isLoading }) => {
   return (
     <AnimatePresence>
       {isLoading && (
