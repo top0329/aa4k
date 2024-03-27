@@ -27,6 +27,7 @@ type PromptFormProps = {
   setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
   aiAnswerRef: React.MutableRefObject<string>;
   finishAiAnswerRef: React.MutableRefObject<boolean>;
+  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export const usePromptFormLogic = ({
@@ -38,6 +39,7 @@ export const usePromptFormLogic = ({
   setCallbackFuncs,
   aiAnswerRef,
   finishAiAnswerRef,
+  scrollRef,
 }: PromptFormProps) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
@@ -54,6 +56,8 @@ export const usePromptFormLogic = ({
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
+
+  // const scrollToBottom = useScrollToBottom();
 
   const { transcript, finalTranscript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -104,6 +108,11 @@ export const usePromptFormLogic = ({
       setInTypeWrite(true);
       setIsSubmitting(true);
       startLoading?.();
+      if (scrollRef && scrollRef.current) {
+        // ローディング表示が表示されるまでの時間を考慮して100ミリ秒後に 一番下にスクロール
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        scrollRef.current.scrollIntoView();
+      }
 
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {

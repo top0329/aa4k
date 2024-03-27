@@ -19,9 +19,10 @@ type PromptFormProps = {
   setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
   aiAnswerRef: React.MutableRefObject<string>;
   finishAiAnswerRef: React.MutableRefObject<boolean>;
+  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, scrollRef }) => {
   const {
     isVoiceInput,
     isPcViewMode,
@@ -32,7 +33,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
     handleViewModeChange,
     isSubmitting,
     voiceInputVisible,
-  } = usePromptFormLogic({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, startLoading, stopLoading, isChangeCodeRef });
+  } = usePromptFormLogic({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, startLoading, stopLoading, isChangeCodeRef, scrollRef });
 
   // Define animation variants for the submit button
   const buttonVariants = {

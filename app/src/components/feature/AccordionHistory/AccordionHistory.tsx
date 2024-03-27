@@ -17,9 +17,10 @@ import { useAccordionHistoryLogic } from './useAccordionHistoryLogic';
 type AccordionHistoryProps = {
   isLoading: boolean;
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, setHumanMessage }) => {
+export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, setHumanMessage, scrollRef }) => {
   const {
     animateText,
     controls,
@@ -174,6 +175,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
             </AccordionContent>
           </Accordion.Item>
         ))}
+        <div ref={scrollRef}></div>
       </ScrollToBottom>
     </Accordion.Root>
   );

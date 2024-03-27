@@ -13,6 +13,7 @@ export const Default = () => {
   const [, setCallbackFuncs] = useState<Function[] | undefined>([]);
   const aiAnswerRef = useRef<string>('');
   const finishAiAnswerRef = useRef<boolean>(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <PromptForm
@@ -22,6 +23,7 @@ export const Default = () => {
       setCallbackFuncs={setCallbackFuncs}
       aiAnswerRef={aiAnswerRef}
       finishAiAnswerRef={finishAiAnswerRef}
+      scrollRef={scrollRef}
     />
   )
 };
