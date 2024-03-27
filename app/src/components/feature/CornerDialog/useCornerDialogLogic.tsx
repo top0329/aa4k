@@ -14,6 +14,7 @@ import { PluginIdState } from "~/state/pluginIdState";
 import { ViewModeState } from "~/state/viewModeState";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
+import { ToastPosition } from "~/types/ToastPosition";
 import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from "~/util/preCheck";
@@ -35,6 +36,7 @@ export const useCornerDialogLogic = () => {
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isInitialChatHistory, setIsInitialChatHistory] = useState<boolean>(false);
+  const [isInitVisible, setIsInitVisible] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [initialPosition, setInitialPosition] = useState<DragPosition>(() => {
     const savedPosition = getSavedPosition();
@@ -63,8 +65,8 @@ export const useCornerDialogLogic = () => {
     setDockState(dockState => ({ ...dockState, dialogVisible: true }));
     // 二重押下防止
     setIsBannerClicked(true);
-    // 事前チェックを行う
-    execPreCheck();
+    // 初期ロードフラグを初期化
+    setIsInitVisible(false);
   }
 
   // 事前チェックを実行
@@ -75,8 +77,13 @@ export const useCornerDialogLogic = () => {
       // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
       if (appId === null) {
         setIsBannerClicked(false);
-        setDockState(dockState => ({ ...dockState, dialogVisible: false }));
-        showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
+        setDockState({
+          dialogVisible: false,
+          chatVisible: false,
+          codeEditorVisible: false,
+          spChatVisible: false,
+        });
+        showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`, ToastPosition.TopCenter);
         return;
       }
 
@@ -84,15 +91,21 @@ export const useCornerDialogLogic = () => {
       const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
       if (resPreCheckStatus !== 200) {
         setIsBannerClicked(false);
-        setDockState(dockState => ({ ...dockState, dialogVisible: false }));
+        setDockState({
+          dialogVisible: false,
+          chatVisible: false,
+          codeEditorVisible: false,
+          spChatVisible: false,
+        });
         // APIエラー時のエラーメッセージを取得
         const errorMessage = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
         // APIエラーの場合、エラーメッセージ表示
-        showErrorToast(errorMessage);
+        showErrorToast(errorMessage, ToastPosition.TopCenter);
         return;
       }
 
       setIsBannerClicked(false);
+      setIsInitVisible(true);
     } catch (err) {
       let message: string = '';
       if (err instanceof KintoneError) {
@@ -101,8 +114,13 @@ export const useCornerDialogLogic = () => {
         message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
       }
       setIsBannerClicked(false);
-      setDockState(dockState => ({ ...dockState, dialogVisible: false }));
-      showErrorToast(message);
+      setDockState({
+        dialogVisible: false,
+        chatVisible: false,
+        codeEditorVisible: false,
+        spChatVisible: false,
+      });
+      showErrorToast(message, ToastPosition.TopCenter);
     }
   }
 
@@ -202,8 +220,8 @@ export const useCornerDialogLogic = () => {
   }
 
   // エラートーストを表示
-  const showErrorToast = (message: string) => {
-    showToast(message, 0, false);
+  const showErrorToast = (message: string, position: ToastPosition = ToastPosition.TopLeft) => {
+    showToast(message, 0, false, position);
   }
 
   // 会話履歴が更新されたら会話履歴の最新のインデックスを更新
@@ -212,6 +230,13 @@ export const useCornerDialogLogic = () => {
       setLatestAiResponseIndex(chatHistoryItems.length);
     }
   }, [chatHistoryItems]);
+
+  useEffect(() => {
+    if (dockState.dialogVisible && !isInitVisible) {
+      // Dock初回表示の場合、事前チェックを行う
+      execPreCheck();
+    }
+  }, [dockState.dialogVisible, isInitVisible]);
 
   useEffect(() => {
     if (dockState.chatVisible && !isInitialChatHistory) {
@@ -280,5 +305,7 @@ export const useCornerDialogLogic = () => {
     execCallbacks,
     aiAnswerRef,
     finishAiAnswerRef,
+    isInitVisible,
+    isInitialChatHistory,
   };
 };

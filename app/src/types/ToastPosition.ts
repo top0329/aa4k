@@ -1,9 +1,12 @@
 // src/types/ToastPosition.ts
 
+export const ToastPosition = {
+  TopLeft: "top-left",
+  TopCenter: "top-center",
+  TopRight: "top-right",
+  BottomRight: "bottom-right",
+  BottomCenter: "bottom-center",
+  BottomLeft: "bottom-left",
+} as const;
 export type ToastPosition =
-  | "top-left"
-  | "top-center"
-  | "top-right"
-  | "bottom-right"
-  | "bottom-center"
-  | "bottom-left";
+  (typeof ToastPosition)[keyof typeof ToastPosition];

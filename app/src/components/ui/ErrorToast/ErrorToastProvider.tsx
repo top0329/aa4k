@@ -28,7 +28,7 @@ export const ErrorToastProvider = ({ children, ...props }: ErrorToastProviderPro
   const [messages, setMessages] = useState<ToastMessage[]>([]);
   const toastElementsMapRef = useRef(new Map());
 
-  const showToast = useCallback((message: string, timeout = 3000, isTimeout = true, position: ToastPosition = 'bottom-right') => {
+  const showToast = useCallback((message: string, timeout = 3000, isTimeout = true, position: ToastPosition = 'top-left') => {
     const newMessage = {
       id: Date.now().toString(),
       message,

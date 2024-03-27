@@ -2,11 +2,14 @@
 import { faSparkles } from "@fortawesome/pro-duotone-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Flex } from "@radix-ui/themes";
+import { Box, Flex } from "@radix-ui/themes";
 import { motion } from 'framer-motion';
 import Dock from "~/components/feature/Dock/Dock.tsx";
+import { DockGroup } from "~/components/feature/Dock/Dock.css";
 import DragButton from "~/components/ui/DragButton/DragButton.tsx";
 import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
+import ChatSkeleton from "~/components/ui/Skeleton/ChatSkeleton";
+import DockSkeleton from "~/components/ui/Skeleton/DockSkeleton";
 import "~/styles/scrollbar.css";
 import Chat from "../Chat/Chat.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
@@ -28,6 +31,8 @@ const CornerDialog = () => {
     setCallbackFuncs,
     aiAnswerRef,
     finishAiAnswerRef,
+    isInitVisible,
+    isInitialChatHistory,
   } = useCornerDialogLogic();
 
   return (
@@ -65,7 +70,7 @@ const CornerDialog = () => {
             <CodeEditor isChangeCodeRef={isChangeCodeRef} isLoading={isLoading} />
           )}
 
-          {dockState.chatVisible && (
+          {dockState.chatVisible && isInitialChatHistory ? (
             <Chat
               isLoading={isLoading}
               startLoading={startLoading}
@@ -77,16 +82,17 @@ const CornerDialog = () => {
               aiAnswerRef={aiAnswerRef}
               finishAiAnswerRef={finishAiAnswerRef}
             />
-          )}
+          ) : null}
+          {dockState.chatVisible && !isInitialChatHistory ? <ChatSkeleton /> : null}
           <BarLoading isLoading={isLoading} />
 
-          {/*
-            実装例・初期ロードフラグで切り替える
-            {isInitVisible ? <DockSkeleton /> :
-              <Dock />
-            }
-          */}
-          <Dock />
+          {isInitVisible ? (
+            <Dock />
+          ) : (
+            <Box className={DockGroup}>
+              <DockSkeleton />
+            </Box>
+          )}
         </motion.div>
       </Dialog.Content>
     </Dialog.Root>
