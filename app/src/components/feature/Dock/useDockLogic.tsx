@@ -2,15 +2,23 @@
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { ChatMode, InfoMessage } from "~/constants";
-import { IsChangeCodeState } from '~/state/codeActionState';
+import { useCodeAction } from "~/hooks/useCodeAction";
+import { DesktopIsChangeCodeState, MobileIsChangeCodeState } from '~/state/codeActionState';
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { ViewModeState } from "~/state/viewModeState";
 
-export const useDockLogic = () => {
+type DockProps = {
+  setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export const useDockLogic = ({ setHumanMessage }: DockProps) => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [activeChatMode, setActiveChatMode] = useState<ChatMode>(ChatMode.desktopChat);
-  const [isPcViewMode] = useAtom(ViewModeState);
-  const [isChangeCode, setIsChangeCode] = useAtom(IsChangeCodeState);
+  const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
+  const [isDesktopChangeCode] = useAtom(DesktopIsChangeCodeState);
+  const [isMobileChangeCode] = useAtom(MobileIsChangeCodeState);
+
+  const { initCodeActionState } = useCodeAction(isPcViewMode);
 
   const updateKintonePointerEvents = () => {
     document.body.style.pointerEvents = dockState.dialogVisible && (dockState.chatVisible || dockState.spChatVisible) || dockState.codeEditorVisible ? 'none' : '';
@@ -59,10 +67,12 @@ export const useDockLogic = () => {
 
   // Docを閉じる処理
   const handleDockClose = () => {
-    const shouldCloseDock = !dockState.codeEditorVisible || !isChangeCode || window.confirm(InfoMessage.I_MSG002);
+    const shouldCloseDock = (!isDesktopChangeCode && !isMobileChangeCode) || window.confirm(InfoMessage.I_MSG002);
 
     if (shouldCloseDock) {
-      setIsChangeCode(false);
+      setHumanMessage("");
+      setIsPcViewMode(true);
+      initCodeActionState();
       initDockState();
     }
   };

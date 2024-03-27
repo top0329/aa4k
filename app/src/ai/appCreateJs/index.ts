@@ -27,19 +27,13 @@ import * as prettierPluginEstree from "prettier/plugins/estree";
 /**
  * kintoneカスタマイズJavascript生成
  * @param conversation 
- * @param codeEditorVisible 
  * @param isChangeCode 
- * @param setCode 
- * @param setCodeLatest 
  * @param isChangeCodeRef 
  * @returns AiResponse
  */
 export const appCreateJs = async (
   conversation: Conversation,
-  codeEditorVisible: boolean,
   isChangeCode: boolean,
-  setCode: React.Dispatch<React.SetStateAction<string>>,
-  setCodeLatest: React.Dispatch<React.SetStateAction<string>>,
   isChangeCodeRef?: React.MutableRefObject<boolean>
 ): Promise<AiResponse> => {
   const callbackFuncs: Function[] = [];
@@ -96,22 +90,14 @@ export const appCreateJs = async (
         // プレビュー画面の場合
         callbackFuncs.push(createPreviewEnvCallbackFunc({
           redirectPath,
-          codeEditorVisible,
           isChangeCode,
-          formattedCode,
-          setCode,
-          setCodeLatest,
           isChangeCodeRef
         }));
       } else {
         // 本番画面の場合
         callbackFuncs.push(createProdEnvCallbackFunc({
           redirectPath,
-          codeEditorVisible,
           isChangeCode,
-          formattedCode,
-          setCode,
-          setCodeLatest,
           isChangeCodeRef
         }));
       }
@@ -148,26 +134,21 @@ export const appCreateJs = async (
 
 type CreateCallbackFuncProps = {
   redirectPath: string;
-  codeEditorVisible: boolean;
   isChangeCode: boolean;
-  formattedCode: string;
-  setCode: React.Dispatch<React.SetStateAction<string>>;
-  setCodeLatest: React.Dispatch<React.SetStateAction<string>>;
   isChangeCodeRef?: React.MutableRefObject<boolean>;
 }
 
 /**
  * プレビュー画面の場合のコールバック関数を作成
  * @param redirectPath 
- * @param codeEditorVisible 
  * @param isChangeCode 
  * @param isChangeCodeRef 
  */
-const createPreviewEnvCallbackFunc = ({ redirectPath, codeEditorVisible, isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
+const createPreviewEnvCallbackFunc = ({ redirectPath, isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
   const previewEnvCallbackFunc = () => {
-    if (codeEditorVisible && isChangeCode) {
+    if (isChangeCode) {
       // コードエディタのコードが編集されていたら、確認モーダルを表示
-      if (window.confirm(`${InfoMessage.I_MSG002}`)) {
+      if (window.confirm(`${InfoMessage.I_MSG005}`)) {
         if (isChangeCodeRef) {
           isChangeCodeRef.current = false;
         }
@@ -186,15 +167,14 @@ const createPreviewEnvCallbackFunc = ({ redirectPath, codeEditorVisible, isChang
 /**
  * 本番画面の場合のコールバック関数を作成
  * @param redirectPath 
- * @param codeEditorVisible 
  * @param isChangeCode 
  * @param isChangeCodeRef 
  */
-const createProdEnvCallbackFunc = ({ redirectPath, codeEditorVisible, isChangeCode, formattedCode, setCode, setCodeLatest, isChangeCodeRef }: CreateCallbackFuncProps) => {
+const createProdEnvCallbackFunc = ({ redirectPath, isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
   const prodEnvCallbackFunc = () => {
     // 画面遷移の確認モーダルを表示
     if (window.confirm(`${InfoMessage.I_MSG001}`)) {
-      if (codeEditorVisible && isChangeCode) {
+      if (isChangeCode) {
         // コードエディタのコードが編集されていたら、確認モーダルを表示
         if (window.confirm(`${InfoMessage.I_MSG002}`)) {
           if (isChangeCodeRef) {
@@ -205,16 +185,6 @@ const createProdEnvCallbackFunc = ({ redirectPath, codeEditorVisible, isChangeCo
         }
       } else {
         (location.href = redirectPath)
-      }
-    } else {
-      if (codeEditorVisible) {
-        // コードエディタ表示中の場合、、確認モーダルを表示
-        const infoMessage = isChangeCode ? `${InfoMessage.I_MSG007}` : `${InfoMessage.I_MSG006}`;
-        if (window.confirm(infoMessage)) {
-          // 作成したJavaScriptに置き換え
-          setCode(formattedCode);
-          setCodeLatest(formattedCode);
-        }
       }
     }
   }

@@ -2,20 +2,23 @@
 import { faClose, faCode, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
 import { Box, Flex, Separator } from "@radix-ui/themes";
 import logoIcon from "~/assets/logo.svg";
-import { useCodeEditorLogic } from "~/components/feature/CodeEditor/useCodeEditorLogic";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import { vars } from "~/styles/theme.css";
 import { DockGroup, DockItem } from "./Dock.css";
 import { useDockLogic } from "./useDockLogic";
 
-const Dock = () => {
+type DockProps = {
+  setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Dock: React.FC<DockProps> = ({ setHumanMessage }) => {
   const {
     isPcViewMode,
     dockState,
+    toggleItemVisibility,
     toggleChatVisibility,
     handleDockClose,
-  } = useDockLogic();
-  const { handleCodeEditorClick } = useCodeEditorLogic();
+  } = useDockLogic({ setHumanMessage });
 
   return (
     <Box className={DockGroup}>
@@ -30,7 +33,7 @@ const Dock = () => {
         <IconTooltipButton
           icon={faCode}
           tooltip={'コードエディター'}
-          onClick={handleCodeEditorClick}
+          onClick={() => toggleItemVisibility('codeEditorVisible')}
           className={DockItem}
           pressed={dockState.codeEditorVisible}
           pressedColor={

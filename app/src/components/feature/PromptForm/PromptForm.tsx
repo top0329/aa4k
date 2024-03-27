@@ -26,11 +26,11 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
   const {
     isVoiceInput,
     isPcViewMode,
+    setIsPcViewMode,
     handleSubmit,
     handleKeyDown,
     handleVoiceInput,
     handleHumanMessageChange,
-    handleViewModeChange,
     isSubmitting,
     voiceInputVisible,
   } = usePromptFormLogic({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, startLoading, stopLoading, isChangeCodeRef, scrollRef });
@@ -103,7 +103,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
           justify={'between'}
         >
           <Flex gap="2" align={'center'}>
-            <ToggleSwitch isOn={isPcViewMode} onToggle={handleViewModeChange} disabled={isLoading} />
+            <ToggleSwitch isOn={isPcViewMode} onToggle={() => setIsPcViewMode(!isPcViewMode)} disabled={isLoading} />
             {
               isPcViewMode ? <Badge color='iris'>スマートフォン用アプリのカスタマイズに切り替える</Badge> : <Badge color='cyan'>PC用アプリのカスタマイズに切り替える</Badge>
             }

@@ -87,7 +87,7 @@ const CornerDialog = () => {
           <BarLoading isLoading={isLoading} />
 
           {isInitVisible ? (
-            <Dock />
+            <Dock setHumanMessage={setHumanMessage} />
           ) : (
             <Box className={DockGroup}>
               <DockSkeleton />
