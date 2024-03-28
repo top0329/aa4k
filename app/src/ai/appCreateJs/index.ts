@@ -141,7 +141,7 @@ const createProdEnvCallbackFunc = ({ isChangeCode, isChangeCodeRef }: CreateCall
         if (isChangeCodeRef) {
           isChangeCodeRef.current = false;
         }
-        // テスト環境画面に遷移する
+        // 画面再読み込み
         (location.reload())
       }
     } else {
