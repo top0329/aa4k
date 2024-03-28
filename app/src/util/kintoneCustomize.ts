@@ -175,6 +175,16 @@ export async function updateKintoneCustomizeJs(
     ).catch((e: KintoneRestAPiError) => {
       throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
     });
+
+    // アプリの設定を運用環境へ反映する
+    await kintone.api(
+      kintone.api.url("/k/v1/preview/app/deploy.json", isGuestSpace),
+      "POST",
+      { apps: [{ app: appId }] },
+    ).catch((e: KintoneRestAPiError) => {
+      throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+    });
+
   } catch (e) {
     if (e instanceof KintoneError) {
       throw new KintoneError(e.message)

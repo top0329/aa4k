@@ -84,23 +84,12 @@ export const appCreateJs = async (
       // --------------------
       // コールバック関数設定(コード生成後の動作)
       // --------------------
-      const redirectPath = `/k/admin/preview/${appId}/`;
-      const currentUrl = location.href;
-      if (currentUrl.includes(redirectPath)) {
-        // プレビュー画面の場合
-        callbackFuncs.push(createPreviewEnvCallbackFunc({
-          redirectPath,
-          isChangeCode,
-          isChangeCodeRef
-        }));
-      } else {
-        // 本番画面の場合
-        callbackFuncs.push(createProdEnvCallbackFunc({
-          redirectPath,
-          isChangeCode,
-          isChangeCodeRef
-        }));
-      }
+      // 本番画面の場合
+      callbackFuncs.push(createProdEnvCallbackFunc({
+        // redirectPath,
+        isChangeCode,
+        isChangeCodeRef
+      }));
     }
     // 終了
     return {
@@ -133,36 +122,10 @@ export const appCreateJs = async (
 }
 
 type CreateCallbackFuncProps = {
-  redirectPath: string;
   isChangeCode: boolean;
   isChangeCodeRef?: React.MutableRefObject<boolean>;
 }
 
-/**
- * プレビュー画面の場合のコールバック関数を作成
- * @param redirectPath 
- * @param isChangeCode 
- * @param isChangeCodeRef 
- */
-const createPreviewEnvCallbackFunc = ({ redirectPath, isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
-  const previewEnvCallbackFunc = () => {
-    if (isChangeCode) {
-      // コードエディタのコードが編集されていたら、確認モーダルを表示
-      if (window.confirm(`${InfoMessage.I_MSG005}`)) {
-        if (isChangeCodeRef) {
-          isChangeCodeRef.current = false;
-        }
-        // テスト環境画面に遷移する
-        (location.href = redirectPath)
-      }
-    } else {
-      // テスト環境画面に遷移する
-      (location.href = redirectPath)
-    }
-  }
-
-  return previewEnvCallbackFunc;
-}
 
 /**
  * 本番画面の場合のコールバック関数を作成
@@ -170,22 +133,19 @@ const createPreviewEnvCallbackFunc = ({ redirectPath, isChangeCode, isChangeCode
  * @param isChangeCode 
  * @param isChangeCodeRef 
  */
-const createProdEnvCallbackFunc = ({ redirectPath, isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
+const createProdEnvCallbackFunc = ({ isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
   const prodEnvCallbackFunc = () => {
-    // 画面遷移の確認モーダルを表示
-    if (window.confirm(`${InfoMessage.I_MSG001}`)) {
-      if (isChangeCode) {
-        // コードエディタのコードが編集されていたら、確認モーダルを表示
-        if (window.confirm(`${InfoMessage.I_MSG002}`)) {
-          if (isChangeCodeRef) {
-            isChangeCodeRef.current = false;
-          }
-          // テスト環境画面に遷移する
-          (location.href = redirectPath)
+    if (isChangeCode) {
+      // コードエディタのコードが編集されていたら、確認モーダルを表示
+      if (window.confirm(`${InfoMessage.I_MSG001}`)) {
+        if (isChangeCodeRef) {
+          isChangeCodeRef.current = false;
         }
-      } else {
-        (location.href = redirectPath)
+        // 画面再読み込み
+        (location.reload())
       }
+    } else {
+      (location.reload())
     }
   }
 
