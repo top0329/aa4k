@@ -49,15 +49,16 @@ const CornerDialog = () => {
         animate={dockState.dialogVisible ? { opacity: 0 } : { opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <DragButton initialPosition={initialPosition} onPositionChange={savePosition}>
-          <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
+        <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
+          <DragButton initialPosition={initialPosition} onPositionChange={savePosition}>
+
             <Flex style={{
               cursor: 'pointer',
             }}>
               <FontAwesomeIcon icon={faSparkles} color="white" />
             </Flex>
-          </Dialog.Trigger>
-        </DragButton>
+          </DragButton>
+        </Dialog.Trigger>
       </motion.div>
       <Dialog.Overlay />
       <Dialog.Content onPointerDownOutside={(e) => e.preventDefault()}>
