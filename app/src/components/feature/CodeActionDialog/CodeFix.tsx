@@ -17,7 +17,7 @@ const CodeFix: React.FC<CodeFixProps> = ({
       justify={'center'}
     >
       <Text size={'3'} weight={'bold'} color='gray'>
-        編集したコードをテスト確認しますか？
+        編集したコードを反映しますか？
       </Text>
     </Flex>
     <Flex
@@ -26,10 +26,7 @@ const CodeFix: React.FC<CodeFixProps> = ({
       gap={'1'}
     >
       <Text size={'1'} color='gray'>
-        反映ボタンを押すと、テスト環境へ遷移します
-      </Text>
-      <Text size={'1'} color='gray'>
-        ※編集したコードはアプリ設定からアプリの更新を行うことで反映されます
+        反映ボタンを押すと、運用環境に適用してアプリを更新します
       </Text>
     </Flex>
     <Flex

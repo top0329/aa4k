@@ -6,6 +6,7 @@ import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useLoadingLogic } from '~/components/ui/Loading/useLoadingLogic';
 import { CodeActionDialogType, CodeCheckStatus, DeviceDiv, ErrorCode, ErrorMessage } from "~/constants";
 import { PluginIdState } from '~/state/pluginIdState';
+import { ReloadState } from "~/state/reloadState";
 import { ViewModeState } from '~/state/viewModeState';
 import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
@@ -18,6 +19,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
   const [codeViolations, setCodeViolations] = useState<string[]>([]);
   const [isPcViewMode] = useAtom(ViewModeState);
   const [pluginId] = useAtom(PluginIdState);
+  const [, setIsReload] = useAtom(ReloadState);
 
   const { isLoading,
     startLoading,
@@ -60,6 +62,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
       props.setIsCodeActionDialog(false);
       props.setCodeLatest(props.code);
       props.setIsChangeCode(false);
+      setIsReload(true);
 
       // 画面再読み込み
       location.reload()

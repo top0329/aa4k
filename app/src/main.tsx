@@ -35,13 +35,18 @@ export const handleKintoneEvent = (
   );
 };
 ((PLUGIN_ID: string) => {
-  kintone.events.on("app.record.index.show", () =>
-    handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, true),
-  );
-  kintone.events.on("app.record.detail.show", () =>
-    handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, true),
-  );
-  kintone.events.on("app.record.edit.show", () =>
-    handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, false),
-  );
+  const appId = kintone.app.getId();
+  const previewPath = `/k/admin/preview/${appId}/`;
+  const currentUrl = location.href;
+  const isPreview = currentUrl.includes(previewPath);
+
+  kintone.events.on("app.record.index.show", () => {
+    if (!isPreview) handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, true);
+  });
+  kintone.events.on("app.record.detail.show", () => {
+    if (!isPreview) handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, true)
+  });
+  kintone.events.on("app.record.edit.show", () => {
+    if (!isPreview) handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, false)
+  });
 })(`${kintone.$PLUGIN_ID}`);

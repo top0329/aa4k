@@ -10,6 +10,7 @@ import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHis
 import { DesktopIsChangeCodeState, MobileIsChangeCodeState } from '~/state/codeActionState';
 import { InTypeWriteState } from '~/state/inTypeWriteState';
 import { PluginIdState } from '~/state/pluginIdState';
+import { ReloadState } from "~/state/reloadState";
 import { ViewModeState } from '~/state/viewModeState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
@@ -50,6 +51,7 @@ export const usePromptFormLogic = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [pluginId] = useAtom(PluginIdState);
+  const [, setIsReload] = useAtom(ReloadState);
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
@@ -216,7 +218,8 @@ export const usePromptFormLogic = ({
           },
         },
         isChangeCode,
-        isChangeCodeRef
+        setIsReload,
+        isChangeCodeRef,
       );
       setCallbackFuncs(callbacks);
 

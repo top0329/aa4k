@@ -28,13 +28,15 @@ import * as prettierPluginEstree from "prettier/plugins/estree";
  * kintoneカスタマイズJavascript生成
  * @param conversation 
  * @param isChangeCode 
+ * @param setIsReload 
  * @param isChangeCodeRef 
  * @returns AiResponse
  */
 export const appCreateJs = async (
   conversation: Conversation,
   isChangeCode: boolean,
-  isChangeCodeRef?: React.MutableRefObject<boolean>
+  setIsReload: React.Dispatch<React.SetStateAction<boolean>>,
+  isChangeCodeRef?: React.MutableRefObject<boolean>,
 ): Promise<AiResponse> => {
   const callbackFuncs: Function[] = [];
   const appCreateJsContext = conversation.context as AppCreateJsContext;
@@ -88,7 +90,8 @@ export const appCreateJs = async (
       callbackFuncs.push(createProdEnvCallbackFunc({
         // redirectPath,
         isChangeCode,
-        isChangeCodeRef
+        isChangeCodeRef,
+        setIsReload,
       }));
     }
     // 終了
@@ -124,16 +127,17 @@ export const appCreateJs = async (
 type CreateCallbackFuncProps = {
   isChangeCode: boolean;
   isChangeCodeRef?: React.MutableRefObject<boolean>;
+  setIsReload: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 
 /**
  * 本番画面の場合のコールバック関数を作成
- * @param redirectPath 
  * @param isChangeCode 
  * @param isChangeCodeRef 
+ * @param setIsReload 
  */
-const createProdEnvCallbackFunc = ({ isChangeCode, isChangeCodeRef }: CreateCallbackFuncProps) => {
+const createProdEnvCallbackFunc = ({ isChangeCode, isChangeCodeRef, setIsReload }: CreateCallbackFuncProps) => {
   const prodEnvCallbackFunc = () => {
     if (isChangeCode) {
       // コードエディタのコードが編集されていたら、確認モーダルを表示
@@ -141,10 +145,12 @@ const createProdEnvCallbackFunc = ({ isChangeCode, isChangeCodeRef }: CreateCall
         if (isChangeCodeRef) {
           isChangeCodeRef.current = false;
         }
+        setIsReload(true);
         // 画面再読み込み
         (location.reload())
       }
     } else {
+      setIsReload(true);
       (location.reload())
     }
   }

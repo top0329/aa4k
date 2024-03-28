@@ -12,6 +12,7 @@ import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHis
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
 import { PluginIdState } from "~/state/pluginIdState";
+import { ReloadState } from "~/state/reloadState";
 import { ViewModeState } from "~/state/viewModeState";
 import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { ConversationHistory, ConversationHistoryListResponseBody, ConversationHistoryRow, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
@@ -34,6 +35,7 @@ export const useCornerDialogLogic = () => {
   const [, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
   const [, setMobileChatHistory] = useAtom(MobileChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
+  const [isReload, setIsReload] = useAtom(ReloadState);
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isInitialChatHistory, setIsInitialChatHistory] = useState<boolean>(false);
@@ -107,6 +109,7 @@ export const useCornerDialogLogic = () => {
 
       setIsBannerClicked(false);
       setIsInitVisible(true);
+      setIsReload(false);
     } catch (err) {
       let message: string = '';
       if (err instanceof KintoneError) {
@@ -272,11 +275,8 @@ export const useCornerDialogLogic = () => {
   }, [isLoading, isSpeech]);
 
   useEffect(() => {
-    const appId = kintone.app.getId();
-    const previewPath = `/k/admin/preview/${appId}/`;
-    const currentUrl = location.href;
-    if (!currentUrl.includes(previewPath)) {
-      // 本番画面の場合、起動バナーのみ表示
+    if (!isReload) {
+      // 自動リロード以外でアプリ画面に遷移した場合、起動バナーのみ表示
       const initDockState = async () => {
         await setDockState({
           dialogVisible: false,
