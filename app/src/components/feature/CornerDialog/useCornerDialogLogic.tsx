@@ -1,6 +1,7 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from 'react';
+import { useBeforeunload } from 'react-beforeunload';
 import { useUpdateEffect } from "react-use";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
@@ -288,6 +289,16 @@ export const useCornerDialogLogic = () => {
       initDockState();
     }
   }, []);
+
+  const handleBeforeunload = (event: BeforeUnloadEvent) => {
+    // コードエディタのコードが編集されていたら、確認モーダルを表示
+    if (isChangeCodeRef && isChangeCodeRef.current) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  };
+
+  useBeforeunload(handleBeforeunload);
 
   return {
     dockState,

@@ -1,7 +1,6 @@
 // src/components/feature/CodeEditor/useCodeEditorLogic.tsx
 import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
-import { useBeforeunload } from 'react-beforeunload';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage, InfoMessage } from "~/constants";
 import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
@@ -110,16 +109,6 @@ export const useCodeEditorLogic = (
       isChangeCodeRef.current = isDesktopChangeCode || isMobileChangeCode ? true : false;
     }
   }, [isDesktopChangeCode, isMobileChangeCode]);
-
-  const handleBeforeunload = (event: BeforeUnloadEvent) => {
-    // コードエディタのコードが編集されていたら、確認モーダルを表示
-    if (isChangeCodeRef && isChangeCodeRef.current) {
-      event.preventDefault();
-      event.returnValue = "";
-    }
-  };
-
-  useBeforeunload(handleBeforeunload);
 
   return {
     copySuccess,
