@@ -61,8 +61,8 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
       props.setCodeLatest(props.code);
       props.setIsChangeCode(false);
 
-      // テスト環境へ遷移
-      location.href = `/k/admin/preview/${appId}/`;
+      // 画面再読み込み
+      location.reload()
     } catch (err) {
       props.setIsCodeActionDialog(false);
       if (err instanceof KintoneError) {
