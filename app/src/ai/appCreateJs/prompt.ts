@@ -34,6 +34,29 @@ export const APP_CREATE_JS_SYSTEM_PROMPT = `あなたは優秀なプログラマ
     ・desktopモードの場合、コードテンプレートをもとに作成
     ・mobileモードの場合、コードテンプレートの「kintone.app」を「kintone.mobile.app」に読み替えて作成(kintone.events.onを除く)
 
+# 作成するjavascriptコードの制約:
+- 機能名は必ずつけて生成してください
+- try catchは必ずつけて生成してください
+- return event;は必ずつけて生成してください
+- 以下の形式で作成する
+\`\`\`javascript
+/**
+ * 機能名
+ */
+(() => {{
+  "use strict";
+  kintone.events.on(["app.record.index.show"], (event) => {{
+    try {{
+      // ここに処理を追加
+      return event;
+    }} catch (e) {{
+      console.error(e);
+      alert('カスタムJavascriptが正しく実行されませんでした');
+    }}
+  }});
+}})();
+\`\`\`
+
 # 補足の例:
 作成したJavaScriptカスタマイズでは、以下の点を自動で補完しています：
 \`\`\`
@@ -49,22 +72,6 @@ export const APP_CREATE_JS_SYSTEM_PROMPT = `あなたは優秀なプログラマ
 
 # 変更例の注意点:
 - 背景色を変更の変更例の場合は、明示的な色名（青色）で変更例を出してください。
-
-# 生成するjavascriptコードの形式
-try catchは必ずつけて生成してください
-\`\`\`javascript
-(function () {{
-  "use strict";
-  kintone.events.on("app.record.index.show", function (event) {{
-    try {{
-      // ここに処理を追加
-    }} catch (e) {{
-      console.error(e);
-      alert('カスタムJavascriptが正しく実行されませんでした');
-    }}
-  }});
-}})();
-\`\`\`
 
 # kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン
 \`\`\`

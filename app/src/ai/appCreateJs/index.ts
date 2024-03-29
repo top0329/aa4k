@@ -337,17 +337,25 @@ async function createJs(
   if (llmResponse.properties.length) {
     // JS生成された場合はコード編集して返却
     // 出力コード編集
-    const resProperties = llmResponse.properties;
     let editedCode = originalCode;
-    resProperties.forEach((obj) => {
-      const method = obj.method;
-      if (method === CodeCreateMethodCreate.create) {
-        editedCode = obj.javascriptCode;
-      } else {
-        editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
-      }
-    })
-    const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] });
+    try {
+      const resProperties = llmResponse.properties;
+      resProperties.forEach((obj) => {
+        const method = obj.method;
+        if (method === CodeCreateMethodCreate.create) {
+          editedCode = obj.javascriptCode;
+        } else {
+          editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
+        }
+      })
+    } catch (e) {
+      throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00010}）`)
+    }
+    // フォーマット整形
+    const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] })
+      .catch(() => {
+        throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00010}）`)
+      });
 
     // 結果返却
     return {

@@ -115,6 +115,7 @@ export const ErrorCode = {
   E00007: "E00007", // kintone REST APIのエラー
   E00008: "E00008", // kintoneガイドライン取得エラー
   E00009: "E00009", // OpenAI API Key不正
+  E00010: "E00010", // JS生成後の編集でエラー
   E99999: "E99999", // その他例外エラー
 } as const;
 export type ErrorCode = keyof typeof ErrorCode;
