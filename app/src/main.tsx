@@ -40,13 +40,16 @@ export const handleKintoneEvent = (
   const currentUrl = location.href;
   const isPreview = currentUrl.includes(previewPath);
 
-  kintone.events.on("app.record.index.show", () => {
+  kintone.events.on("app.record.index.show", (event) => {
     if (!isPreview) handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, true);
+    return event;
   });
-  kintone.events.on("app.record.detail.show", () => {
+  kintone.events.on("app.record.detail.show", (event) => {
     if (!isPreview) handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, true)
+    return event;
   });
-  kintone.events.on("app.record.edit.show", () => {
+  kintone.events.on("app.record.edit.show", (event) => {
     if (!isPreview) handleKintoneEvent("corner-dialog-fab", "modal-dialog-fab", PLUGIN_ID, false)
+    return event;
   });
 })(`${kintone.$PLUGIN_ID}`);
