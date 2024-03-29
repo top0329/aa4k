@@ -1,9 +1,9 @@
 // src/components/ui/Accordion/AccordionTrigger.tsx
 import * as Accordion from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-import { Box, Text, Tooltip } from '@radix-ui/themes';
+import { Box, Text } from '@radix-ui/themes';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef } from "react";
 import { vars } from '~/styles/theme.css';
 import LineClamp from '../LineClamp/LineClamp';
 import { sAccordionChevron, sAccordionHeader, sAccordionHumenMessage, sAccordionTrigger, sAccordionTriggerText } from './AccordionTrigger.css';
@@ -16,19 +16,6 @@ type AccordionTriggerProps = Accordion.AccordionTriggerProps & {
 
 const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
   ({ text, className, isOpen, ...props }, forwardedRef) => {
-    // Tooltipの表示状態を管理するための状態
-    const [tooltipOpen, setTooltipOpen] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
-
-    // isOpenの変更を監視し、Tooltipの状態を更新
-    // 初回レンダリング時にTooltipを非表示にする
-    useEffect(() => {
-      if (isOpen) {
-        setTooltipOpen(false);
-      }
-      setIsMounted(true);
-    }, [isOpen]);
 
     return (
       <Accordion.Header className={sAccordionHeader}>
@@ -57,19 +44,8 @@ const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
           className={clsx(sAccordionTrigger, className)}
           {...props}
           ref={forwardedRef}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
-          <Tooltip content={isOpen ? '閉じる' : '開く'}
-            delayDuration={0}
-            open={isHovered || tooltipOpen || !isMounted}
-            side={'right'}
-            style={{
-              zIndex: 10000,
-            }}
-          >
-            <ChevronDownIcon className={sAccordionChevron} />
-          </Tooltip>
+          <ChevronDownIcon className={sAccordionChevron} />
         </Accordion.Trigger>
       </Accordion.Header>
     );

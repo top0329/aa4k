@@ -166,13 +166,31 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
         {chatHistoryItems.map((item, index) => (
           <Accordion.Item className={sChatHistoryItem} value={`item-${index}`} key={index}>
             <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item.human.content} />
-            <AccordionContent
-              style={{
-                padding: '0 16px'
+            <motion.div
+              key={index}
+              // isOpenが変更されたときにアニメーションを実行
+              animate={activeItem === `item-${index}` ? 'open' : 'closed'}
+              variants={{
+                open: {
+                  opacity: 1,
+                  height: 'auto',
+                  transition: { duration: 0.3 } // openのアニメーション設定
+                },
+                closed: {
+                  opacity: 0,
+                  height: 0,
+                  transition: { duration: 0.2 } // closedのアニメーション設定
+                }
               }}
             >
-              {showAiOrErrorMessage(item, index)}
-            </AccordionContent>
+              <AccordionContent
+                style={{
+                  padding: '0 16px'
+                }}
+              >
+                {showAiOrErrorMessage(item, index)}
+              </AccordionContent>
+            </motion.div>
           </Accordion.Item>
         ))}
         <div ref={scrollRef}></div>
