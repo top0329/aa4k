@@ -1,7 +1,7 @@
 {
   "name": "aa4k-plugin-app",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "",
   "type": "module",
   "repository": {
@@ -21,10 +21,13 @@
     "langchain-update": "npx npm-check-updates langchain -u && npm i",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "init": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs prod",
+    "init": "node scripts/marge-json.mjs prod && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs prod",
+    "init-stg": "node scripts/marge-json.mjs stg && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs stg",
     "init-dev": "node scripts/marge-json.mjs dev && kintone-plugin-packer --out dist/plugin-dev.zip plugin && node scripts/rename-ppk.mjs dev",
-    "package": "node scripts/marge-json.mjs prod && concurrently \"npm:build\" \"npm:build-plugin\" && concurrently \"npm:package:*\" && kintone-plugin-packer --out dist/plugin.zip --ppk plugin/ppk/private.ppk plugin",
+    "package": "node scripts/marge-json.mjs prod && concurrently \"npm:build:prod\" \"npm:build-plugin\" && concurrently \"npm:package:*\" && kintone-plugin-packer --out dist/plugin.zip --ppk plugin/ppk/private.ppk plugin",
     "package:js": "cp -p dist/src/desktop/desktop.js plugin/desktop.js && cp -p dist/src/config/config.js plugin/config.js",
+    "package-stg": "node scripts/marge-json.mjs stg && concurrently \"npm:build\" \"npm:build-plugin\" && concurrently \"npm:package-stg:js\" && kintone-plugin-packer --out dist/plugin-stg.zip --ppk plugin/ppk/private-stg.ppk plugin",
+    "package-stg:js": "cp -p dist/src/desktop/desktop.js plugin/desktop.js && cp -p dist/src/config/config.js plugin/config.js",
     "package-dev": "node scripts/marge-json.mjs dev && concurrently \"npm:build\" \"npm:build-plugin\" && concurrently \"npm:package-dev:js\" && kintone-plugin-packer --out dist/plugin-dev.zip --ppk plugin/ppk/private-dev.ppk plugin && concurrently \"npm:package-dev:upload\"",
     "package-dev:js": "cp -p dist/src/desktop/desktop.js plugin/desktop.js && cp -p dist/src/config/config.js plugin/config.js",
     "package-dev:upload": "node scripts/upload.mjs"

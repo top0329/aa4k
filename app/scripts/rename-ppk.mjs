@@ -4,7 +4,8 @@ import path from 'path';
 
 try {
   const envName = process.argv[2] ?? 'dev';
-  const ppkFileName = envName == 'dev' ? `private-${envName}.ppk` : 'private.ppk'
+  // const ppkFileName = envName == 'dev' ? `private-${envName}.ppk` : 'private.ppk'
+  const ppkFileName = envName == 'prod' ? 'private.ppk' : `private-${envName}.ppk`
 
   const root = process.cwd();
   const distPath = path.join(root, 'plugin/ppk');
