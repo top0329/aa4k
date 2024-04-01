@@ -9,16 +9,17 @@ import { useDockLogic } from "./useDockLogic";
 
 type DockProps = {
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  isChangeCodeRef: React.MutableRefObject<boolean>;
 }
 
-const Dock: React.FC<DockProps> = ({ setHumanMessage }) => {
+const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
   const {
     isPcViewMode,
     dockState,
     toggleItemVisibility,
     toggleChatVisibility,
     handleDockClose,
-  } = useDockLogic({ setHumanMessage });
+  } = useDockLogic({ setHumanMessage, isChangeCodeRef });
 
   return (
     <Box className={DockGroup}>

@@ -9,9 +9,10 @@ import { ViewModeState } from "~/state/viewModeState";
 
 type DockProps = {
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  isChangeCodeRef: React.MutableRefObject<boolean>;
 }
 
-export const useDockLogic = ({ setHumanMessage }: DockProps) => {
+export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [activeChatMode, setActiveChatMode] = useState<ChatMode>(ChatMode.desktopChat);
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
@@ -73,6 +74,7 @@ export const useDockLogic = ({ setHumanMessage }: DockProps) => {
       setHumanMessage("");
       setIsPcViewMode(true);
       initCodeActionState();
+      isChangeCodeRef.current = false;
       initDockState();
     }
   };
