@@ -58,7 +58,7 @@ export const useCornerDialogLogic = () => {
     startLoading,
     stopLoading
   } = useLoadingLogic(false);
-  const { isSpeech } = useTextSpeech(
+  const { setDisable, isSpeech } = useTextSpeech(
     aiAnswerRef,
     finishAiAnswerRef,
   );
@@ -240,6 +240,7 @@ export const useCornerDialogLogic = () => {
       // Dock初回表示の場合、事前チェックを行う
       execPreCheck();
     }
+    setDisable(!dockState.dialogVisible);
   }, [dockState.dialogVisible, isInitVisible]);
 
   useEffect(() => {
@@ -269,10 +270,10 @@ export const useCornerDialogLogic = () => {
 
   // JS生成AI機能の呼び出し後、音声出力が完了したのを確認したのちにJS生成AI機能からのcallbacksを実行する
   useUpdateEffect(() => {
-    if (!isLoading && !isSpeech) {
+    if (dockState.dialogVisible && !isLoading && !isSpeech) {
       execCallbacks();
     }
-  }, [isLoading, isSpeech]);
+  }, [dockState.dialogVisible, isLoading, isSpeech]);
 
   useEffect(() => {
     if (!isReload) {
