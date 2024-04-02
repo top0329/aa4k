@@ -1,0 +1,5 @@
+body#kintone-copilot-root,
+#kintone-copilot-root #sidebar-list-gaia {
+  height: fit-content;
+  padding-bottom: 68px;
+}

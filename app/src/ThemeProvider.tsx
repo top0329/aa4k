@@ -1,5 +1,6 @@
 import { Theme } from "@radix-ui/themes";
 import '@radix-ui/themes/styles.css';
+import './styles/bodyAdjustHeghit.css';
 import './styles/theme-config.css';
 import { themeClass } from "./styles/theme.css";
 
