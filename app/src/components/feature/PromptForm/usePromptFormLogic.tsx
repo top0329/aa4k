@@ -62,7 +62,7 @@ export const usePromptFormLogic = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const pressCtrlEnter = e.key === 'Enter' && e.ctrlKey
-    if (pressCtrlEnter) {
+    if (pressCtrlEnter && humanMessage) {
       e.preventDefault(); // Prevent the default action to avoid newline insertion
       handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>); // Cast the event type to match the form event type
     }
