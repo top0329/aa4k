@@ -13,11 +13,20 @@ export const sChat = style({
   alignItems: "flex-end",
   flexDirection: "column",
   width: 640,
+  maxWidth: `100vw`,
   height: `90vh`,
+  maxHeight: `100vh`,
   msOverflowY: `auto`,
   zIndex: 101,
   ":focus": {
     outline: `none`,
+  },
+  "@media": {
+    "screen and (max-width: 1440px) and (max-height: 800px)": {
+      width: `46vw`,
+      height: `fit-content`,
+      maxHeight: `100vh`,
+    },
   },
 });
 

@@ -160,7 +160,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
       collapsible
     >
       <ScrollToBottom
-        className={clsx(sChatScroll)}
+        className={clsx(sChatScroll, 'w-100')}
         scrollViewClassName={clsx(sChatScrollInner, 'scrollbar')}
       >
         {chatHistoryItems.map((item, index) => (

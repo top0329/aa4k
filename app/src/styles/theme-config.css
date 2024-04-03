@@ -35,7 +35,7 @@ input {
   --letter-spacing-4: 0.1em;
 }
 
-#corner-dialog-fab {
+#kintone-copilot {
   position: relative;
   z-index: 100;
 }

@@ -10,11 +10,19 @@ export const sCodeEditor = style({
   right: 660,
   display: `flex`,
   width: `calc(100vw - 680px)`,
+  maxWidth: `100vw`,
   overflowY: `auto`,
   msOverflowY: `auto`,
   zIndex: 201,
   ":focus": {
     outline: `none`,
+  },
+  "@media": {
+    "screen and (max-width: 1280px) and (max-height: 800px)": {
+      left: 0,
+      width: `680px`,
+      maxHeight: `calc(90vh - 20px)`,
+    },
   },
 });
 
