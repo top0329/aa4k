@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Box, Flex } from "@radix-ui/themes";
 import { motion } from 'framer-motion';
-import Dock from "~/components/feature/Dock/Dock.tsx";
 import { DockGroup } from "~/components/feature/Dock/Dock.css";
+import Dock from "~/components/feature/Dock/Dock.tsx";
 import DragButton from "~/components/ui/DragButton/DragButton.tsx";
 import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
 import ChatSkeleton from "~/components/ui/Skeleton/ChatSkeleton";
@@ -24,8 +24,8 @@ const CornerDialog = () => {
     startLoading,
     stopLoading,
     isChangeCodeRef,
-    initialPosition,
     savePosition,
+    savedPosition,
     humanMessage,
     setHumanMessage,
     setCallbackFuncs,
@@ -50,7 +50,10 @@ const CornerDialog = () => {
         exit={{ opacity: 0 }}
       >
         <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
-          <DragButton initialPosition={initialPosition} onPositionChange={savePosition}>
+          <DragButton
+            initialPosition={savedPosition}
+            onPositionChange={savePosition}
+          >
 
             <Flex style={{
               cursor: 'pointer',

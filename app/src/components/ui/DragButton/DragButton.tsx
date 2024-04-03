@@ -1,7 +1,7 @@
 // src/components/ui/DragButton/DragButton.tsx
 import { Box } from '@radix-ui/themes';
 import clsx from 'clsx';
-import { motion, useMotionValue } from 'framer-motion';
+import { PanInfo, motion, useMotionValue } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import DragHandle from '../DragHandle/DragHandle';
 import { animatedBG, sDragBg, sDragButton } from './DragButton.css';
@@ -12,62 +12,34 @@ type DragButtonProps = {
   children?: React.ReactNode;
 };
 
-const DragButton: React.FC<DragButtonProps> = ({ initialPosition, onPositionChange, children }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isHover, setIsHover] = useState(false);
-
+const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPositionChange }) => {
+  const [isHover] = useState(false);
   const x = useMotionValue(initialPosition.x);
   const y = useMotionValue(initialPosition.y);
 
   useEffect(() => {
     const handleResize = () => {
       const currentPosition = { x: x.get(), y: y.get() };
-      if (isOffScreen(currentPosition)) {
-        const newPosition = getInitialPosition();
-        x.set(newPosition.x);
-        y.set(newPosition.y);
-        onPositionChange(newPosition);
-      }
+      const newPosition = {
+        x: Math.min(currentPosition.x, window.innerWidth - 120),
+        y: Math.min(currentPosition.y, window.innerHeight - 120),
+      };
+      x.set(newPosition.x);
+      y.set(newPosition.y);
+      onPositionChange(newPosition);
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [x, y, onPositionChange]);
 
-  const handleDragStart = () => setIsDragging(true);
-
-  const handleDragEnd = () => {
-    const newPosition = { x: x.get(), y: y.get() };
-    if (isOffScreen(newPosition)) {
-      alert('ボタンがウィンドウ外に出ました。初期位置に戻します。');
-      resetToInitialPosition();
-    } else {
-      onPositionChange(newPosition);
-    }
-    setIsDragging(false);
-  };
-
-  const getInitialPosition = () => ({
-    x: window.innerWidth - 120,
-    y: window.innerHeight - 120,
-  });
-
-  const isOffScreen = (position: { x: number; y: number }) => {
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    return (
-      position.x < 0 ||
-      position.y < 0 ||
-      position.x > screenWidth ||
-      position.y > screenHeight
-    );
-  };
-
-  const resetToInitialPosition = () => {
-    const initialPosition = getInitialPosition();
-    x.set(initialPosition.x);
-    y.set(initialPosition.y);
-    onPositionChange(initialPosition);
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const newPosition = { x: info.point.x, y: info.point.y };
+    const constrainedPosition = {
+      x: Math.min(Math.max(newPosition.x, 0), window.innerWidth - 120),
+      y: Math.min(Math.max(newPosition.y, 0), window.innerHeight - 120),
+    };
+    onPositionChange(constrainedPosition);
   };
 
   return (
@@ -75,24 +47,18 @@ const DragButton: React.FC<DragButtonProps> = ({ initialPosition, onPositionChan
       className={sDragButton}
       drag
       dragMomentum={false}
-      onDragStart={handleDragStart}
+      dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
-      style={{
-        x,
-        y,
+      dragConstraints={{
+        top: 0,
+        left: 0,
+        right: window.innerWidth - 120,
+        bottom: window.innerHeight - 120,
       }}
+      style={{ x, y }}
     >
       <DragHandle />
-      <Box
-        style={{
-          pointerEvents: isDragging ? 'none' : 'auto',
-          zIndex: 2,
-        }}
-      >
-        {children}
-      </Box>
+      <Box style={{ zIndex: 2 }}>{children}</Box>
       <Box
         className={clsx(sDragBg, {
           [animatedBG]: isHover,

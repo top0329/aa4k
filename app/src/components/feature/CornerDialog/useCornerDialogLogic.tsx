@@ -1,6 +1,6 @@
 // src/hooks/useCornerDialogLogic.tsx
 import { useAtom } from "jotai";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useUpdateEffect } from "react-use";
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
@@ -41,12 +41,33 @@ export const useCornerDialogLogic = () => {
   const [isInitialChatHistory, setIsInitialChatHistory] = useState<boolean>(false);
   const [isInitVisible, setIsInitVisible] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
+  const [humanMessage, setHumanMessage] = useState("");
+  const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
+
   const [initialPosition, setInitialPosition] = useState<DragPosition>(() => {
     const savedPosition = getSavedPosition();
     return savedPosition || { x: window.innerWidth - 120, y: window.innerHeight - 120 };
   });
-  const [humanMessage, setHumanMessage] = useState("");
-  const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
+
+  const savedPosition = useMemo(() => {
+    const position = localStorage.getItem('bannerPosition');
+    if (position) {
+      const parsedPosition = JSON.parse(position);
+      const adjustedPosition = {
+        x: Math.min(parsedPosition.x, window.innerWidth - 120),
+        y: Math.min(parsedPosition.y, window.innerHeight - 120),
+      };
+      if (
+        adjustedPosition.x !== parsedPosition.x ||
+        adjustedPosition.y !== parsedPosition.y
+      ) {
+        localStorage.removeItem('bannerPosition');
+        return { x: window.innerWidth - 120, y: window.innerHeight - 120 };
+      }
+      return adjustedPosition;
+    }
+    return { x: window.innerWidth - 120, y: window.innerHeight - 120 };
+  }, []);
 
   // Ref
   const isChangeCodeRef = useRef<boolean>(false); // コード編集中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
@@ -209,7 +230,7 @@ export const useCornerDialogLogic = () => {
           // AI回答待ち中の場合、AI回答にはエラーメッセージを表示しない
           aiMessageContent = '';
           aiMessageComment = '';
-        } 
+        }
         const aiMessage: AiMessage = {
           role: MessageType.ai,
           content: aiMessageContent,
@@ -310,7 +331,9 @@ export const useCornerDialogLogic = () => {
     stopLoading,
     isChangeCodeRef,
     initialPosition,
+    setInitialPosition,
     savePosition,
+    savedPosition,
     humanMessage,
     setHumanMessage,
     setCallbackFuncs,
