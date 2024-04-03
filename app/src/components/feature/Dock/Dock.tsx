@@ -1,6 +1,6 @@
 // src/components/feature/Dock/Dock.tsx
 import { faClose, faCode, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
-import { Box, Flex, Separator } from "@radix-ui/themes";
+import { Flex, Separator } from "@radix-ui/themes";
 import logoIcon from "~/assets/logo.svg";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import { vars } from "~/styles/theme.css";
@@ -22,7 +22,9 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
   } = useDockLogic({ setHumanMessage, isChangeCodeRef });
 
   return (
-    <Box className={DockGroup}>
+    <Flex
+      justify={'between'}
+      className={DockGroup}>
       <Flex>
         <img src={logoIcon} alt="logo" width={'40'} />
       </Flex>
@@ -64,7 +66,7 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
         />
 
       </Flex>
-    </Box>
+    </Flex>
   );
 }
 

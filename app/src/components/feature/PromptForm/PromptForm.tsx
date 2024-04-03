@@ -53,11 +53,13 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
   }
 
   return (
-    <Box p={'5'}
+    <Box px={'5'}
+      pb={'5'}
       width={'100%'}
       style={{
         background: isPcViewMode ? vars.color.primarySubBg : vars.color.accentBg
       }}>
+
       <form onSubmit={(e) => handleSubmit(e)}>
 
         <Flex direction={'column'} position={'relative'} gap={'1'}>
@@ -84,6 +86,16 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
                 Ctrl + Enterで送信
               </Text>
             </motion.div>
+          </Flex>
+          <Flex
+            width={'100%'}>
+            <Text size={'1'} color='gray'
+              style={{
+                opacity: 0.5,
+              }}
+            >
+              AIが生成する回答には間違いが含まれる可能性があります。予めご了承ください。
+            </Text>
           </Flex>
           <PromptTextArea
             isPcViewMode={isPcViewMode}
