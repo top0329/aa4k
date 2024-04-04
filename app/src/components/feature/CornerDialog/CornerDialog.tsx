@@ -5,8 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Box, Flex } from "@radix-ui/themes";
 import { AnimatePresence, motion } from 'framer-motion';
-import { DockGroup } from "~/components/feature/Dock/Dock.css";
-import Dock from "~/components/feature/Dock/Dock.tsx";
+import { sDockGroup } from "~/components/feature/Dock/Dock.css";
 import DragButton from "~/components/ui/DragButton/DragButton.tsx";
 import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
 import ChatSkeleton from "~/components/ui/Skeleton/ChatSkeleton";
@@ -14,6 +13,7 @@ import DockSkeleton from "~/components/ui/Skeleton/DockSkeleton";
 import "~/styles/scrollbar.css";
 import Chat from "../Chat/Chat.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
+import Dock from "../Dock/Dock.tsx";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
 const CornerDialog = () => {
@@ -131,10 +131,11 @@ const CornerDialog = () => {
         {isInitVisible ? (
           <Dock setHumanMessage={setHumanMessage} isChangeCodeRef={isChangeCodeRef} />
         ) : (
-          <Box className={DockGroup}>
+          <Box className={sDockGroup} px={'0'}>
             <DockSkeleton />
           </Box>
         )}
+
       </Dialog.Content>
     </Dialog.Root>
   );

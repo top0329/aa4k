@@ -4,7 +4,7 @@ import { Flex, Separator } from "@radix-ui/themes";
 import logoIcon from "~/assets/logo.svg";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import { vars } from "~/styles/theme.css";
-import { DockGroup, DockItem } from "./Dock.css";
+import { sDockGroup, sDockItem } from "./Dock.css";
 import { useDockLogic } from "./useDockLogic";
 
 type DockProps = {
@@ -24,7 +24,7 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
   return (
     <Flex
       justify={'between'}
-      className={DockGroup}>
+      className={sDockGroup}>
       <Flex>
         <img src={logoIcon} alt="logo" width={'40'} />
       </Flex>
@@ -37,7 +37,7 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
           icon={faCode}
           tooltip={'コードエディター'}
           onClick={() => toggleItemVisibility('codeEditorVisible')}
-          className={DockItem}
+          className={sDockItem}
           pressed={dockState.codeEditorVisible}
           pressedColor={
             isPcViewMode
@@ -56,13 +56,13 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
               ? vars.color.primarySolidHover
               : vars.color.accentSolidHover
           }
-          className={DockItem} />
+          className={sDockItem} />
         <Separator orientation="vertical" />
         <IconTooltipButton
           icon={faClose}
           tooltip={'aa4kを閉じる'}
           onClick={handleDockClose}
-          className={DockItem}
+          className={sDockItem}
         />
 
       </Flex>
