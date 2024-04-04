@@ -1,9 +1,10 @@
 // src/componetns/feature/CornerDialog/CornerDialog.tsx
+
 import { faSparkles } from "@fortawesome/pro-duotone-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Box, Flex } from "@radix-ui/themes";
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { DockGroup } from "~/components/feature/Dock/Dock.css";
 import Dock from "~/components/feature/Dock/Dock.tsx";
 import DragButton from "~/components/ui/DragButton/DragButton.tsx";
@@ -55,7 +56,6 @@ const CornerDialog = () => {
             initialPosition={savedPosition}
             onPositionChange={savePosition}
           >
-
             <Flex style={{
               cursor: 'pointer',
             }}>
@@ -65,53 +65,73 @@ const CornerDialog = () => {
         </Dialog.Trigger>
       </motion.div>
       <Dialog.Overlay />
-      <Dialog.Content onPointerDownOutside={(e) => e.preventDefault()}>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+      <Dialog.Content>
+        <AnimatePresence>
           {dockState.codeEditorVisible && (
-            <CodeEditor isChangeCodeRef={isChangeCodeRef} isLoading={isLoading} />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CodeEditor isChangeCodeRef={isChangeCodeRef} isLoading={isLoading} />
+            </motion.div>
           )}
-
-          {isPcViewMode && dockState.chatVisible && isInitialChatHistory ? (
-            <Chat
-              isLoading={isLoading}
-              startLoading={startLoading}
-              stopLoading={stopLoading}
-              isChangeCodeRef={isChangeCodeRef}
-              humanMessage={humanMessage}
-              setHumanMessage={setHumanMessage}
-              setCallbackFuncs={setCallbackFuncs}
-              aiAnswerRef={aiAnswerRef}
-              finishAiAnswerRef={finishAiAnswerRef}
-            />
-          ) : null}
-          {!isPcViewMode && dockState.spChatVisible && isInitialChatHistory ? (
-            <Chat
-              isLoading={isLoading}
-              startLoading={startLoading}
-              stopLoading={stopLoading}
-              isChangeCodeRef={isChangeCodeRef}
-              humanMessage={humanMessage}
-              setHumanMessage={setHumanMessage}
-              setCallbackFuncs={setCallbackFuncs}
-              aiAnswerRef={aiAnswerRef}
-              finishAiAnswerRef={finishAiAnswerRef}
-            />
-          ) : null}
-          {dockState.chatVisible && !isInitialChatHistory ? <ChatSkeleton /> : null}
-          <BarLoading isLoading={isLoading} />
-
-          {isInitVisible ? (
-            <Dock setHumanMessage={setHumanMessage} isChangeCodeRef={isChangeCodeRef} />
-          ) : (
-            <Box className={DockGroup}>
-              <DockSkeleton />
-            </Box>
+        </AnimatePresence>
+        <AnimatePresence>
+          {isPcViewMode && dockState.chatVisible && isInitialChatHistory && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Chat
+                isLoading={isLoading}
+                startLoading={startLoading}
+                stopLoading={stopLoading}
+                isChangeCodeRef={isChangeCodeRef}
+                humanMessage={humanMessage}
+                setHumanMessage={setHumanMessage}
+                setCallbackFuncs={setCallbackFuncs}
+                aiAnswerRef={aiAnswerRef}
+                finishAiAnswerRef={finishAiAnswerRef}
+              />
+            </motion.div>
           )}
-        </motion.div>
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {!isPcViewMode && dockState.spChatVisible && isInitialChatHistory && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Chat
+                isLoading={isLoading}
+                startLoading={startLoading}
+                stopLoading={stopLoading}
+                isChangeCodeRef={isChangeCodeRef}
+                humanMessage={humanMessage}
+                setHumanMessage={setHumanMessage}
+                setCallbackFuncs={setCallbackFuncs}
+                aiAnswerRef={aiAnswerRef}
+                finishAiAnswerRef={finishAiAnswerRef}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {dockState.chatVisible && !isInitialChatHistory ? <ChatSkeleton /> : null}
+        <BarLoading isLoading={isLoading} />
+        {isInitVisible ? (
+          <Dock setHumanMessage={setHumanMessage} isChangeCodeRef={isChangeCodeRef} />
+        ) : (
+          <Box className={DockGroup}>
+            <DockSkeleton />
+          </Box>
+        )}
       </Dialog.Content>
     </Dialog.Root>
   );

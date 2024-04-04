@@ -25,7 +25,7 @@ type DragPosition = { x: number; y: number };
 
 // 起動バナーの位置を保存
 const getSavedPosition = (): DragPosition | null => {
-  const savedPosition = localStorage.getItem('dragButtonPosition');
+  const savedPosition = localStorage.getItem('bannerPosition');
   return savedPosition ? JSON.parse(savedPosition) : null;
 };
 
@@ -273,7 +273,7 @@ export const useCornerDialogLogic = () => {
 
   // 起動バナーの位置を保存
   const savePosition = (position: DragPosition) => {
-    localStorage.setItem('dragButtonPosition', JSON.stringify(position));
+    localStorage.setItem('bannerPosition', JSON.stringify(position));
   };
 
   useEffect(() => {
