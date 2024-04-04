@@ -4,15 +4,16 @@ import clsx from 'clsx';
 import { PanInfo, motion, useMotionValue } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import DragHandle from '../DragHandle/DragHandle';
-import { animatedBG, sDragBg, sDragButton } from './DragButton.css';
+import { animatedBG, sDragBg, sDragButton, sInvisible } from './DragButton.css';
 
 type DragButtonProps = {
   initialPosition: { x: number; y: number };
   onPositionChange: (position: { x: number; y: number }) => void;
   children?: React.ReactNode;
+  isVisible: boolean; // Add this line
 };
 
-const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPositionChange }) => {
+const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPositionChange, isVisible }) => {
   const [isHover] = useState(false);
   const x = useMotionValue(initialPosition.x);
   const y = useMotionValue(initialPosition.y);
@@ -44,7 +45,7 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
 
   return (
     <motion.div
-      className={sDragButton}
+      className={clsx(sDragButton, { [sInvisible]: !isVisible })}
       drag
       dragMomentum={false}
       dragElastic={0.2}

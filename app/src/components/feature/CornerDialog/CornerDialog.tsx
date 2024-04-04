@@ -53,6 +53,7 @@ const CornerDialog = () => {
       >
         <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
           <DragButton
+            isVisible={!dockState.dialogVisible}
             initialPosition={savedPosition}
             onPositionChange={savePosition}
           >

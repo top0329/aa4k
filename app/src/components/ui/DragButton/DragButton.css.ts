@@ -22,6 +22,10 @@ export const sDragButton = style({
   },
 });
 
+export const sInvisible = style({
+  pointerEvents: "none",
+});
+
 export const sDragBg = style({
   position: "absolute",
   width: 60,
