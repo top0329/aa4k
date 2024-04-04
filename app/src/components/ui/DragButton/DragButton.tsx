@@ -10,10 +10,13 @@ type DragButtonProps = {
   initialPosition: { x: number; y: number };
   onPositionChange: (position: { x: number; y: number }) => void;
   children?: React.ReactNode;
-  isVisible: boolean; // Add this line
+  isVisible: boolean;
+  onClick: () => void;
+  disabled?: boolean;
 };
 
-const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPositionChange, isVisible }) => {
+const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPositionChange, isVisible, onClick, disabled }) => {
+  const [isDragging, setIsDragging] = useState(false);
   const [isHover] = useState(false);
   const x = useMotionValue(initialPosition.x);
   const y = useMotionValue(initialPosition.y);
@@ -34,7 +37,12 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
     return () => window.removeEventListener('resize', handleResize);
   }, [x, y, onPositionChange]);
 
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false);
     const newPosition = { x: info.point.x, y: info.point.y };
     const constrainedPosition = {
       x: Math.min(Math.max(newPosition.x, 0), window.innerWidth - 120),
@@ -43,13 +51,21 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
     onPositionChange(constrainedPosition);
   };
 
+  const handleClick = () => {
+    if (!isDragging) {
+      onClick();
+    }
+  };
+
   return (
     <motion.div
       className={clsx(sDragButton, { [sInvisible]: !isVisible })}
-      drag
+      drag={!disabled}
       dragMomentum={false}
       dragElastic={0.2}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onClick={handleClick}
       dragConstraints={{
         top: 0,
         left: 0,

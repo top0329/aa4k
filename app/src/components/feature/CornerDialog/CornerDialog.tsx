@@ -51,11 +51,13 @@ const CornerDialog = () => {
         animate={dockState.dialogVisible ? { opacity: 0 } : { opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <Dialog.Trigger onClick={handleBannerClick} disabled={isBannerClicked}>
+        <Dialog.Trigger asChild>
           <DragButton
             isVisible={!dockState.dialogVisible}
             initialPosition={savedPosition}
             onPositionChange={savePosition}
+            onClick={handleBannerClick}
+            disabled={isBannerClicked}
           >
             <Flex style={{
               cursor: 'pointer',

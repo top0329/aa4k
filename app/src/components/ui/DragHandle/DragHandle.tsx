@@ -25,6 +25,7 @@ const DragHandle: React.FC = () => {
         cursor: 'grab',
         zIndex: 1,
       }}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <Tooltip content="ドラッグして移動" side="bottom" align="center"
         delayDuration={0}
