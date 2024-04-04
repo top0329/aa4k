@@ -10,9 +10,6 @@ export const sCodeEditor = style({
   right: 660,
   display: `flex`,
   width: `calc(100vw - 680px)`,
-  maxWidth: `100vw`,
-  overflowY: `auto`,
-  msOverflowY: `auto`,
   zIndex: 201,
   ":focus": {
     outline: `none`,

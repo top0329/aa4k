@@ -3,13 +3,14 @@ import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { useToast } from "~/components/ui/ErrorToast/ErrorToastProvider";
 import { CodeActionDialogType, DeviceDiv, ErrorCode, ErrorMessage, InfoMessage } from "~/constants";
-import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 import { useCodeAction } from "~/hooks/useCodeAction";
+import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
+import useToggleDockItem from '~/hooks/useToggleDockItem';
 import { DesktopIsChangeCodeState, MobileIsChangeCodeState } from '~/state/codeActionState';
 import { DockItemVisibleState } from '~/state/dockItemState';
 import { ViewModeState } from '~/state/viewModeState';
+import { KintoneError } from "~/util/customErrors";
 import { getKintoneCustomizeJs } from "~/util/kintoneCustomize";
-import { KintoneError } from "~/util/customErrors"
 
 export const useCodeEditorLogic = (
   isChangeCodeRef?: React.MutableRefObject<boolean>
@@ -25,6 +26,9 @@ export const useCodeEditorLogic = (
     isInitialCode,
     setIsInitialCode,
   } = useCodeAction(isPcViewMode);
+  const {
+    toggleItemVisibility,
+  } = useToggleDockItem();
   const [isDesktopChangeCode] = useAtom(DesktopIsChangeCodeState);
   const [isMobileChangeCode] = useAtom(MobileIsChangeCodeState);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -125,6 +129,7 @@ export const useCodeEditorLogic = (
     toggleFullScreen,
     copyToClipboard,
     handleRefreshClick,
+    toggleItemVisibility,
   };
 };
 

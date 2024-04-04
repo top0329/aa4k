@@ -13,6 +13,7 @@ import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import AceEditor from "react-ace-builds";
 import CodeActionDialog from "~/components/feature/CodeActionDialog/CodeActionDialog";
+import CloseButton from '~/components/ui/CloseButton/CloseButton';
 import CopyButton from '~/components/ui/Copy/Copy';
 import IconTooltipButton from '~/components/ui/IconTooltipButton/IconTooltipButton';
 import { CodeActionDialogType } from '~/constants';
@@ -26,7 +27,7 @@ type CodeEditorProps = {
   isLoading: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef, isLoading}) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) => {
   const {
     copySuccess,
     isFullScreen,
@@ -41,7 +42,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef, isLoading}) => 
     toggleFullScreen,
     copyToClipboard,
     handleRunCodeAction,
-    handleRefreshClick
+    handleRefreshClick,
+    toggleItemVisibility
   } = useCodeEditorLogic(isChangeCodeRef);
   const [isPcViewMode] = useAtom(ViewModeState);
 
@@ -69,6 +71,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({isChangeCodeRef, isLoading}) => 
           border: `4px solid ${vars.color.accentEleBg}`,
         }}
       >
+        <CloseButton
+          top={-12}
+          right={-8}
+          onClick={() => toggleItemVisibility('codeEditorVisible')} />
         <Flex
           py={'3'}
           pr={'3'}

@@ -1,11 +1,11 @@
 // src/components/feature/CodeActionDialog/CodeActionDialog.tsx
 import * as Dialog from "@radix-ui/react-dialog";
-import CodeCheck from './CodeCheck';
-import CodeFix from './CodeFix';
-import { sCodeActionDialog, sCodeActionDialogOverlay } from "./CodeActionDialog.css";
-import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 import { CodeActionDialogType, CodeCheckStatus } from "~/constants";
 import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
+import { sCodeActionDialog, sCodeActionDialogOverlay } from "./CodeActionDialog.css";
+import CodeCheck from './CodeCheck';
+import CodeFix from './CodeFix';
+import { useCodeActionDialogLogic } from "./useCodeActionDialogLogic";
 
 const CodeActionDialog: React.FC<CodeActionDialogProps> = (
   props

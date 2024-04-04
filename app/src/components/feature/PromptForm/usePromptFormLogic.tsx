@@ -6,8 +6,10 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import { appCreateJs } from '~/ai/appCreateJs';
 import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
+import useToggleDockItem from '~/hooks/useToggleDockItem';
 import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
 import { DesktopIsChangeCodeState, MobileIsChangeCodeState } from '~/state/codeActionState';
+import { DockItemVisibleState } from '~/state/dockItemState';
 import { InTypeWriteState } from '~/state/inTypeWriteState';
 import { PluginIdState } from '~/state/pluginIdState';
 import { ReloadState } from "~/state/reloadState";
@@ -43,6 +45,10 @@ export const usePromptFormLogic = ({
 }: PromptFormProps) => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
+  const [dockState] = useAtom(DockItemVisibleState);
+  const {
+    toggleItemVisibility
+  } = useToggleDockItem();
   const [isVoiceInput,
     setVoiceInput] = useState(false);
   const [voiceInputVisible, setVoiceInputVisible] = useState(true);
@@ -57,6 +63,12 @@ export const usePromptFormLogic = ({
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
 
   // const scrollToBottom = useScrollToBottom();
+
+  const toggleChatVisibilityHandler = () => {
+    console.log('toggleChatVisibilityHandler');
+    setIsPcViewMode(!isPcViewMode)
+    dockState.chatVisible ? toggleItemVisibility('spChatVisible') : toggleItemVisibility('chatVisible');
+  }
 
   const { transcript, finalTranscript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -81,7 +93,7 @@ export const usePromptFormLogic = ({
         isVoiceInputRef.current = false;
         setVoiceInput(false);
       }
-  
+
       aiAnswerRef.current = '';
       finishAiAnswerRef.current = false;
 
@@ -90,7 +102,7 @@ export const usePromptFormLogic = ({
       const isGuest = kintone.getLoginUser().isGuest;
       const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
       const isChangeCode = isDesktopChangeCode || isMobileChangeCode ? true : false;
-  
+
       const chatHistoryItem: ChatHistoryItem = {
         human: {
           role: MessageType.human,
@@ -143,7 +155,7 @@ export const usePromptFormLogic = ({
       if (resPreCheckStatus !== 200) {
         // APIエラー時のエラーメッセージを取得
         const errMsgStr = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
-  
+
         const errorMessage: ErrorMessage = {
           role: MessageType.error,
           content: errMsgStr
@@ -355,5 +367,6 @@ export const usePromptFormLogic = ({
     handleHumanMessageChange,
     isSubmitting,
     voiceInputVisible,
+    toggleChatVisibilityHandler
   };
 };

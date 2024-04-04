@@ -1,10 +1,10 @@
 // src/components/feature/Dock/useDockLogic.tsx
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
-import { ChatMode, InfoMessage } from "~/constants";
+import { useEffect } from "react";
+import { InfoMessage } from "~/constants";
 import { useCodeAction } from "~/hooks/useCodeAction";
+import useToggleDockItem from "~/hooks/useToggleDockItem";
 import { DesktopIsChangeCodeState, MobileIsChangeCodeState } from '~/state/codeActionState';
-import { DockItemVisibleState } from "~/state/dockItemState";
 import { ViewModeState } from "~/state/viewModeState";
 
 type DockProps = {
@@ -13,12 +13,15 @@ type DockProps = {
 }
 
 export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) => {
-  const [dockState, setDockState] = useAtom(DockItemVisibleState);
-  const [activeChatMode, setActiveChatMode] = useState<ChatMode>(ChatMode.desktopChat);
+  const {
+    dockState,
+    setDockState,
+    toggleItemVisibility,
+    toggleChatVisibility,
+  } = useToggleDockItem();
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const [isDesktopChangeCode] = useAtom(DesktopIsChangeCodeState);
   const [isMobileChangeCode] = useAtom(MobileIsChangeCodeState);
-
   const { initCodeActionState } = useCodeAction(isPcViewMode);
 
   const updateKintonePointerEvents = () => {
@@ -34,10 +37,6 @@ export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) =>
     updateKintonePointerEvents();
   }, [dockState]);
 
-  const toggleItemVisibility = (itemKey: keyof typeof dockState) => {
-    setDockState({ ...dockState, [itemKey]: !dockState[itemKey] });
-  };
-
   const initDockState = async () => {
     await setDockState({
       dialogVisible: false,
@@ -46,24 +45,6 @@ export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) =>
       spChatVisible: false,
     });
     document.body.style.pointerEvents = '';
-  };
-
-  const toggleChatVisibility = () => {
-    setDockState({
-      ...dockState,
-      chatVisible: !dockState.chatVisible,
-      spChatVisible: false,
-    });
-    setActiveChatMode(ChatMode.desktopChat);
-  };
-
-  const toggleSpChatVisibility = () => {
-    setDockState({
-      ...dockState,
-      chatVisible: false,
-      spChatVisible: !dockState.spChatVisible,
-    });
-    setActiveChatMode(ChatMode.mobileChat);
   };
 
   // Docを閉じる処理
@@ -85,12 +66,10 @@ export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) =>
 
   return {
     isPcViewMode,
-    activeChatMode,
     dockState,
     setDockState,
     toggleItemVisibility,
     toggleChatVisibility,
-    toggleSpChatVisibility,
     deleteHistory,
     handleDockClose,
   };

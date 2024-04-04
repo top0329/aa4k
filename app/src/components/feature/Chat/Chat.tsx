@@ -1,9 +1,10 @@
 // src/components/feature/Chat/Chat.tsx
 import { Box } from "@radix-ui/themes";
+import { useChatLogic } from '~/components/feature/Chat/useChatLogic';
+import CloseButton from "~/components/ui/CloseButton/CloseButton";
 import AccordionHistory from "../AccordionHistory/AccordionHistory";
 import PromptForm from "../PromptForm/PromptForm";
 import { sChat } from './Chat.css';
-import { useChatLogic } from '~/components/feature/Chat/useChatLogic';
 
 type ChatProps = {
   isLoading: boolean;
@@ -20,10 +21,14 @@ type ChatProps = {
 const Chat: React.FC<ChatProps> = ({ isLoading, startLoading, stopLoading, isChangeCodeRef, humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef }) => {
   const {
     scrollRef,
+    toggleChatVisibility
   } = useChatLogic();
 
   return (
     <Box className={sChat} >
+      <CloseButton
+        onClick={() => toggleChatVisibility()}
+      />
       <AccordionHistory isLoading={isLoading} setHumanMessage={setHumanMessage} scrollRef={scrollRef} />
       <PromptForm
         isLoading={isLoading}

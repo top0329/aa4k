@@ -327,6 +327,7 @@ export const useCornerDialogLogic = () => {
     handleBannerClick,
     isBannerClicked,
     isLoading,
+    isPcViewMode,
     startLoading,
     stopLoading,
     isChangeCodeRef,

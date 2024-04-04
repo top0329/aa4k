@@ -33,6 +33,7 @@ const CornerDialog = () => {
     finishAiAnswerRef,
     isInitVisible,
     isInitialChatHistory,
+    isPcViewMode,
   } = useCornerDialogLogic();
 
   return (
@@ -74,7 +75,20 @@ const CornerDialog = () => {
             <CodeEditor isChangeCodeRef={isChangeCodeRef} isLoading={isLoading} />
           )}
 
-          {dockState.chatVisible && isInitialChatHistory ? (
+          {isPcViewMode && dockState.chatVisible && isInitialChatHistory ? (
+            <Chat
+              isLoading={isLoading}
+              startLoading={startLoading}
+              stopLoading={stopLoading}
+              isChangeCodeRef={isChangeCodeRef}
+              humanMessage={humanMessage}
+              setHumanMessage={setHumanMessage}
+              setCallbackFuncs={setCallbackFuncs}
+              aiAnswerRef={aiAnswerRef}
+              finishAiAnswerRef={finishAiAnswerRef}
+            />
+          ) : null}
+          {!isPcViewMode && dockState.spChatVisible && isInitialChatHistory ? (
             <Chat
               isLoading={isLoading}
               startLoading={startLoading}
