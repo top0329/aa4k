@@ -56,7 +56,7 @@ const CornerDialog = () => {
             isVisible={!dockState.dialogVisible}
             initialPosition={savedPosition}
             onPositionChange={savePosition}
-            onClick={handleBannerClick}
+            onClick={event => handleBannerClick(event)}
             disabled={isBannerClicked}
           >
             <Flex style={{

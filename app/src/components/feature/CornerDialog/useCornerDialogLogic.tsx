@@ -85,12 +85,14 @@ export const useCornerDialogLogic = () => {
   );
 
   // 起動バナーを押下
-  const handleBannerClick = () => {
-    setDockState(dockState => ({ ...dockState, dialogVisible: true }));
-    // 二重押下防止
-    setIsBannerClicked(true);
-    // 初期ロードフラグを初期化
-    setIsInitVisible(false);
+  const handleBannerClick = (event: React.MouseEvent<HTMLDivElement> | null) => {
+    if (!event?.defaultPrevented) {
+      setDockState(dockState => ({ ...dockState, dialogVisible: true }));
+      // 二重押下防止
+      setIsBannerClicked(true);
+      // 初期ロードフラグを初期化
+      setIsInitVisible(false);
+    }
   }
 
   // 事前チェックを実行

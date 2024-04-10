@@ -11,11 +11,18 @@ type DragButtonProps = {
   onPositionChange: (position: { x: number; y: number }) => void;
   children?: React.ReactNode;
   isVisible: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLDivElement> | null) => void;
   disabled?: boolean;
 };
 
-const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPositionChange, isVisible, onClick, disabled }) => {
+const DragButton = React.forwardRef(({
+  initialPosition,
+  onPositionChange,
+  children,
+  isVisible,
+  onClick,
+  disabled,
+}: DragButtonProps, ref: React.Ref<HTMLDivElement>) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isHover] = useState(false);
   const x = useMotionValue(initialPosition.x);
@@ -51,9 +58,9 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
     onPositionChange(constrainedPosition);
   };
 
-  const handleClick = () => {
-    if (!isDragging) {
-      onClick();
+  const handleClick = (event: React.MouseEvent<HTMLDivElement> | null) => {
+    if (!isDragging && event && !event.defaultPrevented) {
+      onClick(event);
     }
   };
 
@@ -65,7 +72,7 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
       dragElastic={0.2}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onClick={handleClick}
+      onClick={event => handleClick(event)}
       dragConstraints={{
         top: 0,
         left: 0,
@@ -73,6 +80,7 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
         bottom: window.innerHeight - 120,
       }}
       style={{ x, y }}
+      ref={ref}
     >
       <DragHandle />
       <Box style={{ zIndex: 2 }}>{children}</Box>
@@ -83,6 +91,6 @@ const DragButton: React.FC<DragButtonProps> = ({ children, initialPosition, onPo
       />
     </motion.div>
   );
-};
+});
 
 export default DragButton;
