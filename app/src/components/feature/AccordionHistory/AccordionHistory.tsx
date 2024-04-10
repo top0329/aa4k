@@ -147,7 +147,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
     return (
       index + 1 === latestAiResponseIndex && inTypeWrite
         ? <TypewriterEffect aiMessage={aiMessage} chatHistoryItem={item} isLoading={isLoading} />
-        : <ChatContent aiMessage={aiMessage} chatHistoryItem={item} />
+        : <ChatContent humanMessage={item.human.content} aiMessage={aiMessage} chatHistoryItem={item} />
     );
   };
 

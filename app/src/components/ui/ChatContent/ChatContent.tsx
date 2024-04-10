@@ -5,7 +5,9 @@ import Feedback from '~/components/feature/Feedback/Feedback';
 import { ChatContentProps } from "~/types/chatContentTypes";
 import { createClipboardContent } from "~/util/clipboardContent";
 
-export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem }) => {
+export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem, humanMessage }) => {
+  console.log(`chatcontect`)
+  console.log(humanMessage);
 
   return (
     <>
@@ -32,7 +34,7 @@ export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistory
         mt={'5'}
         width={'100%'}
       >
-        <Feedback content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />
+        <Feedback humanMessage={humanMessage || ''} content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />
       </Box>
     </>
   )

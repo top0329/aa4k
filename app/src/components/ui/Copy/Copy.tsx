@@ -1,31 +1,24 @@
 // src/components/ui/Copy/Copy.tsx
-import { faCheck, faClipboard } from '@fortawesome/pro-duotone-svg-icons';
+import { IconDefinition, faCheck, faClipboard } from '@fortawesome/pro-duotone-svg-icons';
 import React from 'react';
 import IconTooltipButton from '../IconTooltipButton/IconTooltipButton';
+import { sCopy } from './copy.css';
 
 
 type CopyProps = {
   isCopied: boolean;
   onCopy: () => void;
+  toopTip?: string;
+  icon?: IconDefinition
 };
 
-const Copy: React.FC<CopyProps> = ({ isCopied, onCopy }) => {
+const Copy: React.FC<CopyProps> = ({ isCopied, onCopy, toopTip = isCopied ? 'Copied!' : 'Copy', icon = faClipboard }) => {
   return (
     <IconTooltipButton
-      icon={isCopied ? faCheck : faClipboard}
-      tooltip={isCopied ? 'Copied!' : 'Copy'}
+      icon={isCopied ? faCheck : icon}
+      tooltip={toopTip}
       onClick={onCopy}
-      style={{
-        width: 40,
-        height: 40,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 8,
-        borderRadius: 8,
-        transition: 'all 0.2s ease-in-out',
-        cursor: 'pointer'
-      }}
+      className={sCopy}
     />
 
   );

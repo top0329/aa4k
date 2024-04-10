@@ -1,5 +1,5 @@
 // src/components/feature/Feedback/Feedback.tsx
-import { faClose, faThumbsDown, faThumbsUp } from '@fortawesome/pro-duotone-svg-icons';
+import { faClose, faMessage, faThumbsDown, faThumbsUp } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Flex, TextArea } from '@radix-ui/themes';
 import { useFeedbackLogic } from '~/components/feature/Feedback/useFeedbackLogic';
@@ -11,11 +11,12 @@ import { ChatHistoryItem } from "~/types/ai";
 
 
 type FeedbackProps = {
+  humanMessage: string;
   content: string;
   chatHistoryItem: ChatHistoryItem;
 };
 
-const Feedback = ({ content, chatHistoryItem }: FeedbackProps) => {
+const Feedback = ({ humanMessage, content, chatHistoryItem }: FeedbackProps) => {
   const { copySuccess, copyToClipboard } = useCopyToClipboard();
 
   const {
@@ -63,12 +64,17 @@ const Feedback = ({ content, chatHistoryItem }: FeedbackProps) => {
           pressedColor={vars.color.grayA.grayA12}
           defaultColor={vars.color.gray.gray9}
         />}
-        {
-          <Copy
-            isCopied={copySuccess}
-            onCopy={() => copyToClipboard(content)}
-          />
-        }
+        <Copy
+          isCopied={copySuccess['humanMessage'] || false}
+          onCopy={() => copyToClipboard(humanMessage, 'humanMessage')}
+          toopTip={copySuccess['humanMessage'] ? 'コピーしました' : '発話をコピー'}
+          icon={faMessage}
+        />
+        <Copy
+          isCopied={copySuccess['content'] || false}
+          onCopy={() => copyToClipboard(content, 'content')}
+          toopTip={copySuccess['content'] ? 'コピーしました' : '回答をコピー'}
+        />
       </Flex>
       {
         showDetailedFeedback &&

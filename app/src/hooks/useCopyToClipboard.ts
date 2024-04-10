@@ -1,13 +1,18 @@
 // src/hooks/useCopyToClipboard.ts
 import { useState } from "react";
 
-export const useCopyToClipboard = () => {
-  const [copySuccess, setCopySuccess] = useState(false);
+type CopySuccessState = {
+  [key: string]: boolean;
+};
 
-  const copyToClipboard = (text: string) => {
+export const useCopyToClipboard = () => {
+  const [copySuccess, setCopySuccess] = useState<CopySuccessState>({});
+
+  const copyToClipboard = (text: string, key: string) => {
+    console.log(text, key);
     navigator.clipboard.writeText(text).then(() => {
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      setCopySuccess({ ...copySuccess, [key]: true });
+      setTimeout(() => setCopySuccess({ ...copySuccess, [key]: false }), 2000);
     });
   };
 

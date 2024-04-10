@@ -95,7 +95,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
               transition: 'all 0.2s ease-in-out',
               cursor: 'pointer',
             }} />
-          <CopyButton isCopied={copySuccess} onCopy={() => copyToClipboard(code)} />
+          <CopyButton isCopied={copySuccess['code']} onCopy={() => copyToClipboard(code, 'code')} />
           {isFullScreen ? (
             <IconTooltipButton
               icon={faCompressAlt}

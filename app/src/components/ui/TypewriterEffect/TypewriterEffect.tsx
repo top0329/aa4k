@@ -62,7 +62,13 @@ export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHi
         mt={'5'}
         width={'100%'}
       >
-        {!inTypeWrite && (<Feedback content={createClipboardContent(aiMessage)} chatHistoryItem={chatHistoryItem} />)}
+        {!inTypeWrite && (
+          <Feedback
+            content={createClipboardContent(aiMessage)}
+            chatHistoryItem={chatHistoryItem}
+            humanMessage={chatHistoryItem.human.content}
+          />
+        )}
       </Box>
     </>
   );
