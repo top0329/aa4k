@@ -16,7 +16,7 @@ import { DeviceDiv, CodeCreateMethodCreate, CodeCreateMethodEdit, ErrorCode, Inf
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
 import { GeneratedCodeGetResponseBody, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
-import { getApiErrorMessage } from "~/util/getErrorMessage"
+import { getApiErrorMessageForCreateJs } from "~/util/getErrorMessage"
 
 import { LlmError, KintoneError, ApiError, GuidelineError, RetrieveError, ContractExpiredError, ContractStatusError } from "~/util/customErrors"
 
@@ -77,7 +77,7 @@ export const appCreateJs = async (
     insertConversation(pluginId, appId, userId, deviceDiv, MessageType.ai, message, conversationId, messageComment, formattedCode)
 
     // JS生成された場合のみ、kintoneへの反映と、コールバック関数の設定を行う
-    if (llmResponse.properties.length) {
+    if (llmResponse.properties && llmResponse.properties.length) {
       // --------------------
       // kintoneカスタマイズへの反映
       // --------------------
@@ -117,7 +117,7 @@ export const appCreateJs = async (
       insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message, } }
     } else {
-      const message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      const message = `${ErrorMessageConst.E_MSG008}（${ErrorCode.E99999}）`;
       insertConversation(pluginId, appId, userId, deviceDiv, MessageType.error, message, conversationId)
       return { message: { role: MessageType.error, content: message } }
     }
@@ -218,7 +218,7 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   const [res_jsCodeForDbBody, res_jsCodeForDbStatus] = res_jsCodeForDb;
   const resJson_jsCodeForDb = JSON.parse(res_jsCodeForDbBody) as GeneratedCodeGetResponseBody;
   if (res_jsCodeForDbStatus !== 200) {
-    const errorMessage = getApiErrorMessage(res_jsCodeForDbStatus, resJson_jsCodeForDb.errorCode)
+    const errorMessage = getApiErrorMessageForCreateJs(res_jsCodeForDbStatus, resJson_jsCodeForDb.errorCode)
     throw new ApiError(errorMessage)
   }
 
@@ -329,12 +329,40 @@ async function createJs(
   }, { callbacks: [handler] }).catch((err) => {
     if (err.code === "invalid_api_key") {
       throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
+    } else if(err.code === "429"){
+      // レート制限に引っかかった場合、エラーを出力
+      throw new LlmError(`${ErrorMessageConst.E_MSG007}（${ErrorCode.E00011}）`)
     } else {
-      throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00004}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00004}）`)
     }
   })) as LLMResponse;
 
-  if (llmResponse.properties.length) {
+  if (llmResponse.properties && llmResponse.properties.length) {    
+    // LLM結果のpropertiesのバリデート
+    type LLMResponseProperties = LLMResponse['properties'];
+    function propertiesValidate(properties: LLMResponseProperties): boolean {
+      return properties.every(property => {
+        const {method, startAt, endAt, javascriptCode, linesCount} = property;
+        // method（CREATE / ADD / UPDATE / DELETE のいずれか）は必須
+        if (method){
+          // [CREATE]: startAt, javascriptCodeをチェック
+          if(method === CodeCreateMethodCreate.create){
+            return startAt && javascriptCode;
+          // [UPDATE]: startAt, endAt, javascriptCodeをチェック
+          }else if (method === CodeCreateMethodEdit.update) {
+            return startAt && endAt && javascriptCode;
+          // [ADD]: startAt, javascriptCodeをチェック
+          } else if (method === CodeCreateMethodEdit.add) {
+            return startAt && javascriptCode;
+          // [DELETE]: startAt, lineCountをチェック
+          } else if (method === CodeCreateMethodEdit.delete) {
+            return startAt && linesCount;
+          }
+        }
+        return false;
+      });
+    }
+    if (!propertiesValidate(llmResponse.properties)) throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00012}）`);
     // JS生成された場合はコード編集して返却
     // 出力コード編集
     let editedCode = originalCode;
@@ -349,12 +377,12 @@ async function createJs(
         }
       })
     } catch (e) {
-      throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00010}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00010}）`)
     }
     // フォーマット整形
     const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] })
       .catch(() => {
-        throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00010}）`)
+        throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00010}）`)
       });
 
     // 結果返却

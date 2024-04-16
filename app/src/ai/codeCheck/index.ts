@@ -61,6 +61,9 @@ export const codeCheck = async (code: string, pluginId: string, contractStatus: 
     }, { callbacks: [handler] }).catch((err) => {
       if (err.code === "invalid_api_key") {
         throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
+      } else if(err.code === "429"){
+        // レート制限に引っかかった場合、エラーを出力
+        throw new LlmError(`${ErrorMessageConst.E_MSG007}（${ErrorCode.E00011}）`)
       } else {
         throw new LlmError(`${ErrorMessageConst.E_MSG001}（${ErrorCode.E00005}）`)
       }

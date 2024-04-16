@@ -9,7 +9,7 @@ import { KintoneProxyResponse, CodeTemplateRetrieverResponseBody } from "~/types
 import { CallbackManager, parseCallbackConfigArg, } from "@langchain/core/callbacks/manager";
 import { patchConfig } from "@langchain/core/runnables"
 import { LangchainLogsInsertCallbackHandler, LangchainLogsInsertCallbackHandlerProps } from "../langchainLogsInsertCallbackHandler";
-import { getApiErrorMessage } from "~/util/getErrorMessage"
+import { getApiErrorMessageForCreateJs } from "~/util/getErrorMessage"
 import { RetrieveError } from "~/util/customErrors"
 import { ErrorCode, ErrorMessage } from "~/constants"
 
@@ -56,7 +56,7 @@ export class CodeTemplateRetriever extends BaseRetriever {
     const [resBody, resStatus] = response;
     const resJson = JSON.parse(resBody) as CodeTemplateRetrieverResponseBody;
     if (resStatus !== 200) {
-      const errorMessage = resJson.errorCode === ErrorCode.A05003 ? `${ErrorMessage.E_MSG003}（${resJson.errorCode}）` : getApiErrorMessage(resStatus, resJson.errorCode)
+      const errorMessage = resJson.errorCode === ErrorCode.A05003 ? `${ErrorMessage.E_MSG003}（${resJson.errorCode}）` : getApiErrorMessageForCreateJs(resStatus, resJson.errorCode)
       throw new RetrieveError(errorMessage)
     }
     await runManager?.handleRetrieverEnd(resJson.documents);
