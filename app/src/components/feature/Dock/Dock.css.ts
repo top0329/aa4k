@@ -13,6 +13,7 @@ export const sDockGroup = style({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
+  backgroundColor: `rgba(255,255,255, 0.8)`,
   backdropFilter: "blur(24px)",
   boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.12)",
   zIndex: 100,
@@ -20,9 +21,6 @@ export const sDockGroup = style({
 
 export const sDockItem = style({
   padding: 4,
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
   width: 40,
   height: 40,
   borderRadius: `100%`,

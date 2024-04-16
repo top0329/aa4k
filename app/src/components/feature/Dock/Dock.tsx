@@ -1,6 +1,7 @@
 // src/components/feature/Dock/Dock.tsx
 import { faClose, faCode, faMessageLines } from "@fortawesome/pro-duotone-svg-icons";
 import { Flex, Separator } from "@radix-ui/themes";
+import clsx from "clsx";
 import logoIcon from "~/assets/logo.svg";
 import IconTooltipButton from "~/components/ui/IconTooltipButton/IconTooltipButton";
 import { vars } from "~/styles/theme.css";
@@ -24,7 +25,7 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
   return (
     <Flex
       justify={'between'}
-      className={sDockGroup}>
+      className={clsx(sDockGroup, 'allow-zoom')}>
       <Flex>
         <img src={logoIcon} alt="logo" width={'40'} />
       </Flex>

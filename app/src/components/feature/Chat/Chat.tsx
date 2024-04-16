@@ -25,7 +25,7 @@ const Chat: React.FC<ChatProps> = ({ isLoading, startLoading, stopLoading, isCha
   } = useChatLogic();
 
   return (
-    <Box className={sChat} >
+    <Box className={`${sChat} allow-zoom`} >
       <CloseButton
         onClick={() => toggleChatVisibility()}
       />

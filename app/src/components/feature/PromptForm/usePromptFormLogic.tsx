@@ -65,7 +65,6 @@ export const usePromptFormLogic = ({
   // const scrollToBottom = useScrollToBottom();
 
   const toggleChatVisibilityHandler = () => {
-    console.log('toggleChatVisibilityHandler');
     setIsPcViewMode(!isPcViewMode)
     dockState.chatVisible ? toggleItemVisibility('spChatVisible') : toggleItemVisibility('chatVisible');
   }

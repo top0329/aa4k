@@ -58,7 +58,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
   }
 
   return (
-    <>
+    <Box className={clsx('allow-zoom')}>
       <Flex
         direction={'column'}
         className={clsx(
@@ -222,7 +222,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
         <CodeActionDialog
           {...codeActionDialogProps}
         />}
-    </>
+    </Box>
   )
 }
 

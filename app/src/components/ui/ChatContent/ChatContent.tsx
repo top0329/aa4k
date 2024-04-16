@@ -6,9 +6,6 @@ import { ChatContentProps } from "~/types/chatContentTypes";
 import { createClipboardContent } from "~/util/clipboardContent";
 
 export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem, humanMessage }) => {
-  console.log(`chatcontect`)
-  console.log(humanMessage);
-
   return (
     <>
       <Flex

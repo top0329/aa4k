@@ -13,7 +13,6 @@ const useToggleDockItem = () => {
   };
 
   const toggleChatVisibility = () => {
-    console.log(isPcViewMode);
     isPcViewMode ? toggleItemVisibility('chatVisible') : toggleItemVisibility('spChatVisible');
   };
 

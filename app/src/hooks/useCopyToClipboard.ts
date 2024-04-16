@@ -9,7 +9,6 @@ export const useCopyToClipboard = () => {
   const [copySuccess, setCopySuccess] = useState<CopySuccessState>({});
 
   const copyToClipboard = (text: string, key: string) => {
-    console.log(text, key);
     navigator.clipboard.writeText(text).then(() => {
       setCopySuccess({ ...copySuccess, [key]: true });
       setTimeout(() => setCopySuccess({ ...copySuccess, [key]: false }), 2000);

@@ -1,7 +1,7 @@
 // src/components/ui/IconTooltipButton/IconTooltipButton.tsx
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Box, Tooltip } from '@radix-ui/themes';
+import { Flex, Tooltip } from '@radix-ui/themes';
 import React, { forwardRef } from 'react';
 import { vars } from '~/styles/theme.css';
 
@@ -35,9 +35,9 @@ const IconTooltipButton = forwardRef<HTMLDivElement, IconTooltipButtonProps>(({
         zIndex: 10000,
       }}
     >
-      <Box ref={ref} onClick={onClick} style={style} className={className}>
+      <Flex justify={'center'} align={'center'} ref={ref} onClick={onClick} style={style} className={className}>
         <FontAwesomeIcon icon={icon} size="lg" color={pressed ? pressedColor : defaultColor} />
-      </Box>
+      </Flex>
     </Tooltip>
   );
 });
