@@ -72,8 +72,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
         }}
       >
         <CloseButton
-          top={-12}
-          right={-8}
+          top={isFullScreen ? -8 : -12}
+          right={isFullScreen ? -6 : -8}
+          zIndex={isFullScreen ? 9999 : 2000}
           onClick={() => toggleItemVisibility('codeEditorVisible')} />
         <Flex
           py={'3'}

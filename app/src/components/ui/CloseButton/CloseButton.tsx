@@ -8,11 +8,13 @@ type CloseButtonProps = {
   onClick: () => void;
   top?: number;
   right?: number;
+  zIndex?: number;
 };
 
 const CloseButton: React.FC<CloseButtonProps> = ({ onClick,
   top = -4,
-  right = -4
+  right = -4,
+  zIndex = 2000
 }) => {
   return (
     <Box
@@ -27,7 +29,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({ onClick,
         right: right,
         cursor: 'pointer',
         padding: 8,
-        zIndex: 1000,
+        zIndex: zIndex,
         background: 'white',
         borderRadius: '50%',
         boxShadow: '0px 0px 16px 0px rgba(0, 0, 0, 0.22)',
