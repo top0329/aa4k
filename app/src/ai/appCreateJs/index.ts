@@ -63,9 +63,9 @@ export const appCreateJs = async (
     // --------------------
     // レスポンス設定
     // --------------------
-    let message = `${llmResponse.resultMessage}`;
-    const comment = llmResponse.comment ? `補足：\n${llmResponse.comment}\n\n` : '';
-    const exampleOfChange = llmResponse.exampleOfChange ? `変更例：\n${llmResponse.exampleOfChange}\n\n` : '';
+    const message = `${llmResponse.resultMessage}`;
+    const comment = llmResponse.supplement.contentsOfCreatedJs ? `補足：\n${llmResponse.supplement.contentsOfCreatedJs}\n\n` : '';
+    const exampleOfChange = llmResponse.supplement.instructionsToChange ? `変更例：\n${llmResponse.supplement.instructionsToChange}\n\n` : '';
     const guideMessage = llmResponse.guideMessage ? `ガイドライン違反：\n${llmResponse.guideMessage}\n` : '';
 
     // テンプレートリテラルを使用して、最終的なメッセージを組み立てる。
@@ -292,8 +292,14 @@ async function createJs(
   const editMethod = z.nativeEnum(CodeCreateMethodEdit).describe("'ADD','UPDATE','DELETE'のいずれかを設定");
   const zodSchema = z.object({
     resultMessage: z.string().describe("質問に対する結果メッセージ"),
-    comment: z.string().describe("補足"),
-    exampleOfChange: z.string().describe("変更例"),
+    supplement: z.object({
+      where: z.string().describe("どの画面での処理なのか（例: 一覧画面、詳細画面、追加画面、編集画面 etc.）"), // どこで
+      when: z.string().describe("何をしたときの処理なのか（例: ○○画面を表示したとき、○○フィールドを変更したとき、○○画面で保存したとき etc.）"),  // いつ
+      what: z.string().describe("何に対しての処理なのか（例: タイトルを、メールアドレスを、○○のレコードを etc.）"),  // 何を
+      how: z.string().describe("何をする処理なのか（例: 背景色を変更する、値をセットする、小文字に変換、無効化する etc.）"), // どのように
+      contentsOfCreatedJs: z.string().describe("[where],[when],[what],[how]をもとした機能の説明（例: [where]を[when]したときに、[wat]を[how]する機能を作成しました。）"),
+      instructionsToChange: z.string().describe("作成されたjavascriptに対する修正指示の具体的な例文"),
+    }).describe("作成したjavascriptの詳細"),
     violationOfGuidelines: z.string().describe("オリジナルコードのガイドライン違反"),
     guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
     properties: z.array(
@@ -329,7 +335,7 @@ async function createJs(
   }, { callbacks: [handler] }).catch((err) => {
     if (err.code === "invalid_api_key") {
       throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
-    } else if(err.code === "429"){
+    } else if (err.code === "429") {
       // レート制限に引っかかった場合、エラーを出力
       throw new LlmError(`${ErrorMessageConst.E_MSG007}（${ErrorCode.E00011}）`)
     } else {
@@ -337,24 +343,24 @@ async function createJs(
     }
   })) as LLMResponse;
 
-  if (llmResponse.properties && llmResponse.properties.length) {    
+  if (llmResponse.properties && llmResponse.properties.length) {
     // LLM結果のpropertiesのバリデート
     type LLMResponseProperties = LLMResponse['properties'];
     function propertiesValidate(properties: LLMResponseProperties): boolean {
       return properties.every(property => {
-        const {method, startAt, endAt, javascriptCode, linesCount} = property;
+        const { method, startAt, endAt, javascriptCode, linesCount } = property;
         // method（CREATE / ADD / UPDATE / DELETE のいずれか）は必須
-        if (method){
+        if (method) {
           // [CREATE]: startAt, javascriptCodeをチェック
-          if(method === CodeCreateMethodCreate.create){
+          if (method === CodeCreateMethodCreate.create) {
             return startAt && javascriptCode;
-          // [UPDATE]: startAt, endAt, javascriptCodeをチェック
-          }else if (method === CodeCreateMethodEdit.update) {
+            // [UPDATE]: startAt, endAt, javascriptCodeをチェック
+          } else if (method === CodeCreateMethodEdit.update) {
             return startAt && endAt && javascriptCode;
-          // [ADD]: startAt, javascriptCodeをチェック
+            // [ADD]: startAt, javascriptCodeをチェック
           } else if (method === CodeCreateMethodEdit.add) {
             return startAt && javascriptCode;
-          // [DELETE]: startAt, lineCountをチェック
+            // [DELETE]: startAt, lineCountをチェック
           } else if (method === CodeCreateMethodEdit.delete) {
             return startAt && linesCount;
           }
