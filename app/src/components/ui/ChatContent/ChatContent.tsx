@@ -1,7 +1,8 @@
 // src/components/ui/ChatContent/ChatContent.tsx
-import { Box, Flex } from "@radix-ui/themes";
+import { Box, Flex, Separator } from "@radix-ui/themes";
 import React from 'react';
 import Feedback from '~/components/feature/Feedback/Feedback';
+import { vars } from "~/styles/theme.css";
 import { ChatContentProps } from "~/types/chatContentTypes";
 import { createClipboardContent } from "~/util/clipboardContent";
 
@@ -24,7 +25,9 @@ export const ChatContent: React.FC<ChatContentProps> = ({ aiMessage, chatHistory
             whiteSpace: "pre-wrap"
           }}
         >
-          {aiMessage.role === "ai" ? aiMessage.comment : ""}
+          {aiMessage.role === "ai" ? (<><Separator mb="4" size={'4'} color='gray' style={{
+            opacity: 0.2
+          }} /><Box p={'3'} style={{ backgroundColor: vars.color.grayA.grayA1, borderRadius: 4 }}>{aiMessage.comment}</Box></>) : ""}
         </Box>
       </Flex>
       <Box
