@@ -1,5 +1,7 @@
 // src/components/feature/CodeActionDialog/CodeActionDialog.tsx
 import * as Dialog from "@radix-ui/react-dialog";
+import { Box } from "@radix-ui/themes";
+import clsx from "clsx";
 import { CodeActionDialogType, CodeCheckStatus } from "~/constants";
 import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 import { sCodeActionDialog, sCodeActionDialogOverlay } from "./CodeActionDialog.css";
@@ -64,11 +66,14 @@ const CodeActionDialog: React.FC<CodeActionDialogProps> = (
   );
 
   return (
-    <Dialog.Root open={isCodeActionDialog} onOpenChange={setIsCodeActionDialog}>
-      <Dialog.Overlay className={sCodeActionDialogOverlay} />
-      <Dialog.Content className={sCodeActionDialog}
+    <Dialog.Root open={isCodeActionDialog} onOpenChange={setIsCodeActionDialog}
+      modal={false}
+    >
+      {isCodeActionDialog && <Box className={sCodeActionDialogOverlay} />}
+      <Dialog.Content className={clsx(sCodeActionDialog, 'allow-zoom')}
         onPointerDownOutside={(event) => event.preventDefault()}
         onKeyDown={preventCloseOnEsc}
+        onInteractOutside={(event) => event.preventDefault()}
       >
         {content}
       </Dialog.Content>
