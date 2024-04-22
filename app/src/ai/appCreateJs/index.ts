@@ -351,9 +351,9 @@ async function createJs(
         const { method, startAt, endAt, javascriptCode, linesCount } = property;
         // method（CREATE / ADD / UPDATE / DELETE のいずれか）は必須
         if (method) {
-          // [CREATE]: startAt, javascriptCodeをチェック
+          // [CREATE]: javascriptCodeをチェック
           if (method === CodeCreateMethodCreate.create) {
-            return startAt && javascriptCode;
+            return javascriptCode;
             // [UPDATE]: startAt, endAt, javascriptCodeをチェック
           } else if (method === CodeCreateMethodEdit.update) {
             return startAt && endAt && javascriptCode;
