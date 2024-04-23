@@ -45,6 +45,7 @@ const CodeActionDialog: React.FC<CodeActionDialogProps> = (
         />);
       case CodeActionDialogType.CodeFix:
         return (<CodeFix
+          isLoading={isLoading}
           setIsCodeActionDialog={setIsCodeActionDialog}
           handleReflectClick={handleReflectClick}
         />);

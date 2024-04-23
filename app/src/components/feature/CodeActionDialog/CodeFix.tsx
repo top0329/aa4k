@@ -1,12 +1,16 @@
 // src/components/feature/CodeActionDialog/CodeFix.tsx
 import { Button, Flex, Text } from "@radix-ui/themes";
+import DonutLoading from "~/components/ui/Loading/DonutLoading/DonutLoading";
+import { vars } from "~/styles/theme.css";
 
 type CodeFixProps = {
+  isLoading: boolean;
   setIsCodeActionDialog: React.Dispatch<React.SetStateAction<boolean>>;
   handleReflectClick: () => Promise<void>;
 }
 
 const CodeFix: React.FC<CodeFixProps> = ({
+  isLoading,
   setIsCodeActionDialog,
   handleReflectClick
 }) => {
@@ -30,6 +34,16 @@ const CodeFix: React.FC<CodeFixProps> = ({
       </Text>
     </Flex>
     <Flex
+      align={'center'}
+      justify={'center'}
+      pt={'4'}
+    >
+      <DonutLoading
+        isLoading={isLoading}
+        borderColor={`${vars.color.crimson.crimson10} ${vars.color.crimson.crimson6} ${vars.color.crimson.crimson6}`}
+      />
+    </Flex>
+    <Flex
       width={'100%'}
       pt={'5'}
       align={'center'}
@@ -46,6 +60,7 @@ const CodeFix: React.FC<CodeFixProps> = ({
         style={{
           cursor: 'pointer',
         }}
+        disabled={isLoading}
       >
         <Text weight={'bold'}>
           キャンセル
@@ -58,6 +73,7 @@ const CodeFix: React.FC<CodeFixProps> = ({
         style={{
           cursor: 'pointer',
         }}
+        disabled={isLoading}
       >
         <Text weight={'bold'}>
           反映

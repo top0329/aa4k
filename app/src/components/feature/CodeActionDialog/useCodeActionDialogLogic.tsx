@@ -36,6 +36,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
 
   // 反映ボタン押下時の処理
   const handleReflectClick = async () => {
+    await startLoading();
     try {
       const appId = kintone.app.getId();
       const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
@@ -59,12 +60,14 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
       // --------------------
       await updateKintoneCustomizeJs(props.code, targetFileKey, kintoneCustomizeFiles, appId, deviceDiv, isGuestSpace);
 
+      // kintoneカスタマイズJSが反映されるまでの時間を考慮して3秒後に画面再読み込み
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       props.setIsCodeActionDialog(false);
       props.setCodeLatest(props.code);
       props.setIsChangeCode(false);
       setIsReload(true);
 
-      // 画面再読み込み
       location.reload()
     } catch (err) {
       props.setIsCodeActionDialog(false);
@@ -76,6 +79,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
         showToast(`${ErrorMessage.E_MSG001}（${ErrorCode.E99999}）`, 0, false);
       }
     }
+    await stopLoading();
   }
 
   // コードチェック実行
