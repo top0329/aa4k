@@ -11,8 +11,8 @@ app.use(
   async (_, res, next) => {
     const azureSecretName = process.env.AZURE_SECRET_NAME ? process.env.AZURE_SECRET_NAME : "";
     const azureSecret = await getSecretValue<AzureSecretValue>(azureSecretName)
+    res.locals.apiManagementEndpoint = azureSecret.azureApiManagementEndpoint
     res.locals.apiKey = azureSecret.azureOpenAIApiKey
-    res.locals.apiInstanceName = azureSecret.azureOpenAIApiInstanceName
     res.locals.apiDeploymentName = azureSecret.azureOpenAIApiDeploymentName
     res.locals.apiVersion = azureSecret.azureOpenAIApiVersion
     next()
@@ -21,14 +21,14 @@ app.use(
 
 app.use(async (req, res, next) => {
   // 以前のミドルウェアで設定された res.locals の値を取得
-  const apiInstanceName = res.locals.apiInstanceName;
+  const apiManagementEndpoint = res.locals.apiManagementEndpoint;
   const apiKey = res.locals.apiKey;
   const apiDeploymentName = res.locals.apiDeploymentName;
   const apiVersion = res.locals.apiVersion;
 
   // プロキシの設定を動的に生成
   const proxy = createProxyMiddleware({
-    target: `https://${apiInstanceName}.openai.azure.com/openai/deployments/${apiDeploymentName}`,
+    target: `https://${apiManagementEndpoint}/openai/deployments/${apiDeploymentName}`,
     pathRewrite: (path) => path + `?api-version=${apiVersion}`,
     changeOrigin: true,
     onProxyReq: (proxyReq) => {

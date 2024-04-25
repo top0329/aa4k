@@ -17,6 +17,7 @@ export class Aa4kSecretsStack extends cdk.Stack {
         // 注意：[azureOpenAIEmbeddingApiDeploymentName]は以下のOpenAIのモデル名と同じ名前でデプロイを作成して使用すること
         // https://platform.openai.com/docs/models/embeddings
         secretStringTemplate: JSON.stringify({
+          azureApiManagementEndpoint: contextProps.apiManagementEndpoint,
           azureOpenAIApiInstanceName: "aa4k-dev-east-us",
           azureOpenAIApiDeploymentName: "gpt-4-0125-preview",
           azureOpenAIApiVersion: "2024-02-15-preview",

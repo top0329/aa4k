@@ -5,4 +5,5 @@ export type ContextProps = {
   cacheNodeType: string,
   suguresEndpoint: string,
   suguresClientId: string,
+  apiManagementEndpoint: string,
 }

@@ -26,6 +26,7 @@ const contextProps: ContextProps = {
   cacheNodeType: stageName === "prod" ? "cache.m7g.large" : "cache.t4g.micro",
   suguresEndpoint: stageName === "prod" ? SUGURES_ENDPOINT_PROD : SUGURES_ENDPOINT_STG,
   suguresClientId: stageName === "prod" ? SUGURES_CLIENT_ID_PROD : SUGURES_CLIENT_ID_STG,
+  apiManagementEndpoint: stageName === "prod" ? "aa4k.azure-api.net" : "aa4k-test.azure-api.net",
 }
 
 const stackProps: cdk.StackProps = {
