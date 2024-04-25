@@ -58,15 +58,15 @@ export const appCreateJs = async (
     // --------------------
     // コード生成
     // --------------------
-    const { llmResponse, formattedCode } = await createJs(conversation, fieldInfo, isLatestCode, codingGuidelineList, codeTemplate, originalCode, sessionId);
+    const { llmResponse, formattedCode, isCreateJs } = await createJs(conversation, fieldInfo, isLatestCode, codingGuidelineList, codeTemplate, originalCode, sessionId);
 
     // --------------------
     // レスポンス設定
     // --------------------
     const message = `${llmResponse.resultMessage}`;
-    const comment = llmResponse.supplement.contentsOfCreatedJs ? `補足：\n${llmResponse.supplement.contentsOfCreatedJs}\n\n` : '';
-    const exampleOfChange = llmResponse.supplement.instructionsToChange ? `変更例：\n${llmResponse.supplement.instructionsToChange}\n\n` : '';
-    const guideMessage = llmResponse.guideMessage ? `ガイドライン違反：\n${llmResponse.guideMessage}\n` : '';
+    const comment = llmResponse.supplement && llmResponse.supplement.contentsOfCreatedJs ? `補足：\n${llmResponse.supplement.contentsOfCreatedJs}\n\n` : '';
+    const exampleOfChange = llmResponse.supplement && llmResponse.supplement.instructionsToChange ? `変更例：\n${llmResponse.supplement.instructionsToChange}\n\n` : '';
+    const guideMessage = llmResponse.supplement && llmResponse.guideMessage ? `ガイドライン違反：\n${llmResponse.guideMessage}\n` : '';
 
     // テンプレートリテラルを使用して、最終的なメッセージを組み立てる。
     const messageComment = `${comment}${exampleOfChange}${guideMessage}`.trim();
@@ -77,7 +77,7 @@ export const appCreateJs = async (
     insertConversation(pluginId, appId, userId, deviceDiv, MessageType.ai, message, conversationId, messageComment, formattedCode)
 
     // JS生成された場合のみ、kintoneへの反映と、コールバック関数の設定を行う
-    if (llmResponse.properties && llmResponse.properties.length) {
+    if (isCreateJs) {
       // --------------------
       // kintoneカスタマイズへの反映
       // --------------------
@@ -302,15 +302,20 @@ async function createJs(
     }).describe("作成したjavascriptの詳細"),
     violationOfGuidelines: z.string().describe("オリジナルコードのガイドライン違反"),
     guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
-    properties: z.array(
+    properties:
       z.object({
         method: originalCode ? editMethod : createMethod,
         startAt: z.number().describe("開始位置"),
         endAt: z.number().describe("終了位置"),
         linesCount: z.number().describe("行数"),
-        javascriptCode: z.string().describe("ソースコード"),
+        referenceJavascriptCode: z.string().describe("参考にした<codeTemplate></codeTemplate>タグ"),
+        javascriptCode: z.string().describe("作成したJavaScriptコード"),
+        updateInfo: z.object({
+          targetCode: z.string().describe("更新対象となるオリジナルコードの開始から終了までのコード"),
+          targetStartAt: z.number().describe("更新対象となるオリジナルコードの開始に該当する行番号"),
+          updateJavascriptCode: z.string().describe("「targetCode」と置換する更新用のコード"),
+        }).describe("更新(update)の場合の情報"),
       }).describe("ユーザーの要望に応じて作成した結果"),
-    )
   }).describe("LLM問い合わせ結果");
   type LLMResponse = z.infer<typeof zodSchema>;
   const functionCallingModel = model.bind({
@@ -343,45 +348,59 @@ async function createJs(
     }
   })) as LLMResponse;
 
-  if (llmResponse.properties && llmResponse.properties.length) {
+  // JS生成された場合
+  let isCreateJs = false;
+  if (llmResponse.properties && (llmResponse.properties.javascriptCode || (llmResponse.properties.updateInfo && llmResponse.properties.updateInfo.updateJavascriptCode ))) {
+    isCreateJs = true;
     // LLM結果のpropertiesのバリデート
     type LLMResponseProperties = LLMResponse['properties'];
     function propertiesValidate(properties: LLMResponseProperties): boolean {
-      return properties.every(property => {
-        const { method, startAt, endAt, javascriptCode, linesCount } = property;
-        // method（CREATE / ADD / UPDATE / DELETE のいずれか）は必須
-        if (method) {
-          // [CREATE]: javascriptCodeをチェック
-          if (method === CodeCreateMethodCreate.create) {
-            return javascriptCode;
-            // [UPDATE]: startAt, endAt, javascriptCodeをチェック
-          } else if (method === CodeCreateMethodEdit.update) {
-            return startAt && endAt && javascriptCode;
-            // [ADD]: startAt, javascriptCodeをチェック
-          } else if (method === CodeCreateMethodEdit.add) {
-            return startAt && javascriptCode;
-            // [DELETE]: startAt, lineCountをチェック
-          } else if (method === CodeCreateMethodEdit.delete) {
-            return startAt && linesCount;
-          }
-        }
-        return false;
-      });
+      const { method, startAt, javascriptCode, linesCount, updateInfo } = properties;
+      // method（CREATE / ADD / UPDATE / DELETE のいずれか）は必須
+      if (!method) return false;
+      // method毎のチェック
+      if (method === CodeCreateMethodCreate.create) {
+        // 新規の場合
+        if (!javascriptCode) return false;
+      } else if (method === CodeCreateMethodEdit.update) {
+        // 更新の場合
+        const { targetCode, targetStartAt, updateJavascriptCode } = updateInfo;
+
+        if (!updateInfo && !targetCode && !targetStartAt && !updateJavascriptCode) return false;
+      } else if (method === CodeCreateMethodEdit.add) {
+        // 追加の場合
+        if (!startAt && !javascriptCode) return false;
+      } else if (method === CodeCreateMethodEdit.delete) {
+        // 削除の場合
+        if (!startAt && !linesCount) return false;
+      }
+      return true;
     }
     if (!propertiesValidate(llmResponse.properties)) throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00012}）`);
-    // JS生成された場合はコード編集して返却
+
     // 出力コード編集
     let editedCode = originalCode;
     try {
       const resProperties = llmResponse.properties;
-      resProperties.forEach((obj) => {
-        const method = obj.method;
-        if (method === CodeCreateMethodCreate.create) {
-          editedCode = obj.javascriptCode;
-        } else {
-          editedCode = modifyCode(editedCode, obj.startAt, obj.endAt, obj.linesCount, obj.javascriptCode);
-        }
-      })
+      const method = resProperties.method;
+
+      // メソッド毎の編集処理 「新規・更新・追加・削除」
+      if (method === CodeCreateMethodCreate.create) {
+        // 新規の場合
+        editedCode = resProperties.javascriptCode;
+      } else if (method === CodeCreateMethodEdit.update) {
+        // 更新の場合
+        const { targetCode, targetStartAt, updateJavascriptCode } = resProperties.updateInfo;
+        // 最後の改行がある場合は削除し、対象コードを行ごとの配列に分割
+        const targetCodeLines = targetCode.endsWith('\n') ? targetCode.slice(0, -1).split('\n') : targetCode.split('\n');
+        editedCode = modifyCode(editedCode, targetStartAt, targetCodeLines.length, updateJavascriptCode);
+      } else if (method === CodeCreateMethodEdit.add) {
+        // 追加の場合
+        editedCode = modifyCode(editedCode, resProperties.startAt, 0, resProperties.javascriptCode);
+      } else if (method === CodeCreateMethodEdit.delete) {
+        // 削除の場合
+        editedCode = modifyCode(editedCode, resProperties.startAt, resProperties.linesCount, resProperties.javascriptCode);
+      }
     } catch (e) {
       throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00010}）`)
     }
@@ -394,14 +413,16 @@ async function createJs(
     // 結果返却
     return {
       llmResponse,
-      formattedCode
+      formattedCode,
+      isCreateJs,
     };
   } else {
     // JS生成されない場合はオリジナルコードを返却
     // 結果返却
     return {
       llmResponse,
-      formattedCode: originalCode
+      formattedCode: originalCode,
+      isCreateJs,
     };
   }
 }

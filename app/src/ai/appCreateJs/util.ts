@@ -4,7 +4,7 @@
  * @returns 行数付きcodeテキスト
  */
 export function addLineNumbersToCode(code: string) {
-  if(!code) return "";
+  if (!code) return "";
   // 各行を改行で分割
   const lines = code.split('\n');
 
@@ -19,28 +19,25 @@ export function addLineNumbersToCode(code: string) {
 }
 
 /**
- * コード編集(挿入・更新・削除)
- *     挿入: originalCodeに対し、startLineにnewCodeを挿入する
- *     更新: originalCodeに対し、startLineからendLineをnewCodeで上書き更新
- *     削除: originalCodeに対し、startLineからdelCountの行数を削除
- * @param originalCode 
- * @param startLine 
- * @param endLine 
- * @param delCount 
- * @param newCode 
+ * コード編集(追加・更新・削除)
+ *     追加: originalCodeに対し、startLine~delCountのコードをnewCodeで置き換える
+ *     更新: originalCodeに対し、startLineにnewCodeを追加
+ *     削除: originalCodeに対し、startLine~delCountのコードを削除
+ * @param originalCode
+ * @param startLine
+ * @param delCount
+ * @param newCode
  * @returns 編集後のコード
  */
-export function modifyCode(originalCode: string, startLine: number, endLine: number, delCount: number, newCode: string) {
+export function modifyCode(originalCode: string, startLine: number, delCount: number, newCode: string) {
   // コードを行ごとに分割
   const lines = originalCode.split('\n');
-  // 指定された範囲の行を削除し、新しいコードを挿入する
-  // spliceの第二引数には削除する要素の数を指定する
-  // newCodeが空文字列の場合は、単に範囲を削除する
-  if (delCount) {
-    lines.splice(startLine - 1, delCount)
-  } else {
-    lines.splice(startLine - 1, endLine - startLine + 1, newCode);
-  }
+
+  // 更新: 指定された位置から、delCountの行数分を新しいコードで置き換える)
+  // 追加: 指定された行の前に新しいコードを挿入
+  // 削除: 指定された行から指定された数（delCount）の行を削除
+  lines.splice(startLine - 1, delCount, newCode);
+
   // 行を再結合して返す
   return lines.join('\n');
 }
