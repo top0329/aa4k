@@ -2,6 +2,7 @@ import { Response, Request } from "express"
 import { Client } from "pg";
 import { z } from "zod";
 import { Document } from "@langchain/core/documents";
+import { PGVectorStore } from "langchain/vectorstores/pgvector";
 import { EnsembleRetriever } from "./ensemble"
 import { SuguresRetriever } from "./sugures"
 import { PgVectorRetriever } from "./pgvector"
@@ -16,6 +17,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
   let subscriptionId;
   let body;
   let dbClient: Client | undefined;
+  let pgvectorStore: PGVectorStore | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
   let retErrorCode: ErrorCode = ErrorCode.A05099;
@@ -62,7 +64,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     await dbClient.connect();
 
     // pgvectorStoreの初期設定 契約ステータスが契約中(trial)の場合のみヘッダのOpenAI API_KEYを渡す
-    const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey: contractStatus === ContractStatus.trial ? openAiApiKey : undefined });
+    pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey: contractStatus === ContractStatus.trial ? openAiApiKey : undefined });
 
     const pgvectorRetriever = new PgVectorRetriever(pgvectorStore, subscriptionId, aa4kConstParameterValue.retrieveScoreThreshold, aa4kConstParameterValue.retrieveMaxCount);
     const suguresRetriever = new SuguresRetriever(subscriptionId, body.conversationId);
@@ -115,6 +117,10 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     if (dbClient) {
       // データベース接続を閉じる
       await dbClient.end();
+    }
+    if (pgvectorStore) {
+      // プール内のすべてのクライアントを閉じる
+      await pgvectorStore.end();
     }
   }
 }
