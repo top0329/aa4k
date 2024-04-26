@@ -40,7 +40,8 @@ const Feedback = ({ humanMessage, content, chatHistoryItem }: FeedbackProps) => 
     padding: 8,
     borderRadius: 8,
     backgroundColor: thumbsUpPressed || thumbsDownPressed ? vars.color.grayA.grayA4 : 'transparent',
-    transition: 'all 0.2s ease-in-out'
+    transition: 'all 0.2s ease-in-out',
+    cursor: 'pointer',
   };
 
   return (
@@ -90,7 +91,12 @@ const Feedback = ({ humanMessage, content, chatHistoryItem }: FeedbackProps) => 
           direction={'column'}
         >
           <Flex justify={'end'}>
-            <FontAwesomeIcon icon={faClose} onClick={() => setShowDetailedFeedback(false)} />
+            <FontAwesomeIcon 
+              icon={faClose} onClick={() => setShowDetailedFeedback(false)} 
+              style={{
+                cursor: 'pointer',
+              }}
+            />
           </Flex>
           <TextArea
             placeholder="Write a comment…"

@@ -15,7 +15,7 @@ const ToggleSwitch: React.FC<SwitchProps> = ({ isOn, onToggle, disabled = false 
     <Flex
       align={'center'}
       style={{
-        cursor: disabled ? 'not-allowed' : 'pointer',
+        cursor: 'pointer',
         opacity: disabled ? 0.5 : 1,
       }}
       onClick={() => {

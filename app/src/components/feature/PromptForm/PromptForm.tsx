@@ -154,7 +154,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
                 color={isPcViewMode ? 'iris' : 'cyan'}
                 type="submit" disabled={!humanMessage || isSubmitting || isLoading}
                 style={{
-                  cursor: !humanMessage ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   width: 32,
                   height: 32,
                 }}

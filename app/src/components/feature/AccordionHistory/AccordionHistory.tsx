@@ -185,7 +185,8 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
             >
               <AccordionContent
                 style={{
-                  padding: '0 16px'
+                  padding: '0 16px',
+                  cursor: 'auto',
                 }}
               >
                 {showAiOrErrorMessage(item, index)}

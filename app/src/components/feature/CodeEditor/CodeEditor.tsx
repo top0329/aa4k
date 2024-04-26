@@ -196,7 +196,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
               <Button variant='soft' color='crimson' size={'3'}
                 onClick={() => handleRunCodeAction(CodeActionDialogType.CodeCheck)}
                 style={{
-                  cursor: !code ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                 }}
                 disabled={!code || isLoading}
               >
@@ -209,7 +209,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
               } size={'3'}
                 onClick={() => handleRunCodeAction(CodeActionDialogType.CodeFix)}
                 style={{
-                  cursor: !code ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                 }}
                 disabled={!code || isLoading}
               >
