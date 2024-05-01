@@ -433,11 +433,6 @@ LimitDay < TODAY() and Status not in ("完了") order by LimitDay asc
 </originalCode>
 
 <format>
-- 機能名は必ずつけて作成する
-- try catchは必ずつけて作成する
-- return event;は必ずつけて作成する
-- 以下の形式で作成する
-\`\`\`javascript
 /**
  * 機能名
  */
@@ -445,7 +440,7 @@ LimitDay < TODAY() and Status not in ("完了") order by LimitDay asc
   "use strict";
   kintone.events.on(["app.record.index.show"], (event) => {{
     try {{
-      // ここに処理を追加
+      // ここに処理を記述
       return event;
     }} catch (e) {{
       console.error(e);
@@ -453,9 +448,9 @@ LimitDay < TODAY() and Status not in ("完了") order by LimitDay asc
     }}
   }});
 }})();
-\`\`\`
-- kintone.api()を使用する場合は、必ず以下のように個別にエラーハンドリングを行う
-\`\`\`
+</format>
+
+<kintoneApiErrorHandling>
 const response = await kintone.api(kintone.api.url('/k/v1/record', true), 'PUT', updateParam)
 .catch((e) => {{
   // ユーザから失敗したときの挙動が指示されている場合はここに記述
@@ -464,8 +459,7 @@ const response = await kintone.api(kintone.api.url('/k/v1/record', true), 'PUT',
   return undefined;
 }});
 if (!response) return event;
-\`\`\`
-</format>
+</kintoneApiErrorHandling>
 
 <codeTemplate>
 {codeTemplate}
@@ -479,15 +473,24 @@ if (!response) return event;
 - テンプレートの関数コメントから特に参考にできる機能を見つけ、その内容を使用してユーザの要望をかなえるjavascriptコードを作成する
 - テンプレートの内容が間違っていない限り、テンプレートのコードを基準にjavascriptコードを作成する
 - テンプレートの関数コメントに「# 本テンプレートの注意事項」があれば、必ず注意事項を厳守してjavascriptコードを作成する
-- 必ずフォーマットを厳守してフォーマット単位にjavascriptコードを作成する
+- 新規作成/追加を行うときは、必ずフォーマットを厳守して、フォーマット単位にjavascriptコードを作成する
+   - 機能名コメントは必ずつけて作成する
+   - try catchは必ずつけて作成する
+   - return event;は必ずつけて作成する
 
 ## 返却内容
 以下をもとにJSON形式で返却する
-- 作成したJavaScriptコードは「javascriptCode」に設定
 - 生成するコードは新規作成やオリジナルコードに対しての追加、更新、削除が想定されるため、新規作成:CREATE/追加:ADD/更新:UPDATE/削除:DELETE のいずれかを「method」に設定
-- 追加 かつ 新規のイベントリストナーを追加する場合、オリジナルコードの最終行番号に+1したものを「startAt」に設定
-- 追加 かつ 既存のイベントリストナー内に新しい機能追加するの場合は追加するコードの開始行番号を「startAt」に設定
-- 削除の場合、削除するコードの開始行番号を「startAt」に設定し、削除するコードの終了行番号までの行数を「linesCount」に設定
+- 新規作成(CREATE)の場合は、作成したjavascriptコード+JSDocを「javascriptCode」、使用したテンプレートのJSDoc+コードを「referenceJavascriptCode」に設定
+- 追加の場合は、オリジナルコードの最終行番号に+1したものを「startAt」、作成したjavascriptコード+JSDocを「javascriptCode」、使用したテンプレートのJSDoc+コードを「referenceJavascriptCode」に設定
+- 削除の場合は、削除対象のjavascriptコードの開始行番号を「startAt」、削除対象のjavascriptコードの終了行番号までの行数を「linesCount」に設定
+   - 次の関数コメント(29行目)からを削除対象のjavascriptコードとして扱う
+   \`\`\`
+   55 | /**
+   56 |  * プロジェクト名の太字表示
+   57 |  */
+   58 | (() => {{
+   \`\`\`
 - 作成されたjavascriptに対して、対象の画面や項目、条件などを修正したいとき、ユーザがAIに対してどのように指示をすればいいかの具体的な（フィールドコードについてを除いた）例文を「instructionsToChange」に設定
 - kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン を優先し、ユーザーの要望をかなえられなかった箇所についての説明を「guideMessage」に設定（オリジナルコードは関係なし）
 - オリジナルコードが kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン に違反していないかのチェックを行い、重要な違反があればその内容を「violationOfGuidelines」に設定
@@ -503,7 +506,9 @@ if (!response) return event;
 2. <fieldInfo></fieldInfo>タグの内容は、対象アプリのフィールド設定情報（フィールド名、フィールドコード、フィールドの種類(type) etc.）であることを理解する
 3. <codeTemplate></codeTemplate>タグの内容は、javascriptコードを作成するために参考にするべき複数の機能のテンプレートであることを理解する
 4. <codeTemplate></codeTemplate>タグの内容は、関連度が高い機能のテンプレートが上から設定されていることを理解する
-5. <format></format>タグの内容は、作成するために絶対に合わせなければいけないフォーマットであることを理解する
-6. <originalCode></originalCode>タグの内容は、オリジナルコードであることを理解する
-7. 「## 作成条件」を厳守してjavascriptコードを作成する
+5. <format></format>タグの内容は、作成するために絶対に守らなければならないフォーマットであることを理解する
+6. <kintoneApiErrorHandling></kintoneApiErrorHandling>タグの内容は、kintone.api()のエラーハンドリングを行う方法であることを理解する
+7. <originalCode></originalCode>タグの内容は、オリジナルコードであることを理解する
+8. 「## 作成条件」を厳守してjavascriptコードを作成する
+9. 「## 返却内容」を厳守して回答する
 `;

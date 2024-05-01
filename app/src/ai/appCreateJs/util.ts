@@ -29,14 +29,18 @@ export function addLineNumbersToCode(code: string) {
  * @param newCode
  * @returns 編集後のコード
  */
-export function modifyCode(originalCode: string, startLine: number, delCount: number, newCode: string) {
+export function modifyCode(originalCode: string, startLine: number, delCount: number, newCode?: string) {
   // コードを行ごとに分割
   const lines = originalCode.split('\n');
 
   // 更新: 指定された位置から、delCountの行数分を新しいコードで置き換える)
   // 追加: 指定された行の前に新しいコードを挿入
   // 削除: 指定された行から指定された数（delCount）の行を削除
-  lines.splice(startLine - 1, delCount, newCode);
+  if(newCode){
+    lines.splice(startLine - 1, delCount, newCode);
+  }else{
+    lines.splice(startLine - 1, delCount);
+  }
 
   // 行を再結合して返す
   return lines.join('\n');

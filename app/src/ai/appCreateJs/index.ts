@@ -308,8 +308,8 @@ async function createJs(
         startAt: z.number().describe("開始位置"),
         endAt: z.number().describe("終了位置"),
         linesCount: z.number().describe("行数"),
-        referenceJavascriptCode: z.string().describe("参考にした<codeTemplate></codeTemplate>タグ"),
-        javascriptCode: z.string().describe("作成したJavaScriptコード"),
+        referenceJavascriptCode: z.string().describe("使用したテンプレートのコード+JSDoc"),
+        javascriptCode: z.string().describe("作成したjavascriptコード+JSDoc"),
         updateInfo: z.object({
           targetCode: z.string().describe("更新対象となるオリジナルコードの開始から終了までのコード"),
           targetStartAt: z.number().describe("更新対象となるオリジナルコードの開始に該当する行番号"),
@@ -350,7 +350,12 @@ async function createJs(
 
   // JS生成された場合
   let isCreateJs = false;
-  if (llmResponse.properties && (llmResponse.properties.javascriptCode || (llmResponse.properties.updateInfo && llmResponse.properties.updateInfo.updateJavascriptCode ))) {
+  if (llmResponse.properties &&
+    (
+      llmResponse.properties.method === CodeCreateMethodEdit.delete || llmResponse.properties.javascriptCode ||
+      (llmResponse.properties.updateInfo && llmResponse.properties.updateInfo.updateJavascriptCode)
+    )
+  ) {
     isCreateJs = true;
     // LLM結果のpropertiesのバリデート
     type LLMResponseProperties = LLMResponse['properties'];
@@ -399,7 +404,7 @@ async function createJs(
         editedCode = modifyCode(editedCode, resProperties.startAt, 0, resProperties.javascriptCode);
       } else if (method === CodeCreateMethodEdit.delete) {
         // 削除の場合
-        editedCode = modifyCode(editedCode, resProperties.startAt, resProperties.linesCount, resProperties.javascriptCode);
+        editedCode = modifyCode(editedCode, resProperties.startAt, resProperties.linesCount);
       }
     } catch (e) {
       throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00010}）`)
