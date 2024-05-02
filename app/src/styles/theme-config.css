@@ -1,22 +1,11 @@
 /* theme-config.css */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap");
 
-html {
-  box-sizing: border-box;
-  line-height: 1.65;
-}
-
-*,
-*:before,
-*:after {
+.kintone-copilot,
+.kintone-copilot *,
+.kintone-copilot *:before,
+.kintone-copilot *:after {
   box-sizing: inherit;
-}
-
-button,
-fieldset,
-input {
-  all: unset;
-  box-sizing: border-box;
 }
 
 .radix-themes {
@@ -36,6 +25,9 @@ input {
 }
 
 #kintone-copilot {
+  all: unset;
+  box-sizing: border-box;
   position: relative;
   z-index: 100;
+  line-height: 1.65;
 }

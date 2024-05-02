@@ -1,8 +1,3 @@
-body#kintone-copilot-root {
-  all: unset;
-  box-sizing: border-box;
-}
-
 body#kintone-copilot-root,
 #kintone-copilot-root #sidebar-list-gaia {
   height: fit-content;

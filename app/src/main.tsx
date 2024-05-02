@@ -21,6 +21,7 @@ export const handleKintoneEvent = (
 ) => {
   const el = document.createElement("div");
   el.id = mainElementId;
+  el.className = mainElementId;
   document.body.appendChild(el);
 
   // css styleのthemingのためにbodyにidを付与

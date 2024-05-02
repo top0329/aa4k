@@ -1,4 +1,5 @@
 import { Theme } from "@radix-ui/themes";
+import './styles/default.css';
 import '@radix-ui/themes/styles.css';
 import './styles/gloabal.css';
 import './styles/theme-config.css';

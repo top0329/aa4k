@@ -1,0 +1,5 @@
+/* default.css */
+.kintone-copilot :where(button, fieldset, input) {
+    all: unset;
+    box-sizing: border-box;
+}
