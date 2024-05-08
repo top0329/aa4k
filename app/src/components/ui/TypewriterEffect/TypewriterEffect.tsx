@@ -2,16 +2,14 @@
 import { Box, Flex } from "@radix-ui/themes";
 import { useAtom } from "jotai";
 import React, { useEffect, useRef, useState } from 'react';
-import Feedback from '~/components/feature/Feedback/Feedback';
 import DonutLoading from "~/components/ui/Loading/DonutLoading/DonutLoading";
 import { InTypeWriteState } from "~/state/inTypeWriteState.tsx";
 import { ChatContentProps } from "~/types/chatContentTypes.ts";
-import { createClipboardContent } from "~/util/clipboardContent";
 
-export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHistoryItem, isLoading = false }) => {
+export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, isLoading = false }) => {
   const [displayedText, setDisplayedText] = useState<string>("");
   const indexRef = useRef<number>(0);
-  const [inTypeWrite, setInTypeWrite] = useAtom(InTypeWriteState);
+  const [, setInTypeWrite] = useAtom(InTypeWriteState);
 
   useEffect(() => {
     if (aiMessage.content.length === 0) return;
@@ -56,19 +54,11 @@ export const TypewriterEffect: React.FC<ChatContentProps> = ({ aiMessage, chatHi
           whiteSpace: "pre-wrap"
         }}
       >
-        {!inTypeWrite && aiMessage.role === "ai" ? aiMessage.comment : ""}
       </Box>
       <Box
         mt={'5'}
         width={'100%'}
       >
-        {!inTypeWrite && (
-          <Feedback
-            content={createClipboardContent(aiMessage)}
-            chatHistoryItem={chatHistoryItem}
-            humanMessage={chatHistoryItem.human.content}
-          />
-        )}
       </Box>
     </>
   );
