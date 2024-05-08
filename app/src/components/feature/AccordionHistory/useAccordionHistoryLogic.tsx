@@ -21,7 +21,7 @@ export const useAccordionHistoryLogic = () => {
     }
   }, [chatHistoryItems]);
 
-  const animateText = "JavaScript生成AIがあなたの質問に答えます。";
+  const animateText = "生成AIがカスタムJavaScriptの\n作成をサポートします。";
 
   useEffect(() => {
     const letters = animateText.split("");

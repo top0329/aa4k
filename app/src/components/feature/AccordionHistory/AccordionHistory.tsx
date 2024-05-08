@@ -41,7 +41,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
         justify={'between'}
         align={'center'}
         direction={'column'}
-        p={'9'}
+        p={'7'}
         gap={'9'}
       >
         <motion.div
@@ -56,7 +56,8 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
             style={{
               opacity: 0.18,
               letterSpacing: 0.8,
-              lineHeight: 1.8
+              lineHeight: 1.8,
+              whiteSpace: "pre-wrap"
             }}>
             {animateText.split("").map((letter, index) => (
               <motion.span
@@ -82,7 +83,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
           >
             <Card
               variant='ghost'
-              onClick={() => setHumanMessage("kintoneのカスタマイズjsでよくある実装はなんでしょうか？")}
+              onClick={() => setHumanMessage("一覧表示の際に奇数行のレコード背景色をパステル調にして")}
               style={{
                 cursor: 'pointer',
               }}
@@ -98,13 +99,13 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
                 <Text size='2' color={
                   isPcViewMode ? 'iris' : 'cyan'
                 }>
-                  kintoneのカスタマイズjsでよくある実装はなんでしょうか？
+                  一覧表示の際に奇数行のレコード背景色をパステル調にして
                 </Text>
               </Flex>
             </Card>
             <Card
               variant='ghost'
-              onClick={() => setHumanMessage("日付フィールドを今日の日付で自動的に埋める機能のコードを生成してください。")}
+              onClick={() => setHumanMessage("詳細画面の再利用アイコンを非表示にしてほしい")}
               style={{
                 cursor: 'pointer',
               }}
@@ -119,7 +120,7 @@ export const AccordionHistory: React.FC<AccordionHistoryProps> = ({ isLoading, s
                 <Text size='2' color={
                   isPcViewMode ? 'iris' : 'cyan'
                 }>
-                  日付フィールドを今日の日付で自動的に埋める機能のコードを生成してください。
+                  詳細画面の再利用アイコンを非表示にしてほしい
                 </Text>
               </Flex>
             </Card>
