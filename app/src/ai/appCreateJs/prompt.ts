@@ -434,7 +434,7 @@ LimitDay < TODAY() and Status not in ("完了") order by LimitDay asc
 
 <format>
 /**
- * 機能名
+ * JSDocコメント
  */
 (() => {{
   "use strict";
@@ -466,35 +466,6 @@ if (!response) return event;
 </codeTemplate>
 
 # javascriptコードの作成
-## 作成条件
-- ガイドラインの内容に準拠したjavascriptコードを作成する
-- フィールドの操作（フィールド値の取得／設定／クリア）をする場合は、フィールド設定情報をもとに指定されたフィールドのフィールドの種類(type)毎に処理するようにjavascriptコードを作成する
-- テンプレートに類似した機能があったときは関連度が高いものを優先して使用する
-- テンプレートの関数コメントから特に参考にできる機能を見つけ、その内容を使用してユーザの要望をかなえるjavascriptコードを作成する
-- テンプレートの内容が間違っていない限り、テンプレートのコードを基準にjavascriptコードを作成する
-- テンプレートの関数コメントに「# 本テンプレートの注意事項」があれば、必ず注意事項を厳守してjavascriptコードを作成する
-- 新規作成/追加を行うときは、必ずフォーマットを厳守して、フォーマット単位にjavascriptコードを作成する
-   - 機能名コメントは必ずつけて作成する
-   - try catchは必ずつけて作成する
-   - return event;は必ずつけて作成する
-
-## 返却内容
-以下をもとにJSON形式で返却する
-- 生成するコードは新規作成やオリジナルコードに対しての追加、更新、削除が想定されるため、新規作成:CREATE/追加:ADD/更新:UPDATE/削除:DELETE のいずれかを「method」に設定
-- 新規作成(CREATE)の場合は、作成したjavascriptコード+JSDocを「javascriptCode」、使用したテンプレートのJSDoc+コードを「referenceJavascriptCode」に設定
-- 追加の場合は、オリジナルコードの最終行番号に+1したものを「startAt」、作成したjavascriptコード+JSDocを「javascriptCode」、使用したテンプレートのJSDoc+コードを「referenceJavascriptCode」に設定
-- 削除の場合は、削除対象のjavascriptコードの開始行番号を「startAt」、削除対象のjavascriptコードの終了行番号までの行数を「linesCount」に設定
-   - 次の関数コメント(29行目)からを削除対象のjavascriptコードとして扱う
-   \`\`\`
-   55 | /**
-   56 |  * プロジェクト名の太字表示
-   57 |  */
-   58 | (() => {{
-   \`\`\`
-- 作成されたjavascriptに対して、対象の画面や項目、条件などを修正したいとき、ユーザがAIに対してどのように指示をすればいいかの具体的な（フィールドコードについてを除いた）例文を「instructionsToChange」に設定
-- kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン を優先し、ユーザーの要望をかなえられなかった箇所についての説明を「guideMessage」に設定（オリジナルコードは関係なし）
-- オリジナルコードが kintoneコーディングガイドラインとkintoneセキュアコーディングガイドライン に違反していないかのチェックを行い、重要な違反があればその内容を「violationOfGuidelines」に設定
-
 ## 制約条件:
 - kintone javascript APIはdesktopとmobileで使用する機能が異なるため以下のようにする
    - desktopモードの場合、[テンプレートコード]をもとに作成
@@ -502,13 +473,143 @@ if (!response) return event;
 
 ## 次の手順に従ってjavascriptコードを作成する
 ステップバイステップで考えて
-1. <guideline></guideline>タグの内容は、kintoneカスタマイズを行うために必要なガイドラインであることを理解する
-2. <fieldInfo></fieldInfo>タグの内容は、対象アプリのフィールド設定情報（フィールド名、フィールドコード、フィールドの種類(type) etc.）であることを理解する
-3. <codeTemplate></codeTemplate>タグの内容は、javascriptコードを作成するために参考にするべき複数の機能のテンプレートであることを理解する
-4. <codeTemplate></codeTemplate>タグの内容は、関連度が高い機能のテンプレートが上から設定されていることを理解する
-5. <format></format>タグの内容は、作成するために絶対に守らなければならないフォーマットであることを理解する
-6. <kintoneApiErrorHandling></kintoneApiErrorHandling>タグの内容は、kintone.api()のエラーハンドリングを行う方法であることを理解する
-7. <originalCode></originalCode>タグの内容は、オリジナルコードであることを理解する
-8. 「## 作成条件」を厳守してjavascriptコードを作成する
-9. 「## 返却内容」を厳守して回答する
+1. <guideline></guideline> タグの内容は、kintoneカスタマイズを行うために必要なガイドラインであることを理解する
+2. <fieldInfo></fieldInfo> タグの内容は、対象アプリのフィールド設定情報（フィールド名、フィールドコード、フィールドの種類(type) etc.）であることを理解する
+3. <codeTemplate></codeTemplate> タグの内容は、javascriptコードを作成するために参考にするべき複数の機能のテンプレート一覧であることを理解する
+4. <codeTemplate></codeTemplate> タグの内容は、関連度が高い機能のテンプレートが上から設定されていることを理解する
+5. <format></format> タグの内容は、作成するために絶対に守らなければならないフォーマットであることを理解する
+6. <kintoneApiErrorHandling></kintoneApiErrorHandling> タグの内容は、kintone.api()のエラーハンドリングを行う方法であることを理解する
+7. <originalCode></originalCode> タグの内容は、オリジナルコードであることを理解する
+8. オリジナルコードは、例えば \`5 |   "use strict";\` のような形で先頭に行番号を含めていることを理解する
+9. 作成するjavascriptコードは[新規作成]、[追加]、[更新]、[削除]が想定されるため、ユーザの要望がどれに該当するかを確認する
+    - 新規作成: 新たにkintoneカスタマイズのjavascriptコードを作成したいとき
+    - 追加: オリジナルコードに対して、追加用のjavascriptコードを作成したいとき
+    - 更新: オリジナルコードに対して、更新・修正・変更用のjavascriptコードを作成したいとき
+    - 削除: オリジナルコードに対して、削除用のjavascriptコードを作成したいとき
+10. [新規作成] または [追加]の場合
+    - [新規作成]の場合は「method」に「CREATE」、追加の場合は「method」に「ADD」を設定する
+    - <codeTemplate></codeTemplate> タグのテンプレートからユーザの要望に近いコードをピックアップする
+    - 次の条件を満たすようにユーザの要望に応じたjavascriptコードを作成する
+       - ガイドラインの内容を準拠する
+       - フィールドの操作（フィールド値の取得／設定／クリア）をする場合は、フィールド設定情報をもとに指定されたフィールドのフィールドの種類(type)毎に処理する
+       - ピックアップしたテンプレートの内容に誤りがない限りは、テンプレートの内容をベースにする
+       - ピックアップしたテンプレートがCDNを使用している場合は、必ずその通りにCDNを読み込んで使用する
+       - ピックアップしたテンプレートのJSDocコメントに「# 本テンプレートの注意事項」があれば、必ず注意事項を厳守する
+       - 必ず次のフォーマットを厳守する
+           - CDNを使用しない場合
+               \`\`\`
+               /**
+                * JSDocコメント
+                */
+               (() => {{
+                 "use strict";
+                 kintone.events.on(["app.record.index.show"], (event) => {{
+                   try {{
+                     // ここに処理を記述
+                     return event;
+                   }} catch (e) {{
+                     console.error(e);
+                     alert('カスタムJavascriptが正しく実行されませんでした');
+                   }}
+                 }});
+               }})();
+               \`\`\`
+           - CDNを使用する場合
+               \`\`\`
+               /**
+                * JSDocコメント
+                */
+               (() => {{
+                 "use strict";
+                 // 「encoding.min.js」をCybozu CDNから読み込む
+                 const script = document.createElement('script');
+                 script.src = 'https://js.cybozu.com/encodingjs/2.1.0/encoding.min.js';
+                 script.onload = () => {{
+                   kintone.events.on(["app.record.index.show"], (event) => {{
+                     try {{
+                       // ここに処理を記述
+                       return event;
+                     }} catch (e) {{
+                       console.error(e);
+                       alert('カスタムJavascriptが正しく実行されませんでした');
+                     }}
+                   }});
+                 }}
+               }})();
+               \`\`\`
+    - ピックアップしたテンプレートの内容を「referenceJavascriptCode」に設定する
+    - 作成したjavascriptコードに必要なJSDocコメントを次の形式で「jsdoc」に設定する
+        \`\`\`
+        /**\n * JSDocコメント\n */\n
+        \`\`\`
+    - 作成したjavascriptコードにJSDocコメントを付けたものを「javascriptCode」に設定する
+        \`\`\`
+        /**\n * JSDocコメント\n */\n
+        (() => {{
+          "use strict";
+          kintone.events.on( …省略…
+        \`\`\`
+    - 「1」を「startAt」に設定する
+11. [更新]の場合
+    - 「method」に「UPDATE」を設定する
+    - ユーザの要望を実現するためにはオリジナルコードのどこを更新すればいいかの更新箇所を把握する
+    - 更新箇所の行番号を把握する
+    - オリジナルコードの構文の崩れが絶対に起きないように注意する
+    - オリジナルコードには次のように1行でかけるものが複数行となっているものも存在するため注意する
+        \`\`\`
+        // 取得した日付をYYYY-MM-DD形式の文字列に変換
+        const formattedDate = targetDate.getFullYear() + '-' + 
+          ('0' + (targetDate.getMonth() + 1)).slice(-2) + '-' +
+          ('0' + targetDate.getDate()).slice(-2);
+        \`\`\`
+    - 次の条件を満たすように、ユーザの要望に応じたオリジナルコードの修正用javascriptコードを作成する
+        - ガイドラインの内容を準拠する
+        - フィールドの操作（フィールド値の取得／設定／クリア）をする場合は、フィールド設定情報をもとに指定されたフィールドのフィールドの種類(type)毎に処理する
+        - <codeTemplate></codeTemplate> タグのテンプレートを使用する
+        - <codeTemplate></codeTemplate> タグのテンプレートは関連度が高いものを優先して使用する
+        - <codeTemplate></codeTemplate> タグのテンプレートの内容が間違っていない限り、テンプレートのコードを基準にする
+        - テンプレートのJSDocコメントに「# 本テンプレートの注意事項」があれば、必ず注意事項を厳守する
+        - オリジナルコードの更新箇所に対して作成するjavascriptコードはズレが無いようにする
+            オリジナルコードの更新箇所
+            \`\`\`
+            // 取得した日付をYYYY-MM-DD形式の文字列に変換
+            const formattedDate = targetDate.getFullYear() + '-' + 
+              ('0' + (targetDate.getMonth() + 1)).slice(-2) + '-' +
+              ('0' + targetDate.getDate()).slice(-2);
+            \`\`\`
+            更新用のjavascriptコード
+            \`\`\`
+            // 取得した日付をYYYY-MM形式の文字列に変換
+            const formattedDate = targetDate.getFullYear() + '-' + 
+              ('0' + (targetDate.getMonth() + 1)).slice(-2) + '-';
+            \`\`\`
+    - オリジナルコードの更新箇所を「updateInfo.targetCode」に設定する
+    - オリジナルコードの更新箇所の開始の行番号を「updateInfo.targetStartAt」に設定する
+    - オリジナルコードの更新箇所に置き換える、更新用のjavascriptコードを「updateInfo.updateJavascriptCode」に設定する
+12. [削除]の場合
+    - 「method」に「DELETE」を設定する
+    - ユーザの要望を実現するためにはオリジナルコードのどこを削除すればいいかの削除箇所を把握する
+    - 削除箇所の行番号を把握する
+    - オリジナルコードの構文の崩れが絶対に起きないように注意する
+    - JSDocコメントを含めて削除する（例: 以下の場合は、行番号:55からを削除箇所とする）
+        \`\`\`
+        55 | /**
+        56 |  * JSDocコメント
+        57 |  */
+        58 | (() => {{
+        \`\`\`
+    - オリジナルコードの削除箇所の開始の行番号を「startAt」に設定する
+    - オリジナルコードの削除箇所の開始の行番号から終了の行番号までの行数を「linesCount」に設定する
+13. 最終的に次の情報をJSON形式で返却する
+    1. 作成されたJavaScriptに対して、対象の画面や項目、条件などを修正したい場合、ユーザがAIに対してどのように指示をすればいいかの具体的な例文を「instructionsToChange」に設定する
+    2. kintoneコーディングガイドラインとkintoneセキュアコーディングガイドラインを優先し、ユーザーの要望をかなえられなかった箇所についての説明を「guideMessage」に設定する（オリジナルコードは関係なし）
+    3. オリジナルコードがkintoneコーディングガイドラインとkintoneセキュアコーディングガイドラインに違反していないかをチェックし、重要な違反があればその内容を「violationOfGuidelines」に設定する
+    4. 「properties」に作成したjavascriptコードの情報を設定する
+    5. 「properties」配下の項目は、新規作成／追加／更新／削除ごとに次のように設定する
+         | - | method | startAt | endAt | linesCount | referenceJavascriptCode | javascriptCode | updateInfo |
+         | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+         | 新規作成 | CREATE | "" | "" | "" | 必須 | 必須 | "" |
+         | 追加 | ADD | 必須 | "" | "" | 必須 | 必須 | "" |
+         | 更新 | UPDATE | "" | "" | "" | 必須 | 必須 | 必須 |
+         | 削除 | DELETE | 必須 | 必須 | 必須 | "" | "" | "" |
 `;

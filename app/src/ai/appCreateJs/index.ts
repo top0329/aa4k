@@ -305,15 +305,16 @@ async function createJs(
     properties:
       z.object({
         method: originalCode ? editMethod : createMethod,
-        startAt: z.number().describe("開始位置"),
-        endAt: z.number().describe("終了位置"),
-        linesCount: z.number().describe("行数"),
-        referenceJavascriptCode: z.string().describe("使用したテンプレートのコード+JSDoc"),
-        javascriptCode: z.string().describe("作成したjavascriptコード+JSDoc"),
+        startAt: z.number().describe("対象のオリジナルコードの開始の行番号"),
+        endAt: z.number().describe("対象のオリジナルコードの終了の行番号"),
+        linesCount: z.number().describe("対象のオリジナルコードの開始の行番号から終了行番号までの行数"),
+        referenceJavascriptCode: z.string().describe("ピックアップしたテンプレートの内容"),
+        javascriptCode: z.string().describe("作成したjavascriptコードとJSDoc"),
+        jsdoc: z.string().describe("作成したjavascriptコードに必要なJSDoc"),
         updateInfo: z.object({
-          targetCode: z.string().describe("更新対象となるオリジナルコードの開始から終了までのコード"),
-          targetStartAt: z.number().describe("更新対象となるオリジナルコードの開始に該当する行番号"),
-          updateJavascriptCode: z.string().describe("「targetCode」と置換する更新用のコード"),
+          targetCode: z.string().describe("更新対象となるオリジナルコードの開始から終了までのjavascriptコード"),
+          targetStartAt: z.number().describe("更新対象となるオリジナルコードの開始の行番号"),
+          updateJavascriptCode: z.string().describe("更新用のjavascriptコード"),
         }).describe("更新(update)の場合の情報"),
       }).describe("ユーザーの要望に応じて作成した結果"),
   }).describe("LLM問い合わせ結果");
