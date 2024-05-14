@@ -1,7 +1,6 @@
 // src/components/ui/PromptTextarea/PromptTextArea.tsx
 import { TextArea } from '@radix-ui/themes';
 import React from 'react';
-import { useAutoResizeTextArea } from '~/hooks/useAutoResizeTextArea';
 import './PromptTextArea.css';
 
 type PromptTextAreaProps = {
@@ -18,7 +17,6 @@ type PromptTextAreaProps = {
 }
 
 export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, required, value, disabled, onChange, onKeyDown, lineHeight, maxRows, isPcViewMode, ...rest }) => {
-  const textAreaRef = useAutoResizeTextArea(value, maxRows, lineHeight);
 
   return (
     <TextArea
@@ -31,7 +29,6 @@ export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, req
       disabled={disabled}
       onChange={onChange}
       onKeyDown={onKeyDown}
-      ref={textAreaRef}
       {...rest}
     />
   );
