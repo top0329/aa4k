@@ -4,7 +4,7 @@ import { style } from "@vanilla-extract/css";
 export const sChatHistory = style({
   borderRadius: 6,
   width: "100%",
-  height: `70vh`,
+  height: `69vh`,
   maxHeight: `100%`,
   backgroundColor: "white",
   display: `flex`,
@@ -12,6 +12,12 @@ export const sChatHistory = style({
   alignItems: "flex-end",
   flexDirection: "column",
   "@media": {
+    "(max-height: 860px)": {
+      height: `68vh`,
+    },
+    "(max-height: 800px)": {
+      height: `66.4vh`,
+    },
     "screen and (max-width: 1280px) and (max-height: 800px)": {
       maxHeight: `calc(90vh - 220px)`,
     },

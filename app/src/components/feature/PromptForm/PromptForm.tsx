@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
 import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
 import { vars } from '~/styles/theme.css';
-import { sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
+import { sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
 
 type PromptFormProps = {
@@ -53,7 +53,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
   }
 
   return (
-    <Box px={'5'}
+    <Box
+      className={sPromptForm}
+      px={'5'}
       pb={'5'}
       width={'100%'}
       style={{

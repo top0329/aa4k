@@ -36,3 +36,15 @@ export const sVoiceInputActive = style({
   },
 });
 
+export const sPromptForm = style({
+  height: '20vh',
+  maxHeight: '100%',
+  "@media": {
+    "(max-height: 860px)": {
+      height: `21vh`,
+    },
+    "(max-height: 800px)": {
+      height: `22.6vh`,
+    },
+  },
+});
