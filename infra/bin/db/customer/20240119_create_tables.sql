@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS t_conversation_history(
     , user_message_at TIMESTAMP (6) WITHOUT TIME zone
     , ai_message_at TIMESTAMP (6) WITHOUT TIME zone
     , error_message_at TIMESTAMP (6) WITHOUT TIME zone
+    , clear_at TIMESTAMP (6) WITHOUT TIME zone
     , created_on DATE DEFAULT CURRENT_DATE NOT NULL
     , PRIMARY KEY (id, created_on)
 ) PARTITION BY
@@ -35,4 +36,5 @@ comment on column t_conversation_history.user_rating_comment is 'ユーザー評
 comment on column t_conversation_history.user_message_at is 'ユーザー発言日時';
 comment on column t_conversation_history.ai_message_at is 'AI発言日時';
 comment on column t_conversation_history.error_message_at is 'エラーメッセージ発言日時';
+comment on column t_conversation_history.clear_at is 'クリア日時:会話履歴をクリアした日時';
 comment on column t_conversation_history.created_on is '作成日:パーティションキーにするためにPKにする';

@@ -30,6 +30,7 @@ export const selectLatestJavascriptCode = async (dbClient: Client, reqBody: GetC
   sql += ` and user_id = $2`;
   sql += ` and device_div = $3`;
   sql += ` and id <> $4`;
+  sql += ` and clear_at is null`;
   sql += ` order by`;
   sql += ` id desc`;
   sql += ` limit 1`;
