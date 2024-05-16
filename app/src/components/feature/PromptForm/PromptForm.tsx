@@ -1,12 +1,12 @@
 // src/components/feature/PromptForm/PromptForm.tsx
-import { faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
+import { faRotateRight, faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Badge, Box, Button, Flex, Text } from '@radix-ui/themes';
+import { Badge, Box, Button, Flex, Text, Tooltip } from '@radix-ui/themes';
 import { motion } from "framer-motion";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
 import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
 import { vars } from '~/styles/theme.css';
-import { sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
+import { sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
 
 type PromptFormProps = {
@@ -30,6 +30,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
     handleKeyDown,
     handleVoiceInput,
     handleHumanMessageChange,
+    handleClearConversation,
     isSubmitting,
     voiceInputVisible,
     toggleChatVisibilityHandler
@@ -129,6 +130,29 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
             justify={'center'}
             align={'center'}
           >
+            <Button
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: `50%`,
+                padding: 0,
+                cursor: 'pointer',
+              }}
+              color={'gray'}
+              variant={'ghost'}
+              className={isSubmitting || isLoading ? sClearConversationDisabled : sClearConversation}
+              onClick={(e) => { handleClearConversation(e) }}
+              disabled={isSubmitting || isLoading}
+            >
+              <Tooltip
+                content={"新しく会話を始める"}
+                style={{
+                  zIndex: 10000,
+                }}
+              >
+                <FontAwesomeIcon size='lg' icon={faRotateRight} />
+              </Tooltip>
+            </Button>
             {voiceInputVisible && (<Button
               style={{
                 width: 32,

@@ -48,3 +48,21 @@ export const sPromptForm = style({
     },
   },
 });
+
+// [新しく会話を始める]ボタンの活性時
+export const sClearConversation = style({
+  borderRadius: `50%`,
+  transition: "opacity 0.2s",
+  cursor: "pointer",
+  ":hover": {
+    opacity: 0.8,
+  },
+});
+
+// [新しく会話を始める]ボタンの非活性時
+export const sClearConversationDisabled = style({
+  opacity: 0.5,
+  borderRadius: `50%`,
+  transition: "opacity 0.2s",
+  cursor: "pointer",
+});

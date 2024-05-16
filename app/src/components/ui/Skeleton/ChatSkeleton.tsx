@@ -52,6 +52,14 @@ const Prompt = () => (
             borderRadius: 8,
           }}
         />
+        <Box
+          style={{
+            width: 40,
+            height: 40,
+            background: vars.color.gray.gray2,
+            borderRadius: 8,
+          }}
+        />
       </Flex>
     </Flex>
   </motion.div>

@@ -99,6 +99,7 @@ const ErrorToast = forwardRef<ElementRef<typeof Toast.Root>, ErrorToastProps>(
                 display: 'flex', justifyContent: 'center', alignItems: 'center',
                 position: 'absolute', top: 12, right: 12,
                 cursor: 'pointer',
+                pointerEvents: 'auto',
               }}>
                 <FontAwesomeIcon color={vars.color.tomato.tomato10} icon={faClose} onClick={() => handleClose()} />
               </Box>

@@ -5,6 +5,7 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { appCreateJs } from '~/ai/appCreateJs';
+import { useToast } from '~/components/ui/ErrorToast/ErrorToastProvider';
 import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
 import useToggleDockItem from '~/hooks/useToggleDockItem';
 import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
@@ -15,7 +16,7 @@ import { PluginIdState } from '~/state/pluginIdState';
 import { ReloadState } from "~/state/reloadState";
 import { ViewModeState } from '~/state/viewModeState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
-import { InsertConversationResponseBody, KintoneProxyResponse } from '~/types/apiResponse';
+import { InsertConversationResponseBody, KintoneProxyResponse, KintoneProxyResponseBody, KintoneRestAPiError } from '~/types/apiResponse';
 import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from '~/util/preCheck';
@@ -62,7 +63,7 @@ export const usePromptFormLogic = ({
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
 
-  // const scrollToBottom = useScrollToBottom();
+  const { showToast } = useToast();
 
   const toggleChatVisibilityHandler = () => {
     setIsPcViewMode(!isPcViewMode)
@@ -280,6 +281,50 @@ export const usePromptFormLogic = ({
     }
   };
 
+  // 会話履歴一覧をクリア
+  const handleClearConversation = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      e.preventDefault();
+      if (window.confirm('これまでの会話の表示をクリアして、新しい会話を始めますが、よろしいですか？')) {
+        const appId = kintone.app.getId();
+        const userId = kintone.getLoginUser().id;
+        const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
+
+        const resClearConversation = await kintone.plugin.app.proxy(
+          pluginId,
+          `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/clear`,
+          "POST",
+          {},
+          { appId: appId, userId: userId, deviceDiv: deviceDiv },
+        ).catch((resBody: string) => {
+          const e = JSON.parse(resBody) as KintoneRestAPiError;
+          throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
+        }) as KintoneProxyResponse;
+        const [resBody, resStatus] = resClearConversation;
+        const resBodyClearConversation = JSON.parse(resBody) as KintoneProxyResponseBody;
+        if (resStatus !== 200) {
+          // APIエラー時のエラーメッセージを取得
+          const errorMessage = getApiErrorMessage(resStatus, resBodyClearConversation.errorCode);
+          // トーストでエラーメッセージ表示
+          showToast(errorMessage, 0, false);
+          return;
+        }
+        // 画面上の会話履歴をクリア
+        setChatHistory([]);
+      }
+    } catch (err) {
+      let message: string = '';
+      if (err instanceof KintoneError) {
+        message = err.message;
+      } else {
+        message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      }
+      // トーストでエラーメッセージ表示
+      showToast(message, 0, false);
+      return;
+    }
+  }
+
   const handleVoiceInput = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
@@ -364,6 +409,7 @@ export const usePromptFormLogic = ({
     handleKeyDown,
     handleVoiceInput,
     handleHumanMessageChange,
+    handleClearConversation,
     isSubmitting,
     voiceInputVisible,
     toggleChatVisibilityHandler
