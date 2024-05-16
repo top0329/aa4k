@@ -288,20 +288,10 @@ async function createJs(
   ]);
 
   // LLMの出力形式を設定
-  const createMethod = z.nativeEnum(CodeCreateMethodCreate).describe("'CREATE'を設定");
-  const editMethod = z.nativeEnum(CodeCreateMethodEdit).describe("'ADD','UPDATE','DELETE'のいずれかを設定");
+  const createMethod = z.nativeEnum(CodeCreateMethodCreate).describe("必ず'CREATE'を設定");
+  const editMethod = z.nativeEnum(CodeCreateMethodEdit).describe("必ず'ADD','UPDATE','DELETE'のいずれかだけを設定");
   const zodSchema = z.object({
     resultMessage: z.string().describe("質問に対する結果メッセージ"),
-    supplement: z.object({
-      where: z.string().describe("どの画面での処理なのか（例: 一覧画面、詳細画面、追加画面、編集画面 etc.）"), // どこで
-      when: z.string().describe("何をしたときの処理なのか（例: ○○画面を表示したとき、○○フィールドを変更したとき、○○画面で保存したとき etc.）"),  // いつ
-      what: z.string().describe("何に対しての処理なのか（例: タイトルを、メールアドレスを、○○のレコードを etc.）"),  // 何を
-      how: z.string().describe("何をする処理なのか（例: 背景色を変更する、値をセットする、小文字に変換、無効化する etc.）"), // どのように
-      contentsOfCreatedJs: z.string().describe("[where],[when],[what],[how]をもとした機能の説明（例: [where]を[when]したときに、[wat]を[how]する機能を作成しました。）"),
-      instructionsToChange: z.string().describe("作成されたjavascriptに対する修正指示の具体的な例文"),
-    }).describe("作成したjavascriptの詳細"),
-    violationOfGuidelines: z.string().describe("オリジナルコードのガイドライン違反"),
-    guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
     properties:
       z.object({
         method: originalCode ? editMethod : createMethod,
@@ -309,14 +299,24 @@ async function createJs(
         endAt: z.number().describe("対象のオリジナルコードの終了の行番号"),
         linesCount: z.number().describe("対象のオリジナルコードの開始の行番号から終了行番号までの行数"),
         referenceJavascriptCode: z.string().describe("ピックアップしたテンプレートの内容"),
-        javascriptCode: z.string().describe("作成したjavascriptコードとJSDoc"),
         jsdoc: z.string().describe("作成したjavascriptコードに必要なJSDoc"),
+        javascriptCode: z.string().describe("作成したjavascriptコードにJSDocコメントを付けたもの"),
         updateInfo: z.object({
           targetCode: z.string().describe("更新対象となるオリジナルコードの開始から終了までのjavascriptコード"),
           targetStartAt: z.number().describe("更新対象となるオリジナルコードの開始の行番号"),
           updateJavascriptCode: z.string().describe("更新用のjavascriptコード"),
-        }).describe("更新(update)の場合の情報"),
-      }).describe("ユーザーの要望に応じて作成した結果"),
+        }).describe("[更新]の場合の情報"),
+      }).describe("作成したjavascriptの詳細"),
+    supplement: z.object({
+      where: z.string().describe("どの画面での処理なのか（例: 一覧画面、詳細画面、追加画面、編集画面 etc.）"), // どこで
+      when: z.string().describe("何をしたときの処理なのか（例: ○○画面を表示したとき、○○フィールドを変更したとき、○○画面で保存したとき etc.）"),  // いつ
+      what: z.string().describe("何に対しての処理なのか（例: タイトルを、メールアドレスを、○○のレコードを etc.）"),  // 何を
+      how: z.string().describe("何をする処理なのか（例: 背景色を変更する、値をセットする、小文字に変換、無効化する etc.）"), // どのように
+      contentsOfCreatedJs: z.string().describe("[where],[when],[what],[how]をもとした機能の説明（例: whereをwhenしたときに、watをhowする機能を作成しました。）"),
+      instructionsToChange: z.string().describe("作成されたjavascriptに対する修正指示の具体的な例文"),
+    }).describe("質問に対するメッセージの補足情報"),
+    violationOfGuidelines: z.string().describe("オリジナルコードのガイドライン違反"),
+    guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
   }).describe("LLM問い合わせ結果");
   type LLMResponse = z.infer<typeof zodSchema>;
   const functionCallingModel = model.bind({
@@ -375,7 +375,7 @@ async function createJs(
         if (!updateInfo && !targetCode && !targetStartAt && !updateJavascriptCode) return false;
       } else if (method === CodeCreateMethodEdit.add) {
         // 追加の場合
-        if (!startAt && !javascriptCode) return false;
+        if (!javascriptCode) return false;
       } else if (method === CodeCreateMethodEdit.delete) {
         // 削除の場合
         if (!startAt && !linesCount) return false;
@@ -391,18 +391,22 @@ async function createJs(
       const method = resProperties.method;
 
       // メソッド毎の編集処理 「新規・更新・追加・削除」
-      if (method === CodeCreateMethodCreate.create) {
-        // 新規の場合
-        editedCode = resProperties.javascriptCode;
+      if (method === CodeCreateMethodCreate.create || method === CodeCreateMethodEdit.add) {
+        // 新規・追加の場合
+        if (!editedCode) {
+          // オリジナルコードが存在しない場合は、新規
+          editedCode = resProperties.javascriptCode;
+        } else {
+          // // オリジナルコードが存在する場合は、追加
+          const editedCodeLines = editedCode.split('\n');
+          editedCode = modifyCode(editedCode, editedCodeLines.length + 1, 0, resProperties.javascriptCode);
+        }
       } else if (method === CodeCreateMethodEdit.update) {
         // 更新の場合
         const { targetCode, targetStartAt, updateJavascriptCode } = resProperties.updateInfo;
         // 最後の改行がある場合は削除し、対象コードを行ごとの配列に分割
         const targetCodeLines = targetCode.endsWith('\n') ? targetCode.slice(0, -1).split('\n') : targetCode.split('\n');
         editedCode = modifyCode(editedCode, targetStartAt, targetCodeLines.length, updateJavascriptCode);
-      } else if (method === CodeCreateMethodEdit.add) {
-        // 追加の場合
-        editedCode = modifyCode(editedCode, resProperties.startAt, 0, resProperties.javascriptCode);
       } else if (method === CodeCreateMethodEdit.delete) {
         // 削除の場合
         editedCode = modifyCode(editedCode, resProperties.startAt, resProperties.linesCount);
