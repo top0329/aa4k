@@ -345,7 +345,7 @@ async function createJs(
       // レート制限に引っかかった場合、エラーを出力
       throw new LlmError(`${ErrorMessageConst.E_MSG007}（${ErrorCode.E00011}）`)
     } else {
-      throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00004}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00004}）`)
     }
   })) as LLMResponse;
 
@@ -382,7 +382,7 @@ async function createJs(
       }
       return true;
     }
-    if (!propertiesValidate(llmResponse.properties)) throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00012}）`);
+    if (!propertiesValidate(llmResponse.properties)) throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00012}）`);
 
     // 出力コード編集
     let editedCode = originalCode;
@@ -412,12 +412,12 @@ async function createJs(
         editedCode = modifyCode(editedCode, resProperties.startAt, resProperties.linesCount);
       }
     } catch (e) {
-      throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00010}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00010}）`)
     }
     // フォーマット整形
     const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] })
       .catch(() => {
-        throw new LlmError(`${ErrorMessageConst.E_MSG008}（${ErrorCode.E00010}）`)
+        throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00010}）`)
       });
 
     // 結果返却
