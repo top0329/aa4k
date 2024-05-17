@@ -146,20 +146,20 @@ async function sendSuguresPostbacks(userRating: UserRating, subscriptionId: stri
     const postbackKeyData = await redisClient.hgetall(redisKey) as (SuguresPostbackResultRow | RedisEmptyRecord);
     if (!isRedisEmptyRecord(postbackKeyData)) {
       const sessionId = postbackKeyData.sessionId;
-      const wasHelpfulPostbackKeys = postbackKeyData.wasHelpfulPostbackKeys.split(",");
-      const wasNotHelpfulPostbackKeys = postbackKeyData.wasNotHelpfulPostbackKeys.split(",");
+      const wasHelpfulPostbackKeys = JSON.parse(postbackKeyData.wasHelpfulPostbackKeys) as string[];
+      const wasNotHelpfulPostbackKeys = JSON.parse(postbackKeyData.wasNotHelpfulPostbackKeys) as string[];
 
       if (userRating === UserRating.good) {
-        Promise.all(
-          wasHelpfulPostbackKeys.map((key) => {
+        await Promise.all(
+          wasHelpfulPostbackKeys.map((key) =>
             sendSuguresPostback(suguresPostbackUrl, key, subscriptionId, sessionId)
-          })
+          )
         )
       } else if (userRating === UserRating.bad) {
-        Promise.all(
-          wasNotHelpfulPostbackKeys.map((key) => {
+        await Promise.all(
+          wasNotHelpfulPostbackKeys.map((key) =>
             sendSuguresPostback(suguresPostbackUrl, key, subscriptionId, sessionId)
-          })
+          )
         )
       }
 
