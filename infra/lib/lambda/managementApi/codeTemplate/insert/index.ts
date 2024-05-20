@@ -3,7 +3,7 @@ import { Client } from "pg";
 import * as crypto from 'crypto'
 import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./schema"
-import { insertTemplateCode } from "./dao";
+import { insertTemplateCode, deleteTemplateCode, deleteLangchainEmbeddingCollection } from "./dao";
 import { pgVectorInitialize } from "../common";
 import { ErrorCode } from "../constants";
 import { getDbConfig, getSecretValues, ValidationError, RequestHeaderName } from "../../../utils";
@@ -20,7 +20,7 @@ export const insertHandler = async (req: Request, res: Response) => {
   try {
     subscriptionId = req.header(RequestHeaderName.aa4kSubscriptionId) as string;
     body = (req.body ? JSON.parse(req.body) : {}) as InsertRequestBody;
-    const { templateCodes } = body;
+    const { templateCodes, refresh } = body;
     // リクエストのバリデーション
     validateRequestParam(subscriptionId, body);
 
@@ -40,6 +40,14 @@ export const insertHandler = async (req: Request, res: Response) => {
     dbClient = new Client(dbConfig);
     await dbClient.connect();
 
+    // データリフレッシュの場合
+    if (refresh) {
+      // template削除
+      await deleteTemplateCode(dbClient, "kintone_codeTemplate")
+      // collection削除
+      await deleteLangchainEmbeddingCollection(dbClient, "kintone_codeTemplate")
+    }
+
     // pgvectorStoreの初期設定
     const pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue })
 
@@ -49,13 +57,14 @@ export const insertHandler = async (req: Request, res: Response) => {
     // リクエストパラメータ分ループ
     let documents: Document[] = [];
     for (const templateCode of templateCodes) {
+      const targetTemplateCode = isBase64(templateCode.templateCode) ? Buffer.from(templateCode.templateCode, "base64").toString("utf-8") : templateCode.templateCode;
       const uuid = crypto.randomUUID();
       // ベクター登録する情報
       const document = new Document({ pageContent: templateCode.templateCodeDescription, metadata: { templateCodeId: uuid, } })
       // pgvectorStoreへの登録
       await pgvectorStore.addDocuments([document]);
       // SQL クエリの実行
-      await insertTemplateCode(dbClient, uuid, templateCode.templateCode)
+      await insertTemplateCode(dbClient, uuid, targetTemplateCode)
       documents.push(document)
     }
 
@@ -103,3 +112,12 @@ const validateRequestParam = (subscriptionId: string, reqBody: InsertRequestBody
     throw new ValidationError('Invalid request parameters');
   }
 }
+
+const isBase64 = (str: string) => {
+  try {
+    Buffer.from(str, 'base64');
+    return true;
+  } catch (err) {
+    return false;
+  }
+};

@@ -8,5 +8,6 @@ export const InsertRequestBodySchema = z.object({
       templateCode: z.string(),
     })
   ),
+  refresh: z.boolean().optional(),
 })
 export type InsertRequestBody = z.infer<typeof InsertRequestBodySchema>

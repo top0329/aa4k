@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { ContextProps } from '../lib/type';
 import { Aa4kApiStack } from '../lib/api-stack';
 import { Aa4kApiAiProxyStack } from '../lib/api-openai-proxy-stack';
+import { Aa4kApiManagementStack } from '../lib/api-management-stack';
 import { Aa4kSecretsStack } from '../lib/secret-stack';
 import { AuroraStack } from '../lib/aurora-stack';
 import { Aa4kElastiCacheStack } from '../lib/elasticache-stack';
@@ -17,7 +18,23 @@ const stageName = context.stageName;
 const SUGURES_ENDPOINT_STG = "https://message-stage.sugures.app";
 const SUGURES_CLIENT_ID_STG = "7a1cdbef-c4b4-4b2e-b76b-9bd37dd6fbfd";
 const SUGURES_ENDPOINT_PROD = "https://message.sugures.app";
-const SUGURES_CLIENT_ID_PROD = "xxxxxxxxxxxx";  // TODO: 本番用スグレスのCLIENT_IDを設定する
+const SUGURES_CLIENT_ID_PROD = "fa20dcfe-c903-446d-be2e-b35c922b0f23";
+// Whitelist IP
+const API_WHITELIST_DEV = [
+  "103.79.14.0/24",     // kintoneプロキシのIPアドレス
+  "202.210.220.64/28",  // SCグローバルIP
+  "39.110.232.32/28",   // SCグローバルIP
+  "118.238.251.130",    // SCグローバルIP
+];
+const API_WHITELIST_PROD = [
+  "103.79.14.0/24",     // kintoneプロキシのIPアドレス
+];
+// Whitelist IP（システム管理API用）
+const API_MNG_WHITELIST = [
+  "202.210.220.64/28",  // SCグローバルIP
+  "39.110.232.32/28",   // SCグローバルIP
+  "118.238.251.130",    // SCグローバルIP
+];
 
 const contextProps: ContextProps = {
   stageKey: stageKey,
@@ -27,11 +44,13 @@ const contextProps: ContextProps = {
   suguresEndpoint: stageName === "prod" ? SUGURES_ENDPOINT_PROD : SUGURES_ENDPOINT_STG,
   suguresClientId: stageName === "prod" ? SUGURES_CLIENT_ID_PROD : SUGURES_CLIENT_ID_STG,
   apiManagementEndpoint: stageName === "prod" ? "aa4k.azure-api.net" : "aa4k-test.azure-api.net",
+  apiIpWhitelist: stageName === "prod" ? API_WHITELIST_PROD : API_WHITELIST_DEV,
+  apiMngIpWhitelist: API_MNG_WHITELIST,
 }
 
 const stackProps: cdk.StackProps = {
   env: {
-    account: "254440508415",
+    account: stageName === "prod" ? "891376998459" : "254440508415",
     region: "ap-northeast-1",
   }
 }
@@ -43,6 +62,7 @@ const parameterStack = new Aa4kParameterStack(app, `Aa4k-ParameterStack-${stageN
 
 new Aa4kApiStack(app, `Aa4k-ApiStack-${stageName}`, contextProps, secretsStack, auroraStack, elastiCacheStack, parameterStack, stackProps);
 new Aa4kApiAiProxyStack(app, `Aa4k-ApiAiProxyStack-${stageName}`, contextProps, secretsStack, auroraStack, elastiCacheStack, parameterStack, stackProps);
+new Aa4kApiManagementStack(app, `Aa4k-ApiManagementStack-${stageName}`, contextProps, secretsStack, auroraStack, elastiCacheStack, parameterStack, stackProps);
 cdk.Tags.of(app).add("Department", "CS");
 cdk.Tags.of(app).add("Production", "AA4K");
 

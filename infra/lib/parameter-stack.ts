@@ -28,13 +28,8 @@ export class Aa4kParameterStack extends cdk.Stack {
 
     // パラメータストア登録値（システム定数）
     const aa4kConstValueObj = {
-      allowedCidrs: [
-        "103.79.14.0/24",       // kintoneプロキシのIPアドレス
-        "118.238.251.130/32",   // SC-VPNのIPアドレス
-        "202.210.220.64/28",    // SC-VPNのIPアドレス
-        "39.110.232.32/28",     // SC-VPNのIPアドレス
-      ],
-      "retrieveMaxCount": 30,
+      allowedCidrs: contextProps.apiIpWhitelist,
+      "retrieveMaxCount": 5,
       "retrieveScoreThreshold": 0.7,
       "historyUseCount": 10,
       "historyGetCount": 30,
