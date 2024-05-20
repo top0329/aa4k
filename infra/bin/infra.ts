@@ -24,7 +24,7 @@ const API_WHITELIST_DEV = [
   "103.79.14.0/24",     // kintoneプロキシのIPアドレス
   "202.210.220.64/28",  // SCグローバルIP
   "39.110.232.32/28",   // SCグローバルIP
-  "118.238.251.130",    // SCグローバルIP
+  "118.238.251.130/32", // SCグローバルIP
 ];
 const API_WHITELIST_PROD = [
   "103.79.14.0/24",     // kintoneプロキシのIPアドレス
@@ -33,7 +33,7 @@ const API_WHITELIST_PROD = [
 const API_MNG_WHITELIST = [
   "202.210.220.64/28",  // SCグローバルIP
   "39.110.232.32/28",   // SCグローバルIP
-  "118.238.251.130",    // SCグローバルIP
+  "118.238.251.130/32", // SCグローバルIP
 ];
 
 const contextProps: ContextProps = {
