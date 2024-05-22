@@ -83,7 +83,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
         >
           <IconTooltipButton
             icon={faArrowsRetweet}
-            tooltip={'Code ReNew'}
+            tooltip={'最新コード取得'}
             onClick={handleRefreshClick}
             style={{
               width: 40,

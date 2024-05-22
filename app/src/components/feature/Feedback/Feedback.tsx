@@ -99,7 +99,7 @@ const Feedback = ({ humanMessage, content, chatHistoryItem }: FeedbackProps) => 
             />
           </Flex>
           <TextArea
-            placeholder="Write a comment…"
+            placeholder="コメントを書く…"
             style={{ height: 80 }}
             value={feedback}
             onChange={

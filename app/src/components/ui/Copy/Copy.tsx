@@ -12,7 +12,7 @@ type CopyProps = {
   icon?: IconDefinition
 };
 
-const Copy: React.FC<CopyProps> = ({ isCopied, onCopy, toopTip = isCopied ? 'Copied!' : 'Copy', icon = faClipboard }) => {
+const Copy: React.FC<CopyProps> = ({ isCopied, onCopy, toopTip = isCopied ? 'コピーしました' : 'コピー', icon = faClipboard }) => {
   return (
     <IconTooltipButton
       icon={isCopied ? faCheck : icon}
