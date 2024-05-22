@@ -66,6 +66,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
     // pgvectorStoreの初期設定 契約ステータスが契約中(trial)の場合のみヘッダのOpenAI API_KEYを渡す
     pgvectorStore = await pgVectorInitialize(dbConfig, { azureSecretValue, openAiApiKey: contractStatus === ContractStatus.trial ? openAiApiKey : undefined });
 
+    const retrieveMaxCount = aa4kConstParameterValue.retrieveMaxCount;
     const pgvectorRetriever = new PgVectorRetriever(pgvectorStore, subscriptionId, aa4kConstParameterValue.retrieveScoreThreshold, aa4kConstParameterValue.retrieveMaxCount);
     const suguresRetriever = new SuguresRetriever(subscriptionId, body.conversationId);
     const ensemble = new EnsembleRetriever({ retrievers: [suguresRetriever, pgvectorRetriever], weights: [0.5, 0.5] })
@@ -81,7 +82,7 @@ export const retrieveHandler = async (req: Request, res: Response) => {
 
 
     // コードテンプレートの取得
-    for (const doc of documents) {
+    for (const doc of documents.slice(0, retrieveMaxCount)) {
       const templateCodeId = doc.metadata.templateCodeId;
       // SQL クエリの実行（取得したtemplateCodeIdに該当するコードを取得）
       const result = await selectTemplateCode(dbClient, templateCodeId);
