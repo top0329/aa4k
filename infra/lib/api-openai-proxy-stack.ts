@@ -111,6 +111,7 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     const azureOpenaiProxyLambda = new nodelambda.NodejsFunction(this, "AzureOpenAIProxyLambda", {
       entry: __dirname + "/lambda/azureOpenaiProxy/index.ts",
       handler: "handler",
+      vpc: auroraStack.vpc,
       environment: {
         AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
       },

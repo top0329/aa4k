@@ -44,6 +44,7 @@ const contextProps: ContextProps = {
   suguresEndpoint: stageName === "prod" ? SUGURES_ENDPOINT_PROD : SUGURES_ENDPOINT_STG,
   suguresClientId: stageName === "prod" ? SUGURES_CLIENT_ID_PROD : SUGURES_CLIENT_ID_STG,
   apiManagementEndpoint: stageName === "prod" ? "aa4k.azure-api.net" : "aa4k-test.azure-api.net",
+  openAIApiInstanceName: stageName === "prod" ? "aa4k-prod-east-us" : "aa4k-dev-east-us",
   apiIpWhitelist: stageName === "prod" ? API_WHITELIST_PROD : API_WHITELIST_DEV,
   apiMngIpWhitelist: API_MNG_WHITELIST,
 }

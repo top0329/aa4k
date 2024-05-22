@@ -6,6 +6,7 @@ export type ContextProps = {
   suguresEndpoint: string,
   suguresClientId: string,
   apiManagementEndpoint: string,
+  openAIApiInstanceName: string,
   apiIpWhitelist: string[],
   apiMngIpWhitelist: string[],
 }
