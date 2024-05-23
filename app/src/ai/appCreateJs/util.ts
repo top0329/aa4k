@@ -36,12 +36,22 @@ export function modifyCode(originalCode: string, startLine: number, delCount: nu
   // 更新: 指定された位置から、delCountの行数分を新しいコードで置き換える)
   // 追加: 指定された行の前に新しいコードを挿入
   // 削除: 指定された行から指定された数（delCount）の行を削除
-  if(newCode){
+  if (newCode) {
     lines.splice(startLine - 1, delCount, newCode);
-  }else{
+  } else {
     lines.splice(startLine - 1, delCount);
   }
 
   // 行を再結合して返す
   return lines.join('\n');
+}
+
+
+/**
+ * 不完全なJSDocコメントを削除
+ * @param code 
+ * @returns 除外後のコード
+ */
+export function removeIncompleteJSDoc(code: string) {
+  return code.replace(/\/\*\*\s*\n(?!\s*\*)/g, '');
 }

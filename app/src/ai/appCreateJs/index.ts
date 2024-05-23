@@ -8,7 +8,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { v4 as uuidv4 } from 'uuid';
 
 import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
-import { addLineNumbersToCode, modifyCode } from "./util"
+import { addLineNumbersToCode, modifyCode, removeIncompleteJSDoc } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
 import { openAIModel, getCodingGuidelines } from "../common"
@@ -410,10 +410,12 @@ async function createJs(
       } else if (method === CodeCreateMethodEdit.delete) {
         // 削除の場合
         editedCode = modifyCode(editedCode, resProperties.startAt, resProperties.linesCount);
+        editedCode = removeIncompleteJSDoc(editedCode)
       }
     } catch (e) {
       throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00010}）`)
     }
+
     // フォーマット整形
     const formattedCode = await prettier.format(editedCode, { parser: "babel", plugins: [parserBabel, prettierPluginEstree] })
       .catch(() => {
