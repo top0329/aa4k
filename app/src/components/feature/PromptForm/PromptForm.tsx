@@ -1,10 +1,10 @@
 // src/components/feature/PromptForm/PromptForm.tsx
 import { faRotateRight, faMicrophone, faSparkles } from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Badge, Box, Button, Flex, Text, Tooltip } from '@radix-ui/themes';
+import { Box, Button, Flex, Text, Tooltip } from '@radix-ui/themes'; // SPモードの切り替えトグルの非表示対応で「Badge,」を除外
 import { motion } from "framer-motion";
 import { PromptTextArea } from "~/components/ui/PromptTextarea/PromptTextArea";
-import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
+// import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
 import { vars } from '~/styles/theme.css';
 import { sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
@@ -33,7 +33,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
-    toggleChatVisibilityHandler
+    // toggleChatVisibilityHandler
   } = usePromptFormLogic({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, startLoading, stopLoading, isChangeCodeRef, scrollRef });
 
   // Define animation variants for the submit button
@@ -118,13 +118,13 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
           justify={'between'}
         >
           <Flex gap="2" align={'center'}>
-            <ToggleSwitch isOn={isPcViewMode} onToggle={() =>
+            {/* <ToggleSwitch isOn={isPcViewMode} onToggle={() =>
               toggleChatVisibilityHandler()
             }
               disabled={isLoading} />
             {
               isPcViewMode ? <Badge color='iris'>スマートフォン用アプリのカスタマイズに切り替える</Badge> : <Badge color='cyan'>PC用アプリのカスタマイズに切り替える</Badge>
-            }
+            } */}
           </Flex>
           <Flex gap={'5'}
             justify={'center'}

@@ -193,7 +193,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
                 gap: 16,
               }}
             >
-              <Button variant='soft' color='crimson' size={'3'}
+              {/* <Button variant='soft' color='crimson' size={'3'}
                 onClick={() => handleRunCodeAction(CodeActionDialogType.CodeCheck)}
                 style={{
                   cursor: 'pointer',
@@ -201,7 +201,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ isChangeCodeRef, isLoading }) =
                 disabled={!code || isLoading}
               >
                 チェック
-              </Button>
+              </Button> */}
               <Button variant='classic' color={
                 isPcViewMode
                   ? 'iris'
