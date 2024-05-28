@@ -19,7 +19,7 @@ export class Aa4kSecretsStack extends cdk.Stack {
         secretStringTemplate: JSON.stringify({
           azureApiManagementEndpoint: contextProps.apiManagementEndpoint,
           azureOpenAIApiInstanceName: contextProps.openAIApiInstanceName,
-          azureOpenAIApiDeploymentName: "gpt-4-0125-preview",
+          azureOpenAIApiDeploymentName: "gpt-4o-global",  // モデルを変更する場合はここを修正
           azureOpenAIApiVersion: "2024-02-15-preview",
           azureOpenAIEmbeddingApiDeploymentName: "text-embedding-3-large",
           azureOpenAIEmbeddingApiVersion: "2023-05-15",
