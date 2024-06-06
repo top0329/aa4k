@@ -1,6 +1,6 @@
 import { DocumentInterface } from "@langchain/core/documents";
 import { ContractStatus, UserRating, ErrorCode } from "~/constants";
-import { SystemSettings } from "./ai";
+import { SystemSettings, PromptInfo } from "./ai";
 
 export type ResponseHeaders = Record<string, any>;
 export type KintoneProxyResponse = [string, number, ResponseHeaders];
@@ -59,4 +59,13 @@ export interface AzureOpenAiProxyCredentialResponseBody
   AccessKeyId: string
   SecretAccessKey: string
   SessionToken?: string
+}
+
+// ********************
+// プロンプト情報
+// ********************
+export type PromptInfoList = Array<PromptInfo>;
+export interface PromptInfoListResponseBody
+  extends KintoneProxyResponseBody {
+    promptInfoList: PromptInfoList;
 }

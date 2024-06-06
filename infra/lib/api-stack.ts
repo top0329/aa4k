@@ -114,6 +114,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // ******************************
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
+      description: "コードテンプレート管理API",
       entry: __dirname + "/lambda/api/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
@@ -145,6 +146,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // conversationHistory Lambda
     const conversationHistoryLambda = new nodelambda.NodejsFunction(this, "ConversationHistoryLambda", {
+      description: "会話履歴API",
       entry: __dirname + "/lambda/api/conversationHistory/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
@@ -176,6 +178,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // generatedCode Lambda
     const generatedCodeLambda = new nodelambda.NodejsFunction(this, "GeneratedCodeLambda", {
+      description: "最新JSコード取得API",
       entry: __dirname + "/lambda/api/generatedCode/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
@@ -203,6 +206,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // pre-check Lambda
     const preCheck = new nodelambda.NodejsFunction(this, "preCheck", {
+      description: "事前チェックAPI",
       entry: __dirname + "/lambda/api/preCheck/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
@@ -228,6 +232,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // speech Lambda
     const speech = new nodelambda.NodejsFunction(this, "SpeechLambda", {
+      description: "Text To Speech API",
       entry: __dirname + "/lambda/api/speech/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
@@ -254,6 +259,7 @@ export class Aa4kApiStack extends cdk.Stack {
 
     // LangchainLog Lambda
     const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
+      description: "Langchain実行ログ登録API",
       entry: __dirname + "/lambda/api/langchainLog/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
@@ -271,6 +277,30 @@ export class Aa4kApiStack extends cdk.Stack {
     secretsStack.azureSecret.grantRead(langchainLog);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(langchainLog)
     restapi.root.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
+    })
+
+    // prompt Lambda
+    const prompt = new nodelambda.NodejsFunction(this, "PromptLambda", {
+      description: "プロンプト取得API",
+      entry: __dirname + "/lambda/api/prompt/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(prompt);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(prompt)
+    restapi.root.addResource("prompt").addMethod("POST", new apigateway.LambdaIntegration(prompt), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })

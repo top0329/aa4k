@@ -55,6 +55,7 @@ export interface AppCreateJsContext {
   isGuestSpace: boolean;
   systemSettings: SystemSettings;
   pluginId: string;
+  promptInfoList?: PromptInfo[]
 }
 export interface Conversation {
   message: HumanMessage;
@@ -75,4 +76,21 @@ export interface CodeCheckResponse {
 export interface kintoneFormFields {
   properties: Record<string, any>;
   revision: string;
+}
+
+export interface Prompt {
+  prompt: string;
+}
+export interface PromptFunctionParameter {
+  item_id: number;
+  parent_item_id: number | null;
+  item_name: string;
+  item_type: string;
+  item_describe: string;
+  constants: string;
+}
+export interface PromptInfo extends Prompt {
+  service_div: string,
+  prompt: string;
+  prompt_function_parameter: PromptFunctionParameter[],
 }

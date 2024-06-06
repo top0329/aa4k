@@ -7,16 +7,16 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { v4 as uuidv4 } from 'uuid';
 
-import { APP_CREATE_JS_SYSTEM_PROMPT } from "./prompt"
 import { addLineNumbersToCode, modifyCode, removeIncompleteJSDoc } from "./util"
 import { CodeTemplateRetriever } from "./retriever";
 import { LangchainLogsInsertCallbackHandler } from "../langchainLogsInsertCallbackHandler";
-import { openAIModel, getCodingGuidelines } from "../common"
-import { DeviceDiv, CodeCreateMethodCreate, CodeCreateMethodEdit, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst } from "~/constants"
+import { openAIModel, getCodingGuidelines, createZodSchema } from "../common"
+import { DeviceDiv, CodeCreateMethodCreate, CodeCreateMethodEdit, ErrorCode, InfoMessage, ErrorMessage as ErrorMessageConst, ServiceDiv } from "~/constants"
 import { AiResponse, Conversation, MessageType, AppCreateJsContext, kintoneFormFields } from "../../types/ai";
 import { GeneratedCodeGetResponseBody, KintoneProxyResponse, KintoneRestAPiError } from "~/types/apiResponse";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from "../../util/kintoneCustomize"
 import { getApiErrorMessageForCreateJs } from "~/util/getErrorMessage"
+import { getPromptInfoList } from "~/util/getPrompt"
 
 import { LlmError, KintoneError, ApiError, GuidelineError, RetrieveError, ContractExpiredError, ContractStatusError } from "~/util/customErrors"
 
@@ -261,7 +261,7 @@ async function createJs(
 ) {
   const { message, chatHistory = [] } = conversation; // デフォルト値としてchatHistory = []を設定
   const appCreateJsContext = conversation.context as AppCreateJsContext;
-  const { appId, userId, conversationId, deviceDiv, contractStatus, systemSettings, pluginId } = appCreateJsContext;
+  const { appId, userId, conversationId, deviceDiv, contractStatus, systemSettings, pluginId, promptInfoList } = appCreateJsContext;
   const codingGuideline = codingGuidelineList[0];
   const secureCodingGuideline = codingGuidelineList[1];
 
@@ -278,46 +278,37 @@ async function createJs(
       }
     });
   }
+
+  // --------------------
+  // プロンプト情報の確認
+  // --------------------
+  let latestPromptInfoList = promptInfoList;
+  if (!latestPromptInfoList || latestPromptInfoList.length === 0) {
+    // プロンプト情報が取得できていない場合は取得
+    const { promptResult, resStatus: resPromptStatus } = await getPromptInfoList(pluginId);
+    if (resPromptStatus !== 200) {
+      const errorMessage = getApiErrorMessageForCreateJs(resPromptStatus, promptResult.errorCode)
+      throw new ApiError(errorMessage)
+    }
+    latestPromptInfoList = promptResult.promptInfoList;
+  }
+  const jsCreatePromptInfo = latestPromptInfoList.find(info => info.service_div === ServiceDiv.jsCreate);
+  if (!jsCreatePromptInfo) {
+    throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00013}）`);
+  }
+
   // 生成（LLM実行）
   const handler = new LangchainLogsInsertCallbackHandler({ pluginId, sessionId, appId, userId, conversationId });
   const model = openAIModel(pluginId, sessionId, contractStatus);
   const prompt = ChatPromptTemplate.fromMessages([
-    ["system", APP_CREATE_JS_SYSTEM_PROMPT],
+    ["system", jsCreatePromptInfo.prompt],
     ...histories,
     ["human", message.content],
   ]);
 
   // LLMの出力形式を設定
-  const createMethod = z.nativeEnum(CodeCreateMethodCreate).describe("必ず'CREATE'を設定");
-  const editMethod = z.nativeEnum(CodeCreateMethodEdit).describe("必ず'ADD','UPDATE','DELETE'のいずれかだけを設定");
-  const zodSchema = z.object({
-    resultMessage: z.string().describe("質問に対する結果メッセージ"),
-    properties:
-      z.object({
-        method: originalCode ? editMethod : createMethod,
-        startAt: z.number().describe("対象のオリジナルコードの開始の行番号"),
-        endAt: z.number().describe("対象のオリジナルコードの終了の行番号"),
-        linesCount: z.number().describe("対象のオリジナルコードの開始の行番号から終了行番号までの行数"),
-        referenceJavascriptCode: z.string().describe("ピックアップしたテンプレートの内容"),
-        jsdoc: z.string().describe("作成したjavascriptコードに必要なJSDoc"),
-        javascriptCode: z.string().describe("作成したjavascriptコードにJSDocコメントを付けたもの"),
-        updateInfo: z.object({
-          targetCode: z.string().describe("更新対象となるオリジナルコードの開始から終了までのjavascriptコード"),
-          targetStartAt: z.number().describe("更新対象となるオリジナルコードの開始の行番号"),
-          updateJavascriptCode: z.string().describe("更新用のjavascriptコード"),
-        }).describe("[更新]の場合の情報"),
-      }).describe("作成したjavascriptの詳細"),
-    supplement: z.object({
-      where: z.string().describe("どの画面での処理なのか（例: 一覧画面、詳細画面、追加画面、編集画面 etc.）"), // どこで
-      when: z.string().describe("何をしたときの処理なのか（例: ○○画面を表示したとき、○○フィールドを変更したとき、○○画面で保存したとき etc.）"),  // いつ
-      what: z.string().describe("何に対しての処理なのか（例: タイトルを、メールアドレスを、○○のレコードを etc.）"),  // 何を
-      how: z.string().describe("何をする処理なのか（例: 背景色を変更する、値をセットする、小文字に変換、無効化する etc.）"), // どのように
-      contentsOfCreatedJs: z.string().describe("[where],[when],[what],[how]をもとした機能の説明（例: whereをwhenしたときに、watをhowする機能を作成しました。）"),
-      instructionsToChange: z.string().describe("作成されたjavascriptに対する修正指示の具体的な例文"),
-    }).describe("質問に対するメッセージの補足情報"),
-    violationOfGuidelines: z.string().describe("オリジナルコードのガイドライン違反"),
-    guideMessage: z.string().describe("ガイドライン違反のためユーザーの要望に答えられなかった内容（無ければブランク）"),
-  }).describe("LLM問い合わせ結果");
+  const zodSchema = createZodSchema(jsCreatePromptInfo, "LLM問い合わせ結果");
+
   type LLMResponse = z.infer<typeof zodSchema>;
   const functionCallingModel = model.bind({
     functions: [

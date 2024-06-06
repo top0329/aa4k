@@ -62,6 +62,13 @@ export const LlmType = {
 } as const;
 export type LlmType = keyof typeof LlmType;
 
+// サービス区分
+export const ServiceDiv = {
+  jsCreate: "js_create",
+  jsCheck: "js_check"
+} as const;
+export type ServiceDiv = keyof typeof ServiceDiv;
+
 // エラーコード
 export const ErrorCode = {
   // 認証チェック(A01)
@@ -105,6 +112,10 @@ export const ErrorCode = {
   // Text To Speech API(A07)
   A07001: "A07001",   // リクエストが不正
   A07099: "A07099",   // その他例外エラー
+  // プロンプト取得API(A09)
+  A09001: "A09001",   // リクエストが不正
+  A09002: "A09002",   // プロンプトデータなしエラー
+  A09099: "A09099",   // その他例外エラー
   // フロント側のエラーコード
   E00001: "E00001", // アプリIDが取得できない
   E00002: "E00002", // 契約期間外
@@ -118,6 +129,7 @@ export const ErrorCode = {
   E00010: "E00010", // JS生成後の編集でエラー
   E00011: "E00011", // レート制限によるエラー
   E00012: "E00012", // propertiesのバリデーションチェックによるエラー
+  E00013: "E00013", // LLM プロンプト情報の取得なし
   E99999: "E99999", // その他例外エラー
 } as const;
 export type ErrorCode = keyof typeof ErrorCode;

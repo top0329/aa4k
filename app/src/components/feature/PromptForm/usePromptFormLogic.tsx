@@ -15,6 +15,7 @@ import { InTypeWriteState } from '~/state/inTypeWriteState';
 import { PluginIdState } from '~/state/pluginIdState';
 import { ReloadState } from "~/state/reloadState";
 import { ViewModeState } from '~/state/viewModeState';
+import { PromptInfoListState } from '~/state/promptState';
 import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
 import { InsertConversationResponseBody, KintoneProxyResponse, KintoneProxyResponseBody, KintoneRestAPiError } from '~/types/apiResponse';
 import { KintoneError } from "~/util/customErrors";
@@ -59,6 +60,7 @@ export const usePromptFormLogic = ({
   const [, setInTypeWrite] = useAtom(InTypeWriteState);
   const [pluginId] = useAtom(PluginIdState);
   const [, setIsReload] = useAtom(ReloadState);
+  const [promptInfoList] = useAtom(PromptInfoListState);
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
@@ -227,6 +229,7 @@ export const usePromptFormLogic = ({
             isGuestSpace: isGuest,
             systemSettings: systemSettings,
             pluginId: pluginId,
+            promptInfoList: promptInfoList
           },
         },
         isChangeCode,

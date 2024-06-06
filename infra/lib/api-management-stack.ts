@@ -84,6 +84,7 @@ export class Aa4kApiManagementStack extends cdk.Stack {
     // ******************************
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
+      description: "運用用_コードテンプレート管理",
       entry: __dirname + "/lambda/managementApi/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,

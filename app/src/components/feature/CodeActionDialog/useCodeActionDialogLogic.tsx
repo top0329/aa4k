@@ -8,6 +8,7 @@ import { CodeActionDialogType, CodeCheckStatus, DeviceDiv, ErrorCode, ErrorMessa
 import { PluginIdState } from '~/state/pluginIdState';
 import { ReloadState } from "~/state/reloadState";
 import { ViewModeState } from '~/state/viewModeState';
+import { PromptInfoListState } from '~/state/promptState';
 import { CodeActionDialogProps } from "~/types/codeActionDialogTypes";
 import { getKintoneCustomizeJs, updateKintoneCustomizeJs } from '~/util/kintoneCustomize';
 import { preCheck } from '~/util/preCheck';
@@ -20,6 +21,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
   const [isPcViewMode] = useAtom(ViewModeState);
   const [pluginId] = useAtom(PluginIdState);
   const [, setIsReload] = useAtom(ReloadState);
+  const [promptInfoList] = useAtom(PromptInfoListState);
 
   const { isLoading,
     startLoading,
@@ -109,7 +111,7 @@ export const useCodeActionDialogLogic = (props: CodeActionDialogProps) => {
         return;
       }
       // コードチェックの呼び出し
-      const resCodeCheck = await codeCheck(props.code, pluginId, contractStatus, appId, userId);
+      const resCodeCheck = await codeCheck(props.code, pluginId, contractStatus, appId, userId, promptInfoList);
 
       switch (resCodeCheck.result) {
         case CodeCheckStatus.safe:

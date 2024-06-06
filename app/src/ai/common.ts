@@ -1,8 +1,11 @@
+import { z, ZodTypeAny, ZodObject, ZodRawShape } from 'zod';
 import { ChatOpenAI } from "@langchain/openai";
 import { LlmType, ContractStatus, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import * as cheerio from "cheerio"
 import { KintoneProxyResponse, AzureOpenAiProxyCredentialResponseBody } from "~/types/apiResponse"
 import { ContractExpiredError, ContractStatusError, GuidelineError } from "~/util/customErrors"
+import { PromptInfo, PromptFunctionParameter } from "~/types/ai"
+
 import { Fetch } from "openai/core"
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
@@ -246,4 +249,60 @@ async function azureOpenAiProxyRequest(credentials: Credentials, url: string, re
     req.headers,
     req.body,
   ) as KintoneProxyResponse;
+}
+
+/**
+ * LLM連携用のzodスキーマの生成
+ * @param inputData 
+ * @param parentDescribe 
+ * @returns 
+ */
+export function createZodSchema(inputData: PromptInfo, parentDescribe: string): ZodObject<ZodRawShape> {
+  // 型マッピング
+  const typeMapping: { [key: string]: (...args: any[]) => ZodTypeAny } = {
+    string: () => z.string(),
+    number: () => z.number(),
+    object: (children: ZodRawShape) => z.object(children),
+    array: (itemType: ZodTypeAny) => z.array(itemType),
+    nativeEnum: (constants: string[]) => z.enum(constants as [string, ...string[]]),
+  };
+
+  // 入力データの解析
+  const parseParameters = (params: PromptFunctionParameter[], parentId: number | null = null): ZodRawShape => {
+    return params
+      .filter(param => param.parent_item_id === parentId)
+      .reduce((acc, param) => {
+        const { item_name, item_type, item_describe, item_id, constants } = param;
+        const children = parseParameters(params, item_id);
+
+        let schema: ZodTypeAny;
+        if (item_type === 'object') {
+          // object型の場合
+          schema = typeMapping[item_type](children).describe(item_describe);
+        } else if (item_type === 'array') {
+          // array型の場合
+          const arrayItemType = params.find(p => p.parent_item_id === item_id);
+          if (arrayItemType) {
+            schema = typeMapping[item_type](typeMapping[arrayItemType.item_type]().describe(arrayItemType.item_describe)).describe(item_describe);
+          } else {
+            throw new Error(`Array item type not found for item_id: ${item_id}`);
+          }
+        } else if (item_type === 'nativeEnum') {
+          // nativeEnum型の場合
+          const constantsArray = constants.split(',');
+          schema = typeMapping[item_type](constantsArray).describe(item_describe);
+        } else {
+          // 上記以外の型の場合
+          schema = typeMapping[item_type]().describe(item_describe);
+        }
+
+        acc[item_name] = schema;
+        return acc;
+      }, {} as ZodRawShape);
+  };
+
+  // Zodスキーマの生成
+  const zodSchema = z.object(parseParameters(inputData.prompt_function_parameter)).describe(parentDescribe);
+
+  return zodSchema;
 }

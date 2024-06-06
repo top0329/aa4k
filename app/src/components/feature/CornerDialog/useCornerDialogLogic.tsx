@@ -9,6 +9,7 @@ import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useChatHistory } from "~/hooks/useChatHistory";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
 import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
+import { PromptInfoListState } from '~/state/promptState';
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
 import { PluginIdState } from "~/state/pluginIdState";
@@ -20,6 +21,7 @@ import { ToastPosition } from "~/types/ToastPosition";
 import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from "~/util/preCheck";
+import { getPromptInfoList } from "~/util/getPrompt"
 
 type DragPosition = { x: number; y: number };
 
@@ -33,6 +35,7 @@ export const useCornerDialogLogic = () => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const { chatHistoryItems } = useChatHistory(isPcViewMode);
   const [, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
+  const [, setPromptInfoList] = useAtom(PromptInfoListState);
   const [, setMobileChatHistory] = useAtom(MobileChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
   const [isReload, setIsReload] = useAtom(ReloadState);
@@ -133,6 +136,9 @@ export const useCornerDialogLogic = () => {
       setIsBannerClicked(false);
       setIsInitVisible(true);
       setIsReload(false);
+
+      // プロンプト情報の取得
+      execGetPromptInfoList();
     } catch (err) {
       let message: string = '';
       if (err instanceof KintoneError) {
@@ -244,6 +250,18 @@ export const useCornerDialogLogic = () => {
     });
 
     return chatHistoryItemList;
+  }
+
+  // プロンプト情報の取得
+  const execGetPromptInfoList = async () => {
+    try {
+      const { promptResult, resStatus: _resPromptStatus } = await getPromptInfoList(pluginId);
+
+      const promptInfoList = promptResult.promptInfoList;
+      setPromptInfoList(promptInfoList);
+    } catch (err) {
+      // 何もしない
+    }
   }
 
   // エラートーストを表示
