@@ -27,7 +27,7 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
       justify={'between'}
       className={clsx(sDockGroup, 'allow-zoom')}>
       <Flex>
-        <img src={logoIcon} alt="logo" width={'40'} />
+        <img src={logoIcon} alt="logo" width={'70'} />
       </Flex>
       <Flex
         gap={'3'}
