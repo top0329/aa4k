@@ -1,0 +1,14 @@
+body#kintone-copilot-root,
+#kintone-copilot-root #sidebar-list-gaia {
+  height: fit-content;
+  padding-bottom: 68px;
+}
+
+/* ズーム機能を許可するCSSクラス */
+.allow-zoom {
+  touch-action: pan-x pan-y;
+}
+
+.allow-zoom > * {
+  pointer-events: auto;
+}

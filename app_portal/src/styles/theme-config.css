@@ -1,0 +1,33 @@
+/* theme-config.css */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap");
+
+.kintone-copilot,
+.kintone-copilot *,
+.kintone-copilot *:before,
+.kintone-copilot *:after {
+  box-sizing: inherit;
+}
+
+.radix-themes {
+  --default-font-size: 18px;
+  --default-font-family: "Noto Sans JP", sans-serif;
+  --default-letter-spacing: 1.4;
+
+  -line-height-1: calc(20px * var(--scaling));
+  --line-height-2: calc(24px * var(--scaling));
+  --line-height-3: calc(28px * var(--scaling));
+  --line-height-4: calc(30px * var(--scaling));
+
+  --letter-spacing-1: 0.0025em;
+  --letter-spacing-2: 0.05em;
+  --letter-spacing-3: 0.05em;
+  --letter-spacing-4: 0.1em;
+}
+
+#kintone-copilot {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 100;
+  line-height: 1.65;
+}

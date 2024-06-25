@@ -1,0 +1,30 @@
+// tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ES2022",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": ["vite-plugin-svgr/client"]
+  },
+  "files" : [
+    "./node_modules/@kintone/dts-gen/kintone.d.ts"
+  ],
+  "include": ["src", "**/*.ts","**/*.tsx",],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "extends": "./tsconfig.paths.json"
+}
