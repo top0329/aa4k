@@ -1,7 +1,9 @@
 // functions
 export { getContractStatus } from "./getContractStatus";
 export { getSubscriptionData } from "./getSubscriptionData";
+export { getSubdomainData } from "./getSubdomainData";
 export { checkPluginVersion } from "./checkPluginVersion";
+export { checkPortalJsVersion } from "./checkPortalJsVersion"
 export { getSecretValues, getSecretValue } from "./getSecretValues";
 export { getParameterValues, AA4KConstParameterValue } from "./getParameterValues";
 export { getDbConfig } from "./getDbConfig";

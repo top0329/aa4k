@@ -112,6 +112,9 @@ export class Aa4kApiStack extends cdk.Stack {
     // ******************************
     // Lambda関数
     // ******************************
+    // ------------------------------
+    // JS生成
+    // ------------------------------
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
       description: "コードテンプレート管理API",
@@ -304,5 +307,37 @@ export class Aa4kApiStack extends cdk.Stack {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })
+
+    // ------------------------------
+    // アプリ生成
+    // ------------------------------
+    // 事前チェック(アプリ生成用)API
+    const restapi_app_generation = restapi.root.addResource("app_generation")
+    // appGeneration_pre-check Lambda
+    const appGeneration_preCheck = new nodelambda.NodejsFunction(this, "appGeneration_preCheck", {
+      description: "事前チェック(アプリ生成用)API",
+      entry: __dirname + "/lambda/api/appGeneration_preCheck/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(appGeneration_preCheck);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(appGeneration_preCheck)
+    parameterStack.aa4kConstParameter.grantRead(appGeneration_preCheck);
+    restapi_app_generation.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(appGeneration_preCheck), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
+    })
+
   }
 }

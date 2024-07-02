@@ -1,7 +1,9 @@
 // リクエストヘッダ
 export const RequestHeaderName = {
   aa4kSubscriptionId: "aa4k-subscription-id",
+  aa4kSubdomain: "aa4k-subdomain",
   aa4kPluginVersion: "aa4k-plugin-version",
+  aa4kPortalJsVersion: "aa4k-portal-js-version",
   aa4kApiKey: "aa4k-api-key",
 } as const;
 
