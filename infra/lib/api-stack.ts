@@ -311,7 +311,6 @@ export class Aa4kApiStack extends cdk.Stack {
     // ------------------------------
     // アプリ生成
     // ------------------------------
-    // 事前チェック(アプリ生成用)API
     const restapi_app_generation = restapi.root.addResource("app_generation")
     // appGeneration_pre-check Lambda
     const appGeneration_preCheck = new nodelambda.NodejsFunction(this, "appGeneration_preCheck", {
@@ -338,6 +337,38 @@ export class Aa4kApiStack extends cdk.Stack {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })
+
+    // conversationHistory Lambda
+    const appGeneration_conversationHistoryLambda = new nodelambda.NodejsFunction(this, "appGeneration_ConversationHistoryLambda", {
+      description: "会話履歴API",
+      entry: __dirname + "/lambda/api/appGeneration_conversationHistory/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+        SUGURES_ENDPOINT: contextProps.suguresEndpoint,
+        SUGURES_CLIENT_ID: contextProps.suguresClientId,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    });
+    secretsStack.azureSecret.grantRead(appGeneration_conversationHistoryLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(appGeneration_conversationHistoryLambda);
+    parameterStack.aa4kConstParameter.grantRead(appGeneration_conversationHistoryLambda);
+    restapi_app_generation.addResource("conversation_history").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(appGeneration_conversationHistoryLambda),
+      anyMethod: true,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
+        authorizer: lambdaAuthorizer,
+      }
+    });
 
   }
 }
