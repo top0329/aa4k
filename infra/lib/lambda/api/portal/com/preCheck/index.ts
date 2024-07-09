@@ -1,7 +1,7 @@
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from "zod";
 import { ErrorCode } from "./constants";
-import { getParameterValues, getSecretValues, ValidationError, getContractStatus, checkPortalJsVersion, getSubdomainData, RequestHeaderName } from "../../utils";
+import { getParameterValues, getSecretValues, ValidationError, getContractStatus, checkPortalJsVersion, getSubdomainData, RequestHeaderName } from "../../../../utils";
 
 /**
  * 事前チェック_アプリ生成用API

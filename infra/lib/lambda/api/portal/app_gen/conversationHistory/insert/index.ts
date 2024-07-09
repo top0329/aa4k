@@ -4,7 +4,7 @@ import { z } from "zod";
 import { InsertRequestBody, InsertRequestBodySchema } from "./schema";
 import { insertConversationHistory, updateAiConversationHistory } from "./dao";
 import { ErrorCode } from "../constants";
-import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubdomainData, changeSchemaSearchPath } from "../../../utils";
+import { getSecretValues, getDbConfig, ValidationError, RequestHeaderName, getSubdomainData, changeSchemaSearchPath } from "../../../../../utils";
 
 export const insertHandler = async (req: Request, res: Response) => {
   let subdomain;

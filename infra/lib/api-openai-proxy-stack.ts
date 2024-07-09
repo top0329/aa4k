@@ -62,6 +62,9 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     // ******************************
     // Lambda関数
     // ******************************
+    // ------------------------------
+    // プラグイン機能
+    // ------------------------------
     // Lambda 関数を定義
     const authorizerFunction = new nodelambda.NodejsFunction(this, "AuthorizerFunction", {
       entry: __dirname + "/lambda/authorizer/index.ts",
@@ -107,6 +110,56 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
       }
     )
 
+    // ------------------------------
+    // ポータル機能
+    // ------------------------------
+    const restapi_portal = restapi.root.addResource("portal")
+    const portalAuthFunction = new nodelambda.NodejsFunction(this, "PortalAuthFunction", {
+      entry: __dirname + "/lambda/authorizer/portal/index.ts",
+      handler: 'index.handler',
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    const portalAuth = new apigateway.RequestAuthorizer(this, 'PortalAuthorizer', {
+      handler: portalAuthFunction,
+      identitySources: [apigateway.IdentitySource.header('aa4k-subdomain')]
+    });
+    secretsStack.azureSecret.grantRead(portalAuthFunction);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(portalAuthFunction);
+    parameterStack.aa4kConstParameter.grantRead(portalAuthFunction);
+
+    // AWS Credential Provider Lambda
+    const portal_credProviderLambda = new nodelambda.NodejsFunction(this, "Portal_CredProviderLambda", {
+      entry: __dirname + "/lambda/azureOpenaiProxy/portal/credential/index.ts",
+      handler: "handler",
+      timeout: cdk.Duration.seconds(30),
+      runtime: Runtime.NODEJS_20_X
+    })
+    const portal_proxyInvokeRole = new iam.Role(this, "Portal_proxyInvokeRole", {
+      assumedBy: new iam.ArnPrincipal(portal_credProviderLambda.role!.roleArn),
+    })
+    portal_credProviderLambda.addEnvironment("PROXY_INVOKE_ROLE_ARN", portal_proxyInvokeRole.roleArn)
+
+    restapi_portal.addResource("azure_openai_proxy_credential").addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(portal_credProviderLambda),
+      {
+        authorizer: portalAuth,
+      }
+    )
+
+
+
     // Proxy Lambda
     const azureOpenaiProxyLambda = new nodelambda.NodejsFunction(this, "AzureOpenAIProxyLambda", {
       entry: __dirname + "/lambda/azureOpenaiProxy/index.ts",
@@ -120,7 +173,10 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     })
     const proxyFuncUrl = azureOpenaiProxyLambda.addFunctionUrl({ authType: FunctionUrlAuthType.AWS_IAM })
     azureOpenaiProxyLambda.grantInvokeUrl(proxyInvokeRole)
+    azureOpenaiProxyLambda.grantInvokeUrl(portal_proxyInvokeRole)
     secretsStack.azureSecret.grantRead(azureOpenaiProxyLambda)
     new cdk.CfnOutput(this, "AzureOpenAiProxyURL", { value: proxyFuncUrl.url })
+
+
   }
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // メッセージ種別
-export const MessageType = {
+export const ActionType = {
   create: "create",
   edit: "edit",
   duplicate: "duplicate",
@@ -9,7 +9,7 @@ export const MessageType = {
   complete: "complete",
   error: "error",
 } as const;
-export type MessageType = keyof typeof MessageType
+export type ActionType = keyof typeof ActionType
 
 
 // ******************************
@@ -18,7 +18,7 @@ export type MessageType = keyof typeof MessageType
 export const InsertRequestBodySchema = z.object({
   userId: z.string(),
   sessionId: z.string().uuid(),
-  messageType: z.nativeEnum(MessageType),
+  actionType: z.nativeEnum(ActionType).optional(),
   userMessage: z.string().optional(),
   resultMessage: z.string().optional(),
   resultMessageDetail: z.string().optional(),

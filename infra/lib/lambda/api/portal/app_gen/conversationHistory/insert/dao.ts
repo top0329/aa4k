@@ -21,17 +21,17 @@ export const insertConversationHistory = async (dbClient: Client, subdomain: str
     subdomain,
     reqBody.userId,
     reqBody.sessionId,
-    reqBody.messageType,
+    reqBody.actionType,
     reqBody.userMessage,
   ];
   let sql = "";
   sql += `insert into`;
   sql += ` t_conversation_history_app_gen`;
   sql += ` (`;
-  sql += ` subdomain`;
+  sql += ` sub_domain`;
   sql += ` , user_id`;
   sql += ` , session_id`;
-  sql += ` , message_type`;
+  sql += ` , action_type`;
   sql += ` , user_message`;
   sql += ` , user_message_at`;
   sql += ` )`;
@@ -57,7 +57,7 @@ export const insertConversationHistory = async (dbClient: Client, subdomain: str
  */
 export const updateAiConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<QueryResultRow>> => {
   const pram = [
-    reqBody.messageType,
+    reqBody.actionType,
     reqBody.resultMessage,
     reqBody.resultMessageDetail,
     reqBody.aiResponse,
@@ -69,7 +69,7 @@ export const updateAiConversationHistory = async (dbClient: Client, reqBody: Ins
   sql += `update`;
   sql += ` t_conversation_history_app_gen`;
   sql += ` set`;
-  sql += ` message_type = $1`;
+  sql += ` action_type = $1`;
   sql += ` , result_message = $2`;
   sql += ` , result_message_detail = $3`;
   sql += ` , ai_response = $4`;

@@ -84,6 +84,9 @@ export class Aa4kApiStack extends cdk.Stack {
     // ******************************
     // Lambdaオーソライザー
     // ******************************
+    // ------------------------------
+    // プラグイン機能
+    // ------------------------------
     // Lambda 関数を定義
     const authorizerFunction = new nodelambda.NodejsFunction(this, "AuthorizerFunction", {
       entry: __dirname + "/lambda/authorizer/index.ts",
@@ -109,11 +112,39 @@ export class Aa4kApiStack extends cdk.Stack {
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(authorizerFunction);
     parameterStack.aa4kConstParameter.grantRead(authorizerFunction);
 
+    // ------------------------------
+    // ポータル機能
+    // ------------------------------
+    const portalAuthFunction = new nodelambda.NodejsFunction(this, "PortalAuthFunction", {
+      entry: __dirname + "/lambda/authorizer/portal/index.ts",
+      handler: 'index.handler',
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    const portalAuth = new apigateway.RequestAuthorizer(this, 'PortalAuthorizer', {
+      handler: portalAuthFunction,
+      identitySources: [apigateway.IdentitySource.header('aa4k-subdomain')]
+    });
+    secretsStack.azureSecret.grantRead(portalAuthFunction);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(portalAuthFunction);
+    parameterStack.aa4kConstParameter.grantRead(portalAuthFunction);
+
+
     // ******************************
     // Lambda関数
     // ******************************
     // ------------------------------
-    // JS生成
+    // プラグイン機能
     // ------------------------------
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
@@ -309,13 +340,16 @@ export class Aa4kApiStack extends cdk.Stack {
     })
 
     // ------------------------------
-    // アプリ生成
+    // ポータル機能
     // ------------------------------
-    const restapi_app_generation = restapi.root.addResource("app_generation")
-    // appGeneration_pre-check Lambda
-    const appGeneration_preCheck = new nodelambda.NodejsFunction(this, "appGeneration_preCheck", {
-      description: "事前チェック(アプリ生成用)API",
-      entry: __dirname + "/lambda/api/appGeneration_preCheck/index.ts",
+    const restapi_portal = restapi.root.addResource("portal")
+    const restapi_portal_com = restapi_portal.addResource("com")
+    const restapi_portal_app_gen = restapi_portal.addResource("app_gen")
+
+    // portal_preCheckLambda
+    const portal_preCheckLambda = new nodelambda.NodejsFunction(this, "Portal_PreCheckLambda", {
+      description: "事前チェック(ポータル用)API",
+      entry: __dirname + "/lambda/api/portal/com/preCheck/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -330,18 +364,71 @@ export class Aa4kApiStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X
     })
-    secretsStack.azureSecret.grantRead(appGeneration_preCheck);
-    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(appGeneration_preCheck)
-    parameterStack.aa4kConstParameter.grantRead(appGeneration_preCheck);
-    restapi_app_generation.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(appGeneration_preCheck), {
+    secretsStack.azureSecret.grantRead(portal_preCheckLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(portal_preCheckLambda)
+    parameterStack.aa4kConstParameter.grantRead(portal_preCheckLambda);
+    restapi_portal_com.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(portal_preCheckLambda), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
-      authorizer: lambdaAuthorizer,
+      authorizer: portalAuth,
     })
 
-    // conversationHistory Lambda
-    const appGeneration_conversationHistoryLambda = new nodelambda.NodejsFunction(this, "appGeneration_ConversationHistoryLambda", {
-      description: "会話履歴API",
-      entry: __dirname + "/lambda/api/appGeneration_conversationHistory/index.ts",
+    // portal_promptLambda
+    const portal_promptLambda = new nodelambda.NodejsFunction(this, "Portal_PromptLambda", {
+      description: "プロンプト取得API",
+      entry: __dirname + "/lambda/api/portal/com/prompt/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(portal_promptLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(portal_promptLambda)
+    restapi_portal_com.addResource("prompt").addMethod("POST", new apigateway.LambdaIntegration(portal_promptLambda), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: portalAuth,
+    })
+
+
+    // portal_speechLambda
+    const portal_speechLambda = new nodelambda.NodejsFunction(this, "Portal_SpeechLambda", {
+      description: "Text To Speech API",
+      entry: __dirname + "/lambda/api/speech/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(portal_speechLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(portal_speechLambda);
+    const policyStatement_portal = new iam.PolicyStatement({
+      actions: ['polly:SynthesizeSpeech'],
+      resources: ['*']
+    });
+    portal_speechLambda.addToRolePolicy(policyStatement_portal);
+    restapi_portal_com.addResource("speech").addMethod("POST", new apigateway.LambdaIntegration(portal_speechLambda), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: portalAuth,
+    });
+
+
+    // appGen_conversationHistoryLambda
+    const appGen_conversationHistoryLambda = new nodelambda.NodejsFunction(this, "AppGen_ConversationHistoryLambda", {
+      description: "会話履歴(アプリ生成用)API",
+      entry: __dirname + "/lambda/api/portal/app_gen/conversationHistory/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -358,17 +445,42 @@ export class Aa4kApiStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(300),
       runtime: Runtime.NODEJS_20_X
     });
-    secretsStack.azureSecret.grantRead(appGeneration_conversationHistoryLambda);
-    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(appGeneration_conversationHistoryLambda);
-    parameterStack.aa4kConstParameter.grantRead(appGeneration_conversationHistoryLambda);
-    restapi_app_generation.addResource("conversation_history").addProxy({
-      defaultIntegration: new apigateway.LambdaIntegration(appGeneration_conversationHistoryLambda),
+    secretsStack.azureSecret.grantRead(appGen_conversationHistoryLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(appGen_conversationHistoryLambda);
+    parameterStack.aa4kConstParameter.grantRead(appGen_conversationHistoryLambda);
+    restapi_portal_app_gen.addResource("conversation_history").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(appGen_conversationHistoryLambda),
       anyMethod: true,
       defaultMethodOptions: {
         authorizationType: apigateway.AuthorizationType.CUSTOM,
-        authorizer: lambdaAuthorizer,
+        authorizer: portalAuth,
       }
     });
+
+    // appGen_langchainLogLambda
+    const appGen_langchainLogLambda = new nodelambda.NodejsFunction(this, "AppGen_LangchainLogLambda", {
+      description: "Langchain実行ログ登録API",
+      entry: __dirname + "/lambda/api/portal/app_gen/langchainLog/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(appGen_langchainLogLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(appGen_langchainLogLambda)
+    restapi_portal_app_gen.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(appGen_langchainLogLambda), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: portalAuth,
+    })
+
 
   }
 }
