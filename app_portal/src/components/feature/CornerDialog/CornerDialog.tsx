@@ -1,139 +1,82 @@
-// // src/componetns/feature/CornerDialog/CornerDialog.tsx
+// src/components/feature/CornerDialog/CornerDialog.tsx
 
-// import { faSparkles } from "@fortawesome/pro-duotone-svg-icons";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import * as Dialog from "@radix-ui/react-dialog";
-// import { Box, Flex } from "@radix-ui/themes";
-// import { AnimatePresence, motion } from 'framer-motion';
-// import { sDockGroup } from "~/components/feature/Dock/Dock.css";
-// import DragButton from "~/components/ui/DragButton/DragButton.tsx";
-// import BarLoading from "~/components/ui/Loading/BarLoading/BarLoading";
-// import ChatSkeleton from "~/components/ui/Skeleton/ChatSkeleton";
-// import DockSkeleton from "~/components/ui/Skeleton/DockSkeleton";
-// import "~/styles/scrollbar.css";
-// import Chat from "../Chat/Chat.tsx";
-// import CodeEditor from "../CodeEditor/CodeEditor.tsx";
-// import Dock from "../Dock/Dock.tsx";
-// import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
+import bannerButtonIcon from "~/assets/bannerButtonIcon.svg";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Flex } from "@radix-ui/themes";
+import { AnimatePresence, motion } from 'framer-motion';
+import DragButton from "~/components/ui/DragButton/DragButton.tsx";
+import "~/styles/scrollbar.css";
+import { sDialogOverlay, sBannerButtonIcon } from './CornerDialog.css';
+import AppGenerationDialog from "../AppGenerationDialog/AppGenerationDialog.tsx";
+import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
-// const CornerDialog = () => {
-//   const {
-//     dockState,
-//     handleBannerClick,
-//     isBannerClicked,
-//     isLoading,
-//     startLoading,
-//     stopLoading,
-//     isChangeCodeRef,
-//     savePosition,
-//     savedPosition,
-//     humanMessage,
-//     setHumanMessage,
-//     setCallbackFuncs,
-//     aiAnswerRef,
-//     finishAiAnswerRef,
-//     isInitVisible,
-//     isInitialChatHistory,
-//     isPcViewMode,
-//   } = useCornerDialogLogic();
+const CornerDialog = () => {
 
-//   return (
-//     <Dialog.Root open={dockState.dialogVisible}
-//       modal={false}
-//     >
-//       <motion.div
-//         initial={{ opacity: 0 }}
-//         animate={dockState.dialogVisible ? { opacity: 0 } : { opacity: 1 }}
-//         exit={{ opacity: 0 }}
-//       >
-//         <Dialog.Trigger asChild>
-//           <DragButton
-//             isVisible={!dockState.dialogVisible}
-//             initialPosition={savedPosition}
-//             onPositionChange={savePosition}
-//             onClick={event => handleBannerClick(event)}
-//             disabled={isBannerClicked}
-//           >
-//             <Flex style={{
-//               cursor: 'pointer',
-//             }}>
-//               <FontAwesomeIcon icon={faSparkles} color="white" />
-//             </Flex>
-//           </DragButton>
-//         </Dialog.Trigger>
-//       </motion.div>
-//       <Dialog.Overlay />
-//       <Dialog.Content>
-//         <AnimatePresence>
-//           {dockState.codeEditorVisible && (
-//             <motion.div
-//               initial={{ opacity: 0 }}
-//               animate={{ opacity: 1 }}
-//               exit={{ opacity: 0 }}
-//               transition={{ duration: 0.3 }}
-//             >
-//               <CodeEditor isChangeCodeRef={isChangeCodeRef} isLoading={isLoading} />
-//             </motion.div>
-//           )}
-//         </AnimatePresence>
-//         <AnimatePresence>
-//           {isPcViewMode && dockState.chatVisible && isInitialChatHistory && (
-//             <motion.div
-//               initial={{ opacity: 0 }}
-//               animate={{ opacity: 1 }}
-//               exit={{ opacity: 0 }}
-//               transition={{ duration: 0.3 }}
-//             >
-//               <Chat
-//                 isLoading={isLoading}
-//                 startLoading={startLoading}
-//                 stopLoading={stopLoading}
-//                 isChangeCodeRef={isChangeCodeRef}
-//                 humanMessage={humanMessage}
-//                 setHumanMessage={setHumanMessage}
-//                 setCallbackFuncs={setCallbackFuncs}
-//                 aiAnswerRef={aiAnswerRef}
-//                 finishAiAnswerRef={finishAiAnswerRef}
-//               />
-//             </motion.div>
-//           )}
-//         </AnimatePresence>
+  // CornerDialogコンポーネントのロジックを管理するカスタムフック
+  const {
+    isAppDialogVisible,
+    handleBannerClick,
+    isBannerClicked,
+    savePosition,
+    savedPosition,
+    humanMessage,
+    setHumanMessage,
+    // setCallbackFuncs,
+    aiAnswerRef,
+    finishAiAnswerRef,
+  } = useCornerDialogLogic();
 
-//         <AnimatePresence>
-//           {!isPcViewMode && dockState.spChatVisible && isInitialChatHistory && (
-//             <motion.div
-//               initial={{ opacity: 0 }}
-//               animate={{ opacity: 1 }}
-//               exit={{ opacity: 0 }}
-//               transition={{ duration: 0.3 }}
-//             >
-//               <Chat
-//                 isLoading={isLoading}
-//                 startLoading={startLoading}
-//                 stopLoading={stopLoading}
-//                 isChangeCodeRef={isChangeCodeRef}
-//                 humanMessage={humanMessage}
-//                 setHumanMessage={setHumanMessage}
-//                 setCallbackFuncs={setCallbackFuncs}
-//                 aiAnswerRef={aiAnswerRef}
-//                 finishAiAnswerRef={finishAiAnswerRef}
-//               />
-//             </motion.div>
-//           )}
-//         </AnimatePresence>
-//         {dockState.chatVisible && !isInitialChatHistory ? <ChatSkeleton /> : null}
-//         <BarLoading isLoading={isLoading} />
-//         {isInitVisible ? (
-//           <Dock setHumanMessage={setHumanMessage} isChangeCodeRef={isChangeCodeRef} />
-//         ) : (
-//           <Box className={sDockGroup} px={'0'}>
-//             <DockSkeleton />
-//           </Box>
-//         )}
+  return (
+    <Dialog.Root open={isAppDialogVisible} >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isAppDialogVisible ? { opacity: 0 } : { opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <Dialog.Trigger asChild>
+          <DragButton
+            isVisible={!isAppDialogVisible}
+            initialPosition={savedPosition}
+            onPositionChange={savePosition}
+            onClick={event => handleBannerClick(event)}
+            disabled={isBannerClicked}
+          >
+            <Flex style={{
+              cursor: 'pointer',
+            }}>
+              <Flex>
+                <img src={bannerButtonIcon} alt="icon" className={sBannerButtonIcon} />
+              </Flex>
+            </Flex>
+          </DragButton>
+        </Dialog.Trigger>
+      </motion.div>
+      <Dialog.Overlay className={sDialogOverlay} />
+      <Dialog.Content
+        onInteractOutside={(e) => e.preventDefault()} //外部クリックを無効にする
+      >
+        <AnimatePresence>
+          {/* AppGenerationDialogの表示にアニメーションを付ける（0.3秒で表示） */}
+          {isAppDialogVisible && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AppGenerationDialog
+                humanMessage={humanMessage}
+                setHumanMessage={setHumanMessage}
+                // setCallbackFuncs={setCallbackFuncs}
+                aiAnswerRef={aiAnswerRef}
+                finishAiAnswerRef={finishAiAnswerRef}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+};
 
-//       </Dialog.Content>
-//     </Dialog.Root>
-//   );
-// };
-
-// export default CornerDialog;
+export default CornerDialog;

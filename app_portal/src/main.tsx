@@ -3,7 +3,7 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-// import "regenerator-runtime/runtime"; // react-speech-recognition のエラーの回避のため https://github.com/JamesBrill/react-speech-recognition#regeneratorruntime-is-not-defined
+import "regenerator-runtime/runtime"; // react-speech-recognition のエラーの回避のため https://github.com/JamesBrill/react-speech-recognition#regeneratorruntime-is-not-defined
 import App from "./App";
 import ThemeProvider from "./ThemeProvider";
 

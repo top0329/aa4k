@@ -1,13 +1,12 @@
 // src/App.tsx
-// import { useAtom } from "jotai";
-// import CornerDialog from "./components/feature/CornerDialog/CornerDialog";
-import { Box } from "@radix-ui/themes";
+
+import CornerDialog from "./components/feature/CornerDialog/CornerDialog";
 
 const App = () => {
 
   return (
-      <Box>App</Box>
-      // <CornerDialog />
+    <CornerDialog />
   );
 }
+
 export default App;
