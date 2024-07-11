@@ -2,7 +2,7 @@ import { style } from '@vanilla-extract/css';
 
 export const sAiMessage = style({
   paddingTop:'24px',
-  height: '376px',
+  height: 'fit-content',
   position: 'relative',
   width: '770px',
   fontSize: '18px',

@@ -12,4 +12,7 @@ export const sUserContent = style({
   lineHeight: '24px',
   top: '-1px',
   whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis', // 表示限界を超えたら「…」を表示する
+  maxWidth: '100%',
 });

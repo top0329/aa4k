@@ -6,7 +6,12 @@ import { AiMessage } from "../AiMessage/AiMessage";
 import { sAiContents } from "./AiContents.css";
 import { AiContentProps } from "~/types/aiContentTypes";
 
-export const AiContents: React.FC<AiContentProps> = ({})=> {
+type AiContentsProps = AiContentProps & {
+  isLoadingVisible: boolean;
+  toggleAiLoadVisibility: (text: string) => void;
+};
+
+export const AiContents: React.FC<AiContentsProps> = ({isLoadingVisible, toggleAiLoadVisibility})=> {
   return (
     <Box className={sAiContents}>
       <Flex
@@ -14,7 +19,7 @@ export const AiContents: React.FC<AiContentProps> = ({})=> {
       >
         <AiResponseEffect />
         {/* TODO: アクションタイプ(create,edit...)の渡し方 */}
-        <AiMessage actionType="create" />
+        <AiMessage actionType="create" isLoadingVisible={isLoadingVisible} toggleAiLoadVisibility={toggleAiLoadVisibility} />
       </Flex>
     </Box>
   );

@@ -16,9 +16,11 @@ type ChatHistoryProps = {
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   isInitVisible: boolean;
   setIsInitVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoadingVisible: boolean;
+  toggleAiLoadVisibility: (text: string) => void;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible }) => {
+export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, isLoadingVisible, toggleAiLoadVisibility }) => {
 
   // ChatHistoryコンポーネントのロジックを管理するカスタムフック
   const {
@@ -159,7 +161,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
         >
           <Flex direction={'column'}>
             <UserContent humanMessage={humanMessage} />
-            <AiContents />
+            <AiContents isLoadingVisible={isLoadingVisible} toggleAiLoadVisibility={toggleAiLoadVisibility}/>
           </Flex>
           <div ref={scrollRef}></div>
         </ScrollArea>

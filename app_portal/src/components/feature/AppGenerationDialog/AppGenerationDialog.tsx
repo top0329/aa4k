@@ -1,10 +1,9 @@
 // src/components/feature/AppGenerationDialog/AppGenerationDialog.tsx
 
-// import React from "react";
-// import clsx from "clsx";
 import { Box } from "@radix-ui/themes";
 import { useAppGenerationDialogLogic } from "./useAppGenerationDialogLogic";
 import CloseButton from "~/components/ui/CloseButton/CloseButton";
+import { AiLoad } from "~/components/ui/AiLoad/AiLoad";
 import ChatHistory from "../ChatHistory/ChatHistory";
 import PromptForm from "../PromptForm/PromptForm";
 import { sAppGenerationDialog, sOuterFrame, sMiddleFrame } from "./AppGenerationDialog.css";
@@ -25,7 +24,9 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
     toggleDialogVisibility,
     isInitVisible,
     setIsInitVisible,
-  } = useAppGenerationDialogLogic();
+    isLoadingVisible,
+    toggleAiLoadVisibility,
+  } = useAppGenerationDialogLogic({ setHumanMessage });
 
   return (
     <Box className={sOuterFrame}>
@@ -34,17 +35,20 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
           <CloseButton
             onClick={() => toggleDialogVisibility()}
           />
-          <ChatHistory humanMessage={humanMessage} setHumanMessage={setHumanMessage} scrollRef={scrollRef} isInitVisible={isInitVisible} setIsInitVisible={setIsInitVisible} />
-          <PromptForm
-            humanMessage={humanMessage}
-            setHumanMessage={setHumanMessage}
-            // setCallbackFuncs={setCallbackFuncs}
-            aiAnswerRef={aiAnswerRef}
-            finishAiAnswerRef={finishAiAnswerRef}
-            scrollRef={scrollRef}
-            isInitVisible={isInitVisible}
-            setIsInitVisible={setIsInitVisible}
-          />
+          {isLoadingVisible && (<AiLoad></AiLoad>)}
+          <ChatHistory humanMessage={humanMessage} setHumanMessage={setHumanMessage} scrollRef={scrollRef} isInitVisible={isInitVisible} setIsInitVisible={setIsInitVisible} toggleAiLoadVisibility={toggleAiLoadVisibility} isLoadingVisible={isLoadingVisible} />
+          {!isLoadingVisible && (
+            <PromptForm
+              humanMessage={humanMessage}
+              setHumanMessage={setHumanMessage}
+              // setCallbackFuncs={setCallbackFuncs}
+              aiAnswerRef={aiAnswerRef}
+              finishAiAnswerRef={finishAiAnswerRef}
+              scrollRef={scrollRef}
+              isInitVisible={isInitVisible}
+              setIsInitVisible={setIsInitVisible}
+            />
+          )}
         </Box>
       </Box>
     </Box>
