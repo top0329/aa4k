@@ -39,4 +39,7 @@ export default defineConfig({
       delimiters: ["", ""],
     }),
   ],
+  define: {
+    '__NPM_PACKAGE_VERSION__': JSON.stringify(process.env.npm_package_version),
+  },
 });

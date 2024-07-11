@@ -1,0 +1,97 @@
+import { MessageType, ActionType, ContractStatus } from "~/constants"
+// メッセージ種別
+export type MessageContent = string;
+export interface ChatMessage {
+  role: MessageType;
+  content: MessageContent;
+}
+
+export interface SystemSettings {
+  historyUseCount: number;
+}
+export interface HumanMessage extends ChatMessage {
+  role: "human";
+}
+
+export interface AiMessage extends ChatMessage {
+  role: "ai";
+  // comment: MessageContent;
+}
+
+export interface SystemMessage extends ChatMessage {
+  role: "system";
+}
+
+export interface ErrorMessage extends ChatMessage {
+  role: "error";
+}
+export interface ChatHistoryItem {
+  human: HumanMessage;
+  ai?: AiMessage;
+  error?: ErrorMessage;
+  conversationId: string;
+}
+export type Context = Record<string, any>;
+export type ChatHistory = Array<ChatHistoryItem>;
+
+
+// ******************************
+// AI機能関連
+// ******************************
+// フィールド情報
+export interface Field {
+  fieldName: string;
+  fieldType: string;
+}
+// 設定リスト
+export interface SettingInfo {
+  appName: string;
+  fields: Field[]
+}
+// プロンプト情報
+export interface Prompt {
+  prompt: string;
+}
+export interface PromptFunctionParameter {
+  item_id: number;
+  parent_item_id: number | null;
+  item_name: string;
+  item_type: string;
+  item_describe: string;
+  constants: string;
+}
+export interface PromptInfo extends Prompt {
+  service_div: string,
+  prompt: string;
+  prompt_function_parameter: PromptFunctionParameter[],
+}
+
+
+export interface AppGenerationContext {
+  userId: string;
+  conversationId: string;
+  sessionId: string;
+  settingInfo?: SettingInfo;
+  contractStatus: ContractStatus;
+  promptInfoList?: PromptInfo[]
+}
+// アプリ作成のプランニング
+export interface AppGenerationPlanningContext extends AppGenerationContext {
+  // 「アプリ作成のプランニング」独自のものがあればここに定義
+  isCreating: boolean;
+}
+export interface AppGenerationPlanningConversation {
+  message: HumanMessage;
+  chatHistory?: ChatHistory;
+  context?: AppGenerationPlanningContext;
+}
+
+export interface AppGenerationPlanningResponse {
+  actionType: ActionType;
+  message: AiMessage | ErrorMessage;
+  message_detail?: string;
+  settingInfo?: SettingInfo;
+  sessionId?: string;
+  isCreating?: boolean;
+  callbacks?: Function[];
+}
