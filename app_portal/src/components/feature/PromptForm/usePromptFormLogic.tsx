@@ -1,6 +1,6 @@
 // src/components/feature/PromptForm/usePromptFormLogic.tsx
 
-// import { useAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -8,12 +8,19 @@ import SpeechRecognition, {
 // import { appCreateJs } from '~/ai/appCreateJs';
 // import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
 // import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
-// import { PromptInfoListState } from '~/state/promptState';
-// import { ChatHistoryItem, ErrorMessage, MessageType } from '~/types/ai';
+import { PromptInfoListState } from '~/state/promptState';
+import { SettingInfoState } from '~/state/settingInfoState';
+import { SessionIdState } from "~/state/sessionIdState";
+import { ChatHistoryItem, /*ErrorMessage,*/AppGenerationPlanningContext, AppGenerationPlanningConversation } from '~/types';
+import { MessageType } from "~/constants"
 // import { InsertConversationResponseBody, KintoneProxyResponse, KintoneProxyResponseBody, KintoneRestAPiError } from '~/types/apiResponse';
 // import { KintoneError } from "~/util/customErrors";
-// import { getApiErrorMessage } from '~/util/getErrorMessage';
-// import { preCheck } from '~/util/preCheck';
+import { getApiErrorMessage } from '~/util/getErrorMessage';
+import { preCheck } from '~/util/preCheck';
+import { insertConversation } from "~/util/insertConversationHistory"
+import { InsertConversationRequest, InsertConversationResponseBody } from "~/types/apiInterfaces"
+import { appGenerationPlanning } from "~/ai/appGen/appGenerationPlanning"
+
 
 type PromptFormProps = {
   humanMessage: string;
@@ -41,11 +48,13 @@ export const usePromptFormLogic = ({
   const [voiceInputVisible, setVoiceInputVisible] = useState(true);
   // 送信ボタン押下の状態管理
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [promptInfoList] = useAtom(PromptInfoListState);
+  const [promptInfoList] = useAtom(PromptInfoListState);
+  const [settingInfo] = useAtom(SettingInfoState);
+  const [sessionId, setSessionId] = useAtom(SessionIdState);
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
-
+  const [isCreating, setIsCreating] = useState(false);
   /* 
     useSpeechRecognitionフックから返されるオブジェクトのプロパティ
 
@@ -83,25 +92,21 @@ export const usePromptFormLogic = ({
 
       console.log("test", conversationId, currentHumanMessage);
 
-      //     const appId = kintone.app.getId();
-      //     const userId = kintone.getLoginUser().id;
-      //     const isGuest = kintone.getLoginUser().isGuest;
-      //     const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
-      //     const isChangeCode = isDesktopChangeCode || isMobileChangeCode ? true : false;
+      const userId = kintone.getLoginUser().id;
 
-      //     const chatHistoryItem: ChatHistoryItem = {
-      //       human: {
-      //         role: MessageType.human,
-      //         content: humanMessage,
-      //       },
-      //       ai: {
-      //         role: MessageType.ai,
-      //         content: "",
-      //         comment: "",
-      //       },
-      //       conversationId: "",
-      //     };
-      //     setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      const chatHistoryItem: ChatHistoryItem = {
+        human: {
+          role: MessageType.human,
+          content: humanMessage,
+        },
+        ai: {
+          role: MessageType.ai,
+          content: "",
+          messageDetail: "",
+        },
+        conversationId: "",
+      };
+      // setChatHistory([...chatHistoryItems, chatHistoryItem]);
       //     setHumanMessage("");
       //     setInTypeWrite(true);
       setIsSubmitting(true);
@@ -113,114 +118,85 @@ export const usePromptFormLogic = ({
       //       scrollRef.current.scrollIntoView();
       //     }
 
-      //     // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
-      //     if (appId === null) {
-      //       const errorMessage: ErrorMessage = {
-      //         role: MessageType.error,
-      //         content: `${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`
-      //       };
-      //       const chatHistoryItem: ChatHistoryItem = {
-      //         human: {
-      //           role: MessageType.human,
-      //           content: humanMessage,
-      //         },
-      //         error: errorMessage,
-      //         conversationId: "",
-      //       };
-      //       aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-      //       finishAiAnswerRef.current = true;
-      //       setChatHistory([...chatHistoryItems, chatHistoryItem]);
-      //       setHumanMessage("");
-      //       setInTypeWrite(true);
-      //       setIsSubmitting(false);
-      //       stopLoading?.();
-      //       return;
-      //     }
 
-      //     // 事前チェックの呼び出し
-      //     const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
-      //     if (resPreCheckStatus !== 200) {
-      //       // APIエラー時のエラーメッセージを取得
-      //       const errMsgStr = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
+      // 事前チェックの呼び出し
+      const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck();
+      if (resPreCheckStatus !== 200) {
+        // APIエラー時のエラーメッセージを取得
+        const errMsgStr = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
+        console.log("errMsgStr:", errMsgStr)
 
-      //       const errorMessage: ErrorMessage = {
-      //         role: MessageType.error,
-      //         content: errMsgStr
-      //       };
-      //       const chatHistoryItem: ChatHistoryItem = {
-      //         human: {
-      //           role: MessageType.human,
-      //           content: humanMessage,
-      //         },
-      //         error: errorMessage,
-      //         conversationId: "",
-      //       };
-      //       aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-      //       finishAiAnswerRef.current = true;
-      //       setChatHistory([...chatHistoryItems, chatHistoryItem]);
-      //       setHumanMessage("");
-      //       setInTypeWrite(true);
-      //       setIsSubmitting(false);
-      //       stopLoading?.();
-      //       return;
-      //     }
-      //     const contractStatus = preCheckResult.contractStatus;
-      //     const systemSettings = preCheckResult.systemSettings;
+        // const errorMessage: ErrorMessage = {
+        //   role: MessageType.error,
+        //   content: errMsgStr
+        // };
+        // const chatHistoryItem: ChatHistoryItem = {
+        //   human: {
+        //     role: MessageType.human,
+        //     content: humanMessage,
+        //   },
+        //   error: errorMessage,
+        //   conversationId: "",
+        // };
+        // aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
+        // finishAiAnswerRef.current = true;
+        // setChatHistory([...chatHistoryItems, chatHistoryItem]);
+        // setHumanMessage("");
+        // setInTypeWrite(true);
+        // setIsSubmitting(false);
+        // stopLoading?.();
+        return;
+      }
+      const contractStatus = preCheckResult.contractStatus;
 
-      //     // ユーザ発話の登録
-      //     const resInsertConversation = await kintone.plugin.app.proxy(
-      //       pluginId,
-      //       `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
-      //       "POST",
-      //       {},
-      //       { appId: appId, userId: userId, deviceDiv: deviceDiv, messageType: MessageType.human, message: humanMessage },
-      //     ) as KintoneProxyResponse;
-      //     const [resBody, resInsertConversationStatus] = resInsertConversation;
-      //     const resJsonInsertConversation = JSON.parse(resBody) as InsertConversationResponseBody;
-      //     if (resInsertConversationStatus !== 200) {
-      //       // APIエラー時のエラーメッセージを取得
-      //       const errMsgStr = getApiErrorMessage(resInsertConversationStatus, resJsonInsertConversation.errorCode);
+      // ユーザ発話の登録
+      const reqConversation: InsertConversationRequest = {
+        userId: userId,
+        sessionId: sessionId,
+        userMessage: humanMessage,
+      };
+      const resInsertConversation = await insertConversation(reqConversation);
+      const [resBody, resInsertConversationStatus] = resInsertConversation;
+      const resJsonInsertConversation = JSON.parse(resBody) as InsertConversationResponseBody;
+      if (resInsertConversationStatus !== 200) {
+        // APIエラー時のエラーメッセージを取得
+        const errMsgStr = getApiErrorMessage(resInsertConversationStatus, resJsonInsertConversation.errorCode);
+        console.log("errMsgStr:", errMsgStr)
+        // // AIメッセージオブジェクトの削除
+        // delete chatHistoryItem.ai;
+        // chatHistoryItem.error = {
+        //   role: MessageType.error,
+        //   content: errMsgStr,
+        // };
+        // aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
+        // finishAiAnswerRef.current = true;
+        // setChatHistory([...chatHistoryItems, chatHistoryItem]);
+        // setInTypeWrite(true);
+        // setIsSubmitting(false);
+        // stopLoading?.();
+        return;
+      }
+      conversationId = resJsonInsertConversation.conversationId;
 
-      //       // AIメッセージオブジェクトの削除
-      //       delete chatHistoryItem.ai;
-      //       chatHistoryItem.error = {
-      //         role: MessageType.error,
-      //         content: errMsgStr,
-      //       };
-      //       aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-      //       finishAiAnswerRef.current = true;
-      //       setChatHistory([...chatHistoryItems, chatHistoryItem]);
-      //       setInTypeWrite(true);
-      //       setIsSubmitting(false);
-      //       stopLoading?.();
-      //       return;
-      //     }
-      //     conversationId = resJsonInsertConversation.conversationId;
+      // AI機能（kintoneカスタマイズJavascript生成）の呼び出し
+      const context: AppGenerationPlanningContext = {
+        userId: userId,
+        conversationId: conversationId,
+        sessionId: sessionId,
+        isCreating: isCreating,
+        settingInfo: settingInfo,
+        contractStatus: contractStatus,
+        promptInfoList: promptInfoList
+      }
+      const conversation: AppGenerationPlanningConversation = {
+        message: chatHistoryItem.human,
+        chatHistory: [],// chatHistoryItems, TODO: chatHistoryの設定
+        context: context,
+      }
+      const response = await appGenerationPlanning(conversation);
+      setIsCreating(response.isCreating)
+      setSessionId(response.sessionId)
 
-      //     // AI機能（kintoneカスタマイズJavascript生成）の呼び出し
-      //     const { message, callbacks } = await appCreateJs(
-      //       {
-      //         message: {
-      //           role: MessageType.human,
-      //           content: humanMessage,
-      //         },
-      //         chatHistory: chatHistoryItems,
-      //         context: {
-      //           appId: appId,
-      //           userId: userId,
-      //           conversationId: conversationId,
-      //           deviceDiv: deviceDiv,
-      //           contractStatus: contractStatus,
-      //           isGuestSpace: isGuest,
-      //           systemSettings: systemSettings,
-      //           pluginId: pluginId,
-      //           promptInfoList: promptInfoList
-      //         },
-      //       },
-      //       isChangeCode,
-      //       setIsReload,
-      //       isChangeCodeRef,
-      //     );
       //     setCallbackFuncs(callbacks);
 
       //     stopLoading?.();

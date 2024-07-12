@@ -247,7 +247,7 @@ https://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
         conversationId: context.conversationId,
       };
       await insertConversation(reqConversation);
-      return { actionType: ActionType.error, message: { role: MessageType.error, content: message, }, sessionId: sessionId }
+      return { actionType: ActionType.error, message: { role: MessageType.error, content: message, }, sessionId: sessionId, isCreating: isCreating }
     } else {
       const message = `${ErrorMessageConst.E_MSG008}（${ErrorCode.E99999}）`;
       const reqConversation: InsertConversationRequest = {
@@ -259,7 +259,7 @@ https://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
         conversationId: context.conversationId,
       };
       await insertConversation(reqConversation);
-      return { actionType: ActionType.error, message: { role: MessageType.error, content: message, }, sessionId: sessionId }
+      return { actionType: ActionType.error, message: { role: MessageType.error, content: message, }, sessionId: sessionId, isCreating: isCreating }
     }
   }
 }

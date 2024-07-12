@@ -15,7 +15,7 @@ export interface HumanMessage extends ChatMessage {
 
 export interface AiMessage extends ChatMessage {
   role: "ai";
-  // comment: MessageContent;
+  messageDetail?: MessageContent;
 }
 
 export interface SystemMessage extends ChatMessage {
@@ -91,7 +91,25 @@ export interface AppGenerationPlanningResponse {
   message: AiMessage | ErrorMessage;
   message_detail?: string;
   settingInfo?: SettingInfo;
-  sessionId?: string;
-  isCreating?: boolean;
+  sessionId: string;
+  isCreating: boolean;
   callbacks?: Function[];
+}
+
+
+// アプリ作成の実行
+export interface AppGenerationExecuteContext extends AppGenerationContext {
+  // 「アプリ作成の実行」独自のものがあればここに定義
+  isGuestSpace: boolean;
+}
+export interface AppGenerationExecuteConversation {
+  message: HumanMessage;
+  chatHistory?: ChatHistory;
+  context?: AppGenerationExecuteContext;
+}
+
+export interface AppGenerationExecuteResponse {
+  result: string;
+  callbacks?: Function[];
+  errorMessage?:string;
 }
