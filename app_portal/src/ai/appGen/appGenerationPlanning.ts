@@ -163,7 +163,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
 
       // 結果回答詳細
       const fieldNames = settingInfoLlmResult.fields.slice(0, 10).map((field: Field) => field.fieldName);
-      const message_detail = `アプリ名:\n${settingInfoLlmResult.applicationName}\n\nフィールド一覧:\n${fieldNames.join(", ")}`
+      const messageDetail = `アプリ名:\n${settingInfoLlmResult.applicationName}\n\nフィールド一覧:\n${fieldNames.join(", ")}`
 
       // --------------------
       // 会話履歴登録
@@ -173,7 +173,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
         sessionId: sessionId,
         actionType: typeLlmResult.userMessageType,
         resultMessage: settingInfoLlmResult.response,
-        resultMessageDetail: message_detail,
+        resultMessageDetail: messageDetail,
         aiResponse: JSON.stringify({
           appName: settingInfoLlmResult.applicationName,
           fields: settingInfoLlmResult.fields
@@ -188,9 +188,8 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       return {
         actionType: typeLlmResult.userMessageType,
         message: {
-          role: MessageType.ai, content: settingInfoLlmResult.response,
+          role: MessageType.ai, content: settingInfoLlmResult.response, messageDetail: messageDetail,
         },
-        message_detail: message_detail,
         settingInfo: {
           appName: settingInfoLlmResult.applicationName,
           fields: settingInfoLlmResult.fields

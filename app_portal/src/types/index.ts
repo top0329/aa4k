@@ -89,7 +89,6 @@ export interface AppGenerationPlanningConversation {
 export interface AppGenerationPlanningResponse {
   actionType: ActionType;
   message: AiMessage | ErrorMessage;
-  message_detail?: string;
   settingInfo?: SettingInfo;
   sessionId: string;
   isCreating: boolean;
