@@ -1,9 +1,6 @@
-// import { AiMessage, ChatHistoryItem, ErrorMessage } from "./ai";
+import { AiMessage, ChatHistoryItem, ErrorMessage } from "~/types";
 
-// TODO: app用に調整
 export type AiContentProps = {
-  // aiMessage: AiMessage | ErrorMessage;
-  // chatHistoryItem: ChatHistoryItem;
-  // isLoading?: boolean;
-  // humanMessage?: string;
+  aiMessage: AiMessage | ErrorMessage;
+  chatHistoryItem: ChatHistoryItem;
 };

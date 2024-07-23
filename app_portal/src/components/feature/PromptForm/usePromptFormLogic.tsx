@@ -5,64 +5,61 @@ import { useEffect, useRef, useState } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-// import { appCreateJs } from '~/ai/appCreateJs';
-// import { DeviceDiv, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
-// import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
 import { PromptInfoListState } from '~/state/promptState';
 import { SettingInfoState } from '~/state/settingInfoState';
 import { SessionIdState } from "~/state/sessionIdState";
-import { ChatHistoryItem, /*ErrorMessage,*/AppGenerationPlanningContext, AppGenerationPlanningConversation } from '~/types';
-import { MessageType } from "~/constants"
-// import { InsertConversationResponseBody, KintoneProxyResponse, KintoneProxyResponseBody, KintoneRestAPiError } from '~/types/apiResponse';
-// import { KintoneError } from "~/util/customErrors";
+import { ChatHistoryState } from '~/state/chatHistoryState';
+import { ActionTypeState } from '~/state/actionTypeState';
+import { ChatHistoryItem, ErrorMessage, AppGenerationPlanningContext, AppGenerationPlanningConversation } from '~/types';
+import { ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage, MessageType, ActionType } from "~/constants"
+import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from '~/util/preCheck';
 import { insertConversation } from "~/util/insertConversationHistory"
 import { InsertConversationRequest, InsertConversationResponseBody } from "~/types/apiInterfaces"
 import { appGenerationPlanning } from "~/ai/appGen/appGenerationPlanning"
 
-
 type PromptFormProps = {
   humanMessage: string;
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
-  // setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
-  aiAnswerRef: React.MutableRefObject<string>;
-  finishAiAnswerRef: React.MutableRefObject<boolean>;
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   isInitVisible: boolean;
   setIsInitVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  aiAnswer: string,
+  setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
+  finishAiAnswer: boolean,
+  setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
 export const usePromptFormLogic = ({
   humanMessage,
   setHumanMessage,
-  // setCallbackFuncs,
-  aiAnswerRef,
-  finishAiAnswerRef,
-  // scrollRef,
-  // isInitVisible,
   setIsInitVisible,
+  setAiAnswer,
+  setFinishAiAnswer,
 }: PromptFormProps) => {
-  // const [chatHistoryItems, setChatHistory] = useAtom(isPcViewMode ? DesktopChatHistoryState : MobileChatHistoryState);
+  const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
+  const [promptInfoList] = useAtom(PromptInfoListState);
+  const [settingInfo,setSettingInfo] = useAtom(SettingInfoState);
+  const [sessionId, setSessionId] = useAtom(SessionIdState);
+  const [, setActionType] = useAtom(ActionTypeState); // AI応答のアクション種別を管理
   const [isVoiceInput, setVoiceInput] = useState(false);
   const [voiceInputVisible, setVoiceInputVisible] = useState(true);
-  // 送信ボタン押下の状態管理
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [promptInfoList] = useAtom(PromptInfoListState);
-  const [settingInfo] = useAtom(SettingInfoState);
-  const [sessionId, setSessionId] = useAtom(SessionIdState);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 送信ボタン押下の状態管理
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
-  const [isCreating, setIsCreating] = useState(false);
-  /* 
-    useSpeechRecognitionフックから返されるオブジェクトのプロパティ
+  const isPreviousCreateAction = useRef(false); // やり取りを開始している（actionTypeがcreateになった）かどうかの判定を行う為のRef
 
-    transcript: 現在の音声認識のテキスト
-    finalTranscript: 音声認識が終了した後の最終的なテキスト
-    resetTranscript: 音声認識のテキストをリセットするための関数（transcriptとfinalTranscriptがクリアされる）
-    browserSupportsSpeechRecognition: ブラウザが音声認識をサポートしているかどうかを示すブール値
-  */
+  /**
+   * useSpeechRecognitionフックから返されるオブジェクトのプロパティ
+   * 
+   * transcript: 現在の音声認識のテキスト
+   * finalTranscript: 音声認識が終了した後の最終的なテキスト
+   * resetTranscript: 音声認識のテキストをリセットするための関数（transcriptとfinalTranscriptがクリアされる）
+   * browserSupportsSpeechRecognition: ブラウザが音声認識をサポートしているかどうかを示すブール値
+   */
   const { transcript, finalTranscript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -73,7 +70,6 @@ export const usePromptFormLogic = ({
     }
   };
 
-  // TODO: 送信ボタンの処理
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     let conversationId: string = "";
     try {
@@ -87,10 +83,8 @@ export const usePromptFormLogic = ({
         setVoiceInput(false);
       }
 
-      aiAnswerRef.current = '';
-      finishAiAnswerRef.current = false;
-
-      console.log("test", conversationId, currentHumanMessage);
+      setAiAnswer("");
+      setFinishAiAnswer(false);
 
       const userId = kintone.getLoginUser().id;
 
@@ -106,18 +100,10 @@ export const usePromptFormLogic = ({
         },
         conversationId: "",
       };
-      // setChatHistory([...chatHistoryItems, chatHistoryItem]);
-      //     setHumanMessage("");
-      //     setInTypeWrite(true);
+      setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      setHumanMessage("");
       setIsSubmitting(true);
       setIsInitVisible(false);
-      //     startLoading?.();
-      //     if (scrollRef && scrollRef.current) {
-      //       // ローディング表示が表示されるまでの時間を考慮して100ミリ秒後に 一番下にスクロール
-      //       await new Promise((resolve) => setTimeout(resolve, 100));
-      //       scrollRef.current.scrollIntoView();
-      //     }
-
 
       // 事前チェックの呼び出し
       const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck();
@@ -126,25 +112,24 @@ export const usePromptFormLogic = ({
         const errMsgStr = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
         console.log("errMsgStr:", errMsgStr)
 
-        // const errorMessage: ErrorMessage = {
-        //   role: MessageType.error,
-        //   content: errMsgStr
-        // };
-        // const chatHistoryItem: ChatHistoryItem = {
-        //   human: {
-        //     role: MessageType.human,
-        //     content: humanMessage,
-        //   },
-        //   error: errorMessage,
-        //   conversationId: "",
-        // };
-        // aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-        // finishAiAnswerRef.current = true;
-        // setChatHistory([...chatHistoryItems, chatHistoryItem]);
-        // setHumanMessage("");
-        // setInTypeWrite(true);
-        // setIsSubmitting(false);
-        // stopLoading?.();
+        const errorMessage: ErrorMessage = {
+          role: MessageType.error,
+          content: errMsgStr
+        };
+        const chatHistoryItem: ChatHistoryItem = {
+          human: {
+            role: MessageType.human,
+            content: humanMessage,
+          },
+          error: errorMessage,
+          conversationId: "",
+        };
+        setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
+        setFinishAiAnswer(true);
+        setChatHistory([...chatHistoryItems, chatHistoryItem]);
+        setHumanMessage("");
+        setActionType(ActionType.error);
+        setIsSubmitting(false);
         return;
       }
       const contractStatus = preCheckResult.contractStatus;
@@ -162,18 +147,18 @@ export const usePromptFormLogic = ({
         // APIエラー時のエラーメッセージを取得
         const errMsgStr = getApiErrorMessage(resInsertConversationStatus, resJsonInsertConversation.errorCode);
         console.log("errMsgStr:", errMsgStr)
-        // // AIメッセージオブジェクトの削除
-        // delete chatHistoryItem.ai;
-        // chatHistoryItem.error = {
-        //   role: MessageType.error,
-        //   content: errMsgStr,
-        // };
-        // aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-        // finishAiAnswerRef.current = true;
-        // setChatHistory([...chatHistoryItems, chatHistoryItem]);
-        // setInTypeWrite(true);
-        // setIsSubmitting(false);
-        // stopLoading?.();
+        // AIメッセージオブジェクトの削除
+        delete chatHistoryItem.ai;
+        chatHistoryItem.error = {
+          role: MessageType.error,
+          content: errMsgStr,
+        };
+        setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
+        setFinishAiAnswer(true);
+        setChatHistory([...chatHistoryItems, chatHistoryItem]);
+        setHumanMessage("");
+        setActionType(ActionType.error);
+        setIsSubmitting(false);
         return;
       }
       conversationId = resJsonInsertConversation.conversationId;
@@ -190,104 +175,93 @@ export const usePromptFormLogic = ({
       }
       const conversation: AppGenerationPlanningConversation = {
         message: chatHistoryItem.human,
-        chatHistory: [],// chatHistoryItems, TODO: chatHistoryの設定
+        chatHistory: chatHistoryItems,
         context: context,
       }
       const response = await appGenerationPlanning(conversation);
       setIsCreating(response.isCreating)
       setSessionId(response.sessionId)
+      setSettingInfo(response.settingInfo)
 
-      //     setCallbackFuncs(callbacks);
-
-      //     stopLoading?.();
-
-      //     chatHistoryItem.conversationId = conversationId;
-      //     if (message.role === MessageType.ai) {
-      //       chatHistoryItem.ai = message;
-      //       const speechMessage = (callbacks && callbacks.length) ? InfoMessage.I_MSG004 : message.content;
-      //       aiAnswerRef.current = speechMessage;   // 成功時に音声出力するメッセージ
-      //     } else {
-      //       // AIメッセージオブジェクトの削除
-      //       delete chatHistoryItem.ai;
-      //       chatHistoryItem.error = message;
-      //       aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-      //     }
-      //     finishAiAnswerRef.current = true;
-      //     setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      chatHistoryItem.conversationId = conversationId;
+      const { role, content } = response.message;
+      const { actionType, isCreating: responseIsCreating} = response;
+      setActionType(actionType);
+      if (role === MessageType.ai) {
+        chatHistoryItem.ai = response.message;
+        let speechMessage = "";
+        // actionTypeに基づいて、音声出力の内容を切り替える
+        if (actionType === ActionType.create || actionType === ActionType.edit || actionType === ActionType.duplicate) {
+          speechMessage = InfoMessage.I_MSG003;
+        } else if (actionType === ActionType.unknown) {
+          // AIが認識できなかったパターン
+          speechMessage = InfoMessage.I_MSG005;
+        } else if (actionType === ActionType.other) {
+          // 雑談等のパターン
+          speechMessage = content;
+        }
+        setAiAnswer(speechMessage); // 成功時に音声出力するメッセージ
+      } else {
+        // AIメッセージオブジェクトの削除
+        delete chatHistoryItem.ai;
+        chatHistoryItem.error = response.message;
+        setActionType(ActionType.error);
+        setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
+      }
+      setFinishAiAnswer(true);
+      if (responseIsCreating && actionType === ActionType.create) {
+        if (isPreviousCreateAction.current) {
+          // 作成（create） -> 作成（create）のパターンではそれまでの会話履歴をリセットする
+          setChatHistory([chatHistoryItem]);
+        } else {
+          // 初回の作成（create）時にフラグをオンにする
+          isPreviousCreateAction.current = true;
+          setChatHistory([...chatHistoryItems, chatHistoryItem]);
+        }
+      } else {
+        setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      }
       setIsSubmitting(false);
 
     } catch (err) {
       let messageContent: string = '';
-      console.log("test", messageContent);
-      //     if (err instanceof KintoneError) {
-      //       messageContent = err.message;
-      //     } else {
-      //       messageContent = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
-      //     }
-      //     const errorMessage: ErrorMessage = {
-      //       role: MessageType.error,
-      //       content: messageContent
-      //     };
-      //     const chatHistoryItem: ChatHistoryItem = {
-      //       human: {
-      //         role: MessageType.human,
-      //         content: humanMessage,
-      //       },
-      //       error: errorMessage,
-      //       conversationId: conversationId,
-      //     };
-      //     aiAnswerRef.current = ErrorMessageConst.E_MSG004;   // 失敗時に音声出力するメッセージ
-      //     finishAiAnswerRef.current = true;
-      //     setChatHistory([...chatHistoryItems, chatHistoryItem]);
-      //     setHumanMessage("");
-      //     setInTypeWrite(true);
+      if (err instanceof KintoneError) {
+        messageContent = err.message;
+      } else {
+        // TODO: 「ErrorMessageConst.E_MSG001」は、暫定でエラー時の音声出力内容を設定中
+        messageContent = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      }
+      const errorMessage: ErrorMessage = {
+        role: MessageType.error,
+        content: messageContent
+      };
+      const chatHistoryItem: ChatHistoryItem = {
+        human: {
+          role: MessageType.human,
+          content: humanMessage,
+        },
+        error: errorMessage,
+        conversationId: conversationId,
+      };
+      setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
+      setFinishAiAnswer(true);
+      setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      setHumanMessage("");
+      setActionType(ActionType.error);
       setIsSubmitting(false);
-      //     stopLoading?.();
     }
   };
 
-  // TODO：新しく会話を始める処理
   const handleClearConversation = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    try {
-      e.preventDefault();
-      console.log("新しく会話を始める");
-      //     if (window.confirm('これまでの会話の表示をクリアして、新しい会話を始めますが、よろしいですか？')) {
-      //       const appId = kintone.app.getId();
-      //       const userId = kintone.getLoginUser().id;
-      //       const deviceDiv = isPcViewMode ? DeviceDiv.desktop : DeviceDiv.mobile;
+    e.preventDefault();
 
-      //       const resClearConversation = await kintone.plugin.app.proxy(
-      //         pluginId,
-      //         `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/clear`,
-      //         "POST",
-      //         {},
-      //         { appId: appId, userId: userId, deviceDiv: deviceDiv },
-      //       ).catch((resBody: string) => {
-      //         const e = JSON.parse(resBody) as KintoneRestAPiError;
-      //         throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
-      //       }) as KintoneProxyResponse;
-      //       const [resBody, resStatus] = resClearConversation;
-      //       const resBodyClearConversation = JSON.parse(resBody) as KintoneProxyResponseBody;
-      //       if (resStatus !== 200) {
-      //         // APIエラー時のエラーメッセージを取得
-      //         const errorMessage = getApiErrorMessage(resStatus, resBodyClearConversation.errorCode);
-      //         // トーストでエラーメッセージ表示
-      //         showToast(errorMessage, 0, false);
-      //         return;
-      //       }
-      //       // 画面上の会話履歴をクリア
-      //       setChatHistory([]);
-      //     }
-    } catch (err) {
-      //     let message: string = '';
-      //     if (err instanceof KintoneError) {
-      //       message = err.message;
-      //     } else {
-      //       message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
-      //     }
-      //     // トーストでエラーメッセージ表示
-      //     showToast(message, 0, false);
-      //     return;
+    if (window.confirm(`${InfoMessage.I_MSG002}`)) {
+      setActionType("");
+      setHumanMessage("");
+      // 会話履歴をクリアする
+      setChatHistory([]);
+      // 初期表示フラグをオンにする
+      setIsInitVisible(true);
     }
   }
 

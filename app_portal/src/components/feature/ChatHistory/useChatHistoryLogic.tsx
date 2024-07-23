@@ -1,9 +1,14 @@
 // src/components/feature/ChatHistory/useChatHistoryLogic.tsx
 
 import { useAnimation } from 'framer-motion';
+import { useAtom } from 'jotai';
 import { useEffect } from 'react';
+import { ActionTypeState } from '~/state/actionTypeState';
+import { ChatHistoryState } from "~/state/chatHistoryState";
 
-export const useChatHistoryLogic = () => {
+export const useChatHistoryLogic = (isInitVisible: boolean) => {
+  const [chatHistoryItems] = useAtom(ChatHistoryState);
+  const [actionType] = useAtom(ActionTypeState);
   const controls = useAnimation();
 
   const animateText = "アプリを自動作成します。\nどのようなアプリを作成しますか？";
@@ -32,9 +37,11 @@ export const useChatHistoryLogic = () => {
     }, 1000);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [isInitVisible]);
 
   return {
+    actionType,
+    chatHistoryItems,
     animateText,
     controls,
   }

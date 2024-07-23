@@ -22,8 +22,10 @@ const CornerDialog = () => {
     humanMessage,
     setHumanMessage,
     // setCallbackFuncs,
-    aiAnswerRef,
-    finishAiAnswerRef,
+    aiAnswer,
+    setAiAnswer,
+    finishAiAnswer,
+    setFinishAiAnswer,
   } = useCornerDialogLogic();
 
   return (
@@ -68,8 +70,10 @@ const CornerDialog = () => {
                 humanMessage={humanMessage}
                 setHumanMessage={setHumanMessage}
                 // setCallbackFuncs={setCallbackFuncs}
-                aiAnswerRef={aiAnswerRef}
-                finishAiAnswerRef={finishAiAnswerRef}
+                aiAnswer={aiAnswer}
+                setAiAnswer={setAiAnswer}
+                finishAiAnswer={finishAiAnswer}
+                setFinishAiAnswer={setFinishAiAnswer}
               />
             </motion.div>
           )}

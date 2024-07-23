@@ -8,18 +8,24 @@ import { AiContentProps } from "~/types/aiContentTypes";
 
 type AiContentsProps = AiContentProps & {
   isLoadingVisible: boolean;
-  toggleAiLoadVisibility: (text: string) => void;
+  createKintoneApp: (text: string) => void;
+  actionType: string;
 };
 
-export const AiContents: React.FC<AiContentsProps> = ({isLoadingVisible, toggleAiLoadVisibility})=> {
+export const AiContents: React.FC<AiContentsProps> = ({ isLoadingVisible, createKintoneApp, aiMessage, chatHistoryItem, actionType }) => {
   return (
     <Box className={sAiContents}>
       <Flex
         direction={'row'}
       >
         <AiResponseEffect />
-        {/* TODO: アクションタイプ(create,edit...)の渡し方 */}
-        <AiMessage actionType="create" isLoadingVisible={isLoadingVisible} toggleAiLoadVisibility={toggleAiLoadVisibility} />
+        <AiMessage
+          isLoadingVisible={isLoadingVisible}
+          createKintoneApp={createKintoneApp}
+          aiMessage={aiMessage}
+          chatHistoryItem={chatHistoryItem}
+          actionType={actionType}
+        />
       </Flex>
     </Box>
   );

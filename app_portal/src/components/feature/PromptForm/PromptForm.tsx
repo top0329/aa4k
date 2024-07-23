@@ -11,15 +11,16 @@ import { usePromptFormLogic } from "./usePromptFormLogic";
 type PromptFormProps = {
   humanMessage: string;
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
-  // setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
-  aiAnswerRef: React.MutableRefObject<string>;
-  finishAiAnswerRef: React.MutableRefObject<boolean>;
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   isInitVisible: boolean;
   setIsInitVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  aiAnswer: string,
+  setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
+  finishAiAnswer: boolean,
+  setFinishAiAnswer:React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, aiAnswerRef, finishAiAnswerRef, scrollRef, isInitVisible, setIsInitVisible }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer }) => {
 
   // PromptFormコンポーネントのロジックを管理するカスタムフック
   const {
@@ -31,7 +32,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
-  } = usePromptFormLogic({ humanMessage, setHumanMessage, aiAnswerRef, finishAiAnswerRef, scrollRef, isInitVisible, setIsInitVisible });
+  } = usePromptFormLogic({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer });
 
   // 送信ボタンのアニメーションのバリエーションを定義
   const buttonVariants = {

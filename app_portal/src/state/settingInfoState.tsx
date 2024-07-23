@@ -2,4 +2,4 @@
 import { atom } from "jotai";
 import { SettingInfo } from "~/types";
 
-export const SettingInfoState = atom<SettingInfo>({ appName: "", fields: [] });
+export const SettingInfoState = atom<SettingInfo | undefined>({ appName: "", fields: [] });

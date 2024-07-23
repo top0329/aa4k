@@ -9,6 +9,7 @@ import { sChatHistorySuggestCard, sChatHistory, sChatHistorySuggest, sChatHistor
 import { useChatHistoryLogic } from "./useChatHistoryLogic";
 import { UserContent } from "~/components/ui/UserContent/UserContent";
 import { AiContents } from "~/components/ui/AiContents/AiContents";
+import { AiMessage, ChatHistoryItem, ErrorMessage } from "~/types";
 
 type ChatHistoryProps = {
   humanMessage: string;
@@ -17,16 +18,21 @@ type ChatHistoryProps = {
   isInitVisible: boolean;
   setIsInitVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isLoadingVisible: boolean;
-  toggleAiLoadVisibility: (text: string) => void;
+  createKintoneApp: (text: string) => void;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, isLoadingVisible, toggleAiLoadVisibility }) => {
+export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, isLoadingVisible, createKintoneApp }) => {
 
   // ChatHistoryコンポーネントのロジックを管理するカスタムフック
   const {
+    actionType,
+    chatHistoryItems,
     animateText,
     controls,
-  } = useChatHistoryLogic();
+  } = useChatHistoryLogic(isInitVisible);
+
+  // 最新のチャット履歴アイテムを取得
+  const latestChatHistoryItem = chatHistoryItems[chatHistoryItems.length - 1];
 
   // 初期表示
   if (isInitVisible) {
@@ -137,6 +143,33 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
     </Box>;
   }
 
+  // AI回答またはエラーメッセージの表示
+  const showAiOrErrorMessage = (item: ChatHistoryItem, actionType: string) => {
+    let aiMessage: AiMessage | ErrorMessage;
+
+    if (item.ai) {
+      // AI回答の場合
+      aiMessage = item.ai;
+    } else if (item.error) {
+      // エラーメッセージの場合
+      aiMessage = item.error;
+    } else {
+      // それ以外の場合
+      return;
+    }
+
+    return (
+      <AiContents
+        key={item.conversationId}
+        isLoadingVisible={isLoadingVisible}
+        createKintoneApp={createKintoneApp}
+        aiMessage={aiMessage}
+        chatHistoryItem={item}
+        actionType={actionType}
+      />
+    );
+  };
+
   // 通常表示
   return (
     <Box className={sChatHistory}>
@@ -159,10 +192,12 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
             width: '100%',
           }}
         >
-          <Flex direction={'column'}>
-            <UserContent humanMessage={humanMessage} />
-            <AiContents isLoadingVisible={isLoadingVisible} toggleAiLoadVisibility={toggleAiLoadVisibility}/>
-          </Flex>
+          {latestChatHistoryItem && (
+            <Flex direction={'column'}>
+              <UserContent humanMessage={!isLoadingVisible ? latestChatHistoryItem.human.content : humanMessage} />
+              {showAiOrErrorMessage(latestChatHistoryItem, actionType)}
+            </Flex>
+          )}
           <div ref={scrollRef}></div>
         </ScrollArea>
       </Flex>

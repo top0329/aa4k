@@ -1,10 +1,10 @@
 // src/components/feature/CornerDialog/useCornerDialogLogic.tsx
 
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 // import { useUpdateEffect } from "react-use";
 // import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
-// import { useTextSpeech } from "~/hooks/useTextSpeech";
+import { useTextSpeech } from "~/hooks/useTextSpeech";
 // import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState'; // TODO: Chat履歴をstateに格納
 import { AppDialogVisibleState } from '~/state/appDialogVisibleState';
 // import { PromptInfoListState } from '~/state/promptState';
@@ -55,14 +55,15 @@ export const useCornerDialogLogic = () => {
     return { x: window.innerWidth - 120, y: window.innerHeight - 120 };
   }, []);
 
-  // Ref
-  const aiAnswerRef = useRef<string>('');
-  const finishAiAnswerRef = useRef<boolean>(false);
-
+  // 音声出力
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [finishAiAnswer, setFinishAiAnswer] = useState(false);
+  const { setDisable } = useTextSpeech(
   // const { setDisable, isSpeech } = useTextSpeech(
-  //   aiAnswerRef,
-  //   finishAiAnswerRef,
-  // );
+    aiAnswer,
+    setAiAnswer,
+    finishAiAnswer,
+  );
 
   // 起動バナーを押下
   const handleBannerClick = (event: React.MouseEvent<HTMLDivElement> | null) => {
@@ -160,6 +161,10 @@ export const useCornerDialogLogic = () => {
     if (isAppDialogVisible) {
       setIsBannerClicked(false);
     }
+    // ダイアログの表示状況で音声出力するか否かを制御
+    setDisable(!isAppDialogVisible);
+    // ダイアログを閉じると初期画面に戻る為、再度開いた際に音声が出力されないようにする
+    setAiAnswer("");
   }, [isAppDialogVisible]);
 
   // 起動バナーの位置を保存
@@ -202,7 +207,9 @@ export const useCornerDialogLogic = () => {
     setHumanMessage,
     // setCallbackFuncs,
     // execCallbacks,
-    aiAnswerRef,
-    finishAiAnswerRef,
+    aiAnswer,
+    setAiAnswer,
+    finishAiAnswer,
+    setFinishAiAnswer
   };
 };

@@ -56,10 +56,10 @@ export interface PreCheckResponseBody extends KintoneProxyResponseBody {
 // }
 
 
-// export interface SpeechResponseBody
-//   extends KintoneProxyResponseBody {
-//   data: string;
-// }
+export interface SpeechResponseBody
+  extends KintoneProxyResponseBody {
+  data: string;
+}
 
 // Azure OpenAI Proxy Credential API
 export interface AzureOpenAiProxyCredentialResponseBody
