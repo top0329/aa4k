@@ -40,8 +40,8 @@ export type ChatHistory = Array<ChatHistoryItem>;
 // ******************************
 // フィールド情報
 export interface Field {
-  fieldName: string;
-  fieldType: string;
+  label: string;
+  type: string;
 }
 // 設定リスト
 export interface SettingInfo {
@@ -71,7 +71,7 @@ export interface AppGenerationContext {
   userId: string;
   conversationId: string;
   sessionId: string;
-  settingInfo?: SettingInfo;
+  settingInfo: SettingInfo;
   contractStatus: ContractStatus;
   promptInfoList?: PromptInfo[]
 }

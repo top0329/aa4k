@@ -33,11 +33,12 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     // 前処理
     // --------------------
     const histories = setChatHistory(chatHistory)
-    const promptInfo = await setPrompt([ServiceDiv.app_gen_type, ServiceDiv.app_gen_app_filed], promptInfoList)
+    const promptInfo = await setPrompt([ServiceDiv.app_gen_type, ServiceDiv.app_gen_create_field, ServiceDiv.app_gen_edit_field], promptInfoList)
     //     const promptInfo = [
     //       {
     //         service_div: "app_gen_type",
     //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
+
     // ユーザのメッセージが以下のどのタイプに該当するかを判定して、userMessageType として出力してください。
     // - 「other」の場合は、ユーザのメッセージへの応答を response として出力してください。
     // - 「unknown」の場合は、「申し訳ありません、よくわかりませんでした。より詳しい表現に変えてお試しください。」を response として出力してください。
@@ -47,7 +48,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     // - create: kintone アプリの新規作成の要望
     // - edit: kintone アプリの編集の要望
     // - duplicate: kintone アプリの複製の要望
-    // - unknown: kintone アプリに関係するが、「作成」「編集」「複製」のいずれかに分類するのが難しいメッセージ
+    // - unknown: kintone アプリに関係するが、「create」「edit」「duplicate」のいずれかに分類するのが難しいメッセージ
     // - other: その他のメッセージ
     // `,
     //         prompt_function_parameter: [
@@ -56,7 +57,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     //             parent_item_id: null,
     //             item_name: "userMessageType",
     //             item_type: "string",
-    //             item_describe: "タイプ一覧",
+    //             item_describe: "「create」「edit」「duplicate」「unknown」「other」のいずれか",
     //             constants: "null",
     //           },
     //           {
@@ -64,27 +65,110 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     //             parent_item_id: null,
     //             item_name: "response",
     //             item_type: "string",
-    //             item_describe: "ユーザのメッセージへの応答",
+    //             item_describe: "type が「unknown」または「other」の場合に、応答するメッセージ",
     //             constants: "null",
     //           }
     //         ],
     //       },
     //       {
-    //         service_div: "app_gen_app_filed",
+    //         service_div: "app_gen_create_field",
     //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
 
-    // ユーザからアプリ作成の要望があれば、そのアプリに必要なフィールド名の一覧を fields として出力してください。
+    // ユーザからアプリ作成の要望がある場合
+    // - アプリに必要なフィールドの情報を fields として出力してください。
+    //     - fields は 8項目以上10項目以下で提案してください。
     // - アプリ名を applicationName として出力してください。
-    // - 「（アプリ名）を作成します。\n以下の内容でよろしければ「アプリを作成する」をクリックしてください。また、アプリ名やフィールドの変更をする場合はお知らせください。」を response として出力してください。
-    //     - （アプリ名）には applicationName を代入してください。
+    // - 「以下の内容でよろしければ「アプリを作成する」をクリックしてください。\nまた、アプリ名やフィールドの変更をする場合はお知らせください。」を responseMessage として出力してください。
 
-    // {settingInfo}
+    // 出力は以下のような形式になります。
+    // {{
+    //   "responseMessage": "メッセージ",
+    //   "applicationName": "アプリ名",
+    //   "fields": [
+    //     {{
+    //       "type": "SINGLE_LINE_TEXT",
+    //       "label": "文字列 (1行)",
+    //     }},
+    //     {{
+    //       "type": "RICH_TEXT",
+    //       "label": "リッチエディター",
+    //     }},
+    //     {{
+    //       "type": "MULTI_LINE_TEXT",
+    //       "label": "文字列 (複数行)",
+    //     }},
+    //     {{
+    //       "type": "NUMBER",
+    //       "label": "数値",
+    //     }},
+    //     {{
+    //       "type": "CALC",
+    //       "label": "計算",
+    //     }},
+    //     {{
+    //       "type": "RADIO_BUTTON",
+    //       "label": "ラジオボタン",
+    //     }},
+    //     {{
+    //       "type": "CHECK_BOX",
+    //       "label": "チェックボックス",
+    //     }},
+    //     {{
+    //       "type": "MULTI_SELECT",
+    //       "label": "複数選択",
+    //     }},
+    //     {{
+    //       "type": "DROP_DOWN",
+    //       "label": "ドロップダウン",
+    //     }},
+    //     {{
+    //       "type": "DATE",
+    //       "label": "日付",
+    //     }},
+    //     {{
+    //       "type": "TIME",
+    //       "label": "時刻",
+    //     }},
+    //     {{
+    //       "type": "DATETIME",
+    //       "label": "日時",
+    //     }},
+    //     {{
+    //       "type": "FILE",
+    //       "label": "添付ファイル",
+    //     }},
+    //     {{
+    //       "type": "LINK",
+    //       "label": "リンク",
+    //     }},
+    //     {{
+    //       "type": "USER_SELECT",
+    //       "label": "ユーザー選択",
+    //     }},
+    //     {{
+    //       "type": "ORGANIZATION_SELECT",
+    //       "label": "組織選択",
+    //     }},
+    //     {{
+    //       "type": "GROUP_SELECT",
+    //       "label": "グループ選択",
+    //     }},
+    //     {{
+    //       "type": "GROUP",
+    //       "label": "グループ",
+    //     }},
+    //     {{
+    //       "type": "SUBTABLE",
+    //       "label": "テーブル",
+    //     }}
+    //   ]
+    // }}
     // `,
     //         prompt_function_parameter: [
     //           {
     //             item_id: 1,
     //             parent_item_id: null,
-    //             item_name: "response",
+    //             item_name: "responseMessage",
     //             item_type: "string",
     //             item_describe: "応答するメッセージ",
     //             constants: "null",
@@ -110,13 +194,13 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     //             parent_item_id: 3,
     //             item_name: "-",
     //             item_type: "object",
-    //             item_describe: "フィールド名",
+    //             item_describe: "フィールド",
     //             constants: "null",
     //           },
     //           {
     //             item_id: 5,
     //             parent_item_id: 4,
-    //             item_name: "fieldName",
+    //             item_name: "label",
     //             item_type: "string",
     //             item_describe: "フィールド名",
     //             constants: "null",
@@ -124,7 +208,154 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     //           {
     //             item_id: 6,
     //             parent_item_id: 4,
-    //             item_name: "fieldType",
+    //             item_name: "type",
+    //             item_type: "string",
+    //             item_describe: "フィールドの種類",
+    //             constants: "null",
+    //           }
+    //         ],
+    //       },
+    //       {
+    //         service_div: "app_gen_edit_field",
+    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
+
+    // ユーザからフィールドの追加・更新・削除の要望があれば、要望を反映したフィールドの情報を fields として出力してください。
+    // - 追加・更新のあったフィールドを先頭に並べてください。
+    // - 「以下の内容でよろしければ「アプリを作成する」をクリックしてください。\nまた、アプリ名やフィールドの変更をする場合はお知らせください。」を response として出力してください。
+
+    // アプリ名は {applicationName} です。
+    // 現在のフィールドは以下のとおりです。
+    // {settingInfo}
+
+    // 出力は以下のような形式になります。
+    // {{
+    //   "responseMessage": "メッセージ",
+    //   "applicationName": "アプリ名",
+    //   "fields": [
+    //     {{
+    //       "type": "SINGLE_LINE_TEXT",
+    //       "label": "文字列 (1行)",
+    //     }},
+    //     {{
+    //       "type": "RICH_TEXT",
+    //       "label": "リッチエディター",
+    //     }},
+    //     {{
+    //       "type": "MULTI_LINE_TEXT",
+    //       "label": "文字列 (複数行)",
+    //     }},
+    //     {{
+    //       "type": "NUMBER",
+    //       "label": "数値",
+    //     }},
+    //     {{
+    //       "type": "CALC",
+    //       "label": "計算",
+    //     }},
+    //     {{
+    //       "type": "RADIO_BUTTON",
+    //       "label": "ラジオボタン",
+    //     }},
+    //     {{
+    //       "type": "CHECK_BOX",
+    //       "label": "チェックボックス",
+    //     }},
+    //     {{
+    //       "type": "MULTI_SELECT",
+    //       "label": "複数選択",
+    //     }},
+    //     {{
+    //       "type": "DROP_DOWN",
+    //       "label": "ドロップダウン",
+    //     }},
+    //     {{
+    //       "type": "DATE",
+    //       "label": "日付",
+    //     }},
+    //     {{
+    //       "type": "TIME",
+    //       "label": "時刻",
+    //     }},
+    //     {{
+    //       "type": "DATETIME",
+    //       "label": "日時",
+    //     }},
+    //     {{
+    //       "type": "FILE",
+    //       "label": "添付ファイル",
+    //     }},
+    //     {{
+    //       "type": "LINK",
+    //       "label": "リンク",
+    //     }},
+    //     {{
+    //       "type": "USER_SELECT",
+    //       "label": "ユーザー選択",
+    //     }},
+    //     {{
+    //       "type": "ORGANIZATION_SELECT",
+    //       "label": "組織選択",
+    //     }},
+    //     {{
+    //       "type": "GROUP_SELECT",
+    //       "label": "グループ選択",
+    //     }},
+    //     {{
+    //       "type": "GROUP",
+    //       "label": "グループ",
+    //     }},
+    //     {{
+    //       "type": "SUBTABLE",
+    //       "label": "テーブル",
+    //     }}
+    //   ]
+    // }}
+    // `,
+    //         prompt_function_parameter: [
+    //           {
+    //             item_id: 1,
+    //             parent_item_id: null,
+    //             item_name: "responseMessage",
+    //             item_type: "string",
+    //             item_describe: "応答するメッセージ",
+    //             constants: "null",
+    //           },
+    //           {
+    //             item_id: 2,
+    //             parent_item_id: null,
+    //             item_name: "applicationName",
+    //             item_type: "string",
+    //             item_describe: "アプリ名",
+    //             constants: "null",
+    //           },
+    //           {
+    //             item_id: 3,
+    //             parent_item_id: null,
+    //             item_name: "fields",
+    //             item_type: "array",
+    //             item_describe: "代表するフィールドの一覧",
+    //             constants: "null",
+    //           },
+    //           {
+    //             item_id: 4,
+    //             parent_item_id: 3,
+    //             item_name: "-",
+    //             item_type: "object",
+    //             item_describe: "フィールド",
+    //             constants: "null",
+    //           },
+    //           {
+    //             item_id: 5,
+    //             parent_item_id: 4,
+    //             item_name: "label",
+    //             item_type: "string",
+    //             item_describe: "フィールド名",
+    //             constants: "null",
+    //           },
+    //           {
+    //             item_id: 6,
+    //             parent_item_id: 4,
+    //             item_name: "type",
     //             item_type: "string",
     //             item_describe: "フィールドの種類",
     //             constants: "null",
@@ -158,12 +389,39 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       // --------------------
       // アプリ名・フィールド一覧の生成
       // --------------------
-      const fieldListPromptInfo = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_app_filed)
-      const settingInfoLlmResult = await executeLlm(message.content, histories, context.contractStatus, fieldListPromptInfo[0], { settingInfo: context.settingInfo ? JSON.stringify(context.settingInfo) : "" }, llmContext)
+      let LlmResult;
+      if (typeLlmResult.userMessageType === ActionType.create) {
+        // 作成の場合
+        const createFieldPromptInfo = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_create_field)
+        const settingInfoLlmResult = await executeLlm(message.content, histories, context.contractStatus, createFieldPromptInfo[0], {}, llmContext)
+        LlmResult = settingInfoLlmResult;
+      } else {
+        // 編集の場合
+        const editFieldPromptInfo = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_edit_field)
+        const editFieldLlmResult = await executeLlm(message.content, histories, context.contractStatus, editFieldPromptInfo[0], { applicationName: context.settingInfo.appName, settingInfo: JSON.stringify(context.settingInfo.fields) }, llmContext)
+        LlmResult = editFieldLlmResult;
+      }
+
+      // kintone固有フィールドの対応
+      const kintoneFieldList = ["レコード番号", "レコードID", "リビジョン", "ステータス", "カテゴリー", "作業者", "作成日時", "更新日時", "作成者", "更新者"]
+      const filteredFields: Field[] = [];
+      const excludedLabels: string[] = [];
+
+      LlmResult.fields.forEach((field: Field) => {
+        if (kintoneFieldList.includes(field.label)) {
+          excludedLabels.push(field.label);
+        } else {
+          filteredFields.push(field);
+        }
+      });
+
+      // kintone固有フィールドがあった場合、ユーザに表示するメッセージにその旨を追記
+      const addMessage = excludedLabels.length ? `${excludedLabels.join("、")}はkintoneの固定フィールドのため指定できません。\n\n` : "";
+      const resultMessage = `${addMessage}${LlmResult.responseMessage}`
 
       // 結果回答詳細
-      const fieldNames = settingInfoLlmResult.fields.slice(0, 10).map((field: Field) => field.fieldName);
-      const messageDetail = `アプリ名:\n${settingInfoLlmResult.applicationName}\n\nフィールド一覧:\n${fieldNames.join(", ")}`
+      const fieldLabels = filteredFields.slice(0, 10).map((field: Field) => field.label);
+      const messageDetail = `アプリ名：\n${LlmResult.applicationName}\n\n代表的なフィールド：\n${fieldLabels.join(", ")}`
 
       // --------------------
       // 会話履歴登録
@@ -172,11 +430,11 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
         userId: context.userId,
         sessionId: sessionId,
         actionType: typeLlmResult.userMessageType,
-        resultMessage: settingInfoLlmResult.response,
+        resultMessage: resultMessage,
         resultMessageDetail: messageDetail,
         aiResponse: JSON.stringify({
-          appName: settingInfoLlmResult.applicationName,
-          fields: settingInfoLlmResult.fields
+          appName: LlmResult.applicationName,
+          fields: filteredFields
         }),
         conversationId: context.conversationId,
       };
@@ -188,11 +446,11 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       return {
         actionType: typeLlmResult.userMessageType,
         message: {
-          role: MessageType.ai, content: settingInfoLlmResult.response, messageDetail: messageDetail,
+          role: MessageType.ai, content: resultMessage, messageDetail: messageDetail,
         },
         settingInfo: {
-          appName: settingInfoLlmResult.applicationName,
-          fields: settingInfoLlmResult.fields
+          appName: LlmResult.applicationName,
+          fields: filteredFields
         },
         sessionId: sessionId,
         isCreating: isCreating,

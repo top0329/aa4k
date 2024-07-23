@@ -10,9 +10,11 @@ export type MessageType = (typeof MessageType)[keyof typeof MessageType];
 // サービス区分
 export const ServiceDiv = {
   app_gen_type: "app_gen_type",
-  app_gen_app_filed: "app_gen_app_filed",
-  app_gen_app_parameter: "app_gen_app_parameter",
-  app_gen_layout_parameter: "app_gen_layout_parameter",
+  app_gen_create_field: "app_gen_create_field",
+  app_gen_edit_field: "app_gen_edit_field",
+  app_gen_field: "app_gen_field",
+  app_gen_field_retry: "app_gen_field_retry",
+  app_gen_layout: "app_gen_layout",
 } as const;
 export type ServiceDiv = keyof typeof ServiceDiv;
 
