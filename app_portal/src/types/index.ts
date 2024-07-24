@@ -71,7 +71,7 @@ export interface AppGenerationContext {
   userId: string;
   conversationId: string;
   sessionId: string;
-  settingInfo: SettingInfo;
+  settingInfo?: SettingInfo;
   contractStatus: ContractStatus;
   promptInfoList?: PromptInfo[]
 }

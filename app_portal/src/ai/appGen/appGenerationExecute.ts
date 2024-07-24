@@ -654,8 +654,8 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
     //   ・フィールド追加用パラメータ生成(LLM)
     //   ・アプリ作成の実行(kintone REST API)
     // --------------------
-    const appName = context.settingInfo.appName;
-    const fieldList = JSON.stringify(context.settingInfo.fields)
+    const appName = context.settingInfo ? context.settingInfo.appName : "";
+    const fieldList = context.settingInfo ? JSON.stringify(context.settingInfo.fields) : "";
     const { appId, fieldsParam } = await executeAppGeneration(message.content, appName, fieldList, context.contractStatus, llmContext, isGuestSpace, promptInfo)
 
     // --------------------
@@ -748,7 +748,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
  * @returns appId, fieldParam
  */
 async function executeAppGeneration(message: string, appName: string, fieldList: string, contractStatus: ContractStatus, llmContext: LlmContext, isGuestSpace: boolean, promptInfo: PromptInfo[]) {
-  let maxRetries = 3; // 最大リトライ回数
+  let maxRetries = 5; // 最大リトライ回数
   let retryCount = 0;
   let success = false;
   let errorInfo = "";

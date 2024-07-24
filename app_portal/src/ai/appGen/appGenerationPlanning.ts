@@ -397,8 +397,10 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
         LlmResult = settingInfoLlmResult;
       } else {
         // 編集の場合
-        const editFieldPromptInfo = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_edit_field)
-        const editFieldLlmResult = await executeLlm(message.content, histories, context.contractStatus, editFieldPromptInfo[0], { applicationName: context.settingInfo.appName, settingInfo: JSON.stringify(context.settingInfo.fields) }, llmContext)
+        const editFieldPromptInfo = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_edit_field);
+        const appName = context.settingInfo ? context.settingInfo.appName : "";
+        const fields = context.settingInfo ? JSON.stringify(context.settingInfo.fields) : "";
+        const editFieldLlmResult = await executeLlm(message.content, histories, context.contractStatus, editFieldPromptInfo[0], { applicationName: appName, settingInfo: JSON.stringify(fields) }, llmContext)
         LlmResult = editFieldLlmResult;
       }
 
@@ -416,7 +418,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       });
 
       // kintone固有フィールドがあった場合、ユーザに表示するメッセージにその旨を追記
-      const addMessage = excludedLabels.length ? `${excludedLabels.join("、")}はkintoneの固定フィールドのため指定できません。\n\n` : "";
+      const addMessage = excludedLabels.length && typeLlmResult.userMessageType === ActionType.edit ? `${excludedLabels.join("、")}はkintoneの固定フィールドのため指定できません。\n\n` : "";
       const resultMessage = `${addMessage}${LlmResult.responseMessage}`
 
       // 結果回答詳細
@@ -535,7 +537,7 @@ function setChatHistory(chatHistory: ChatHistory) {
     // AI回答がある場合、会話履歴に追加
     if (history.human.role === MessageType.human && (history.ai && history.ai.role === MessageType.ai)) {
       histories.push(new HumanMessage(history.human.content));
-      histories.push(new AIMessage(history.ai.content));
+      histories.push(new AIMessage(`${history.ai.content}\n${history.ai.messageDetail}`));
     }
   });
   return histories;
