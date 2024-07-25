@@ -9,7 +9,7 @@ import { KintoneError } from "~/util/customErrors";
 export async function preCheck(pluginId: string) {
   const resPreCheck = await kintone.plugin.app.proxy(
     pluginId,
-    `${import.meta.env.VITE_API_ENDPOINT}/pre_check`,
+    `${import.meta.env.VITE_API_ENDPOINT}/plugin/com/pre_check`,
     "POST",
     {},
     {},

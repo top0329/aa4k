@@ -10,7 +10,7 @@ export const getPromptInfoList = async (pluginId: string) => {
 
   const resPromptInfoList = await kintone.plugin.app.proxy(
     pluginId,
-    `${import.meta.env.VITE_API_ENDPOINT}/prompt`,
+    `${import.meta.env.VITE_API_ENDPOINT}/plugin/com/prompt`,
     "POST",
     {},
     { serviceDivList: Object.values(ServiceDiv) },

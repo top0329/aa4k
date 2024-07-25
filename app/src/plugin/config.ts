@@ -75,6 +75,7 @@ interface KintoneConfig {
       "aa4k-plugin-version": __NPM_PACKAGE_VERSION__,
       "aa4k-subscription-id": subscriptionId,
       "aa4k-api-key": openaiApiKey ? openaiApiKey : "dummy",
+      "aa4k-subdomain": getSubDomain(),
     };
     // トライアル時のOpenAI連携時に[authorization](API Key)を秘匿して連携するためsetProxyConfigに設定
     const openAiHeader = {
@@ -194,6 +195,19 @@ interface KintoneConfig {
     }
     return true;
   }
+  /**
+ * 操作環境のサブドメインを取得
+ * @returns サブドメイン
+ */
+  function getSubDomain(): string {
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    if (parts.length > 2) {
+      return parts.slice(0, -2).join('.');
+    }
+    return '';
+  }
+
 })(`${kintone.$PLUGIN_ID}`);
 
 

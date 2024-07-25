@@ -185,7 +185,7 @@ export const usePromptFormLogic = ({
       // ユーザ発話の登録
       const resInsertConversation = await kintone.plugin.app.proxy(
         pluginId,
-        `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
+        `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/conversation_history/insert`,
         "POST",
         {},
         { appId: appId, userId: userId, deviceDiv: deviceDiv, messageType: MessageType.human, message: humanMessage },
@@ -295,7 +295,7 @@ export const usePromptFormLogic = ({
 
         const resClearConversation = await kintone.plugin.app.proxy(
           pluginId,
-          `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/clear`,
+          `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/conversation_history/clear`,
           "POST",
           {},
           { appId: appId, userId: userId, deviceDiv: deviceDiv },

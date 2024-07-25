@@ -12,7 +12,7 @@ import { utcToZonedTime } from 'date-fns-tz';
  * @param dbAccessSecretValue 
  * @returns チェック結果
  */
-export const getSubscriptionData = async (subscriptionId: string, dbAccessSecretValue: DbAccessSecretValue): Promise<SubscriptionResultRow | null> => {
+export const getSubscriptionData = async (subscriptionId: string, subdomain: string, dbAccessSecretValue: DbAccessSecretValue): Promise<SubscriptionResultRow | null> => {
   let dbClient: Client | undefined;
   let redisClient: Redis | undefined;
 
@@ -36,7 +36,7 @@ export const getSubscriptionData = async (subscriptionId: string, dbAccessSecret
       await dbClient.connect();
 
       // サブスクリプション情報の取得
-      const latestSubscriptionData = await selectSubscription(dbClient, subscriptionId);
+      const latestSubscriptionData = await selectSubscription(dbClient, subscriptionId, subdomain);
       if (latestSubscriptionData.rowCount === null || latestSubscriptionData.rowCount === 0) {
         return null;
       } else if (latestSubscriptionData.rowCount >= 2) {

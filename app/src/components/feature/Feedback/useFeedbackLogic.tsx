@@ -55,7 +55,7 @@ export const useFeedbackLogic = (chatHistoryItem: ChatHistoryItem) => {
     // ユーザー評価コメント更新(※ユーザー評価コメント更新でエラーが発生しても、画面にはエラーメッセージは表示しない)
     await kintone.plugin.app.proxy(
       pluginId,
-      `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/update-user-rating`,
+      `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/conversation_history/update-user-rating`,
       "POST",
       {},
       { conversationId: activeConversationId, userRating: chatHistoryItem.userRating, userRatingComment: feedback },
@@ -77,7 +77,7 @@ export const useFeedbackLogic = (chatHistoryItem: ChatHistoryItem) => {
     try {
       const resUpdateUserRating = await kintone.plugin.app.proxy(
         pluginId,
-        `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/update-user-rating`,
+        `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/conversation_history/update-user-rating`,
         "POST",
         {},
         { conversationId: activeConversationId, userRating: userRating },

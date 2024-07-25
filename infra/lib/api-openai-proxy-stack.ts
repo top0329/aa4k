@@ -66,8 +66,9 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     // プラグイン機能
     // ------------------------------
     // Lambda 関数を定義
+    const restapi_plugin = restapi.root.addResource("plugin")
     const authorizerFunction = new nodelambda.NodejsFunction(this, "AuthorizerFunction", {
-      entry: __dirname + "/lambda/authorizer/index.ts",
+      entry: __dirname + "/lambda/authorizer/plugin/index.ts",
       handler: 'index.handler',
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -92,7 +93,7 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
 
     // AWS Credential Provider Lambda
     const credProviderLambda = new nodelambda.NodejsFunction(this, "AzureOpenAIProxyCredentialLambda", {
-      entry: __dirname + "/lambda/azureOpenaiProxy/credential/index.ts",
+      entry: __dirname + "/lambda/azureOpenaiProxy/plugin/credential/index.ts",
       handler: "handler",
       timeout: cdk.Duration.seconds(30),
       runtime: Runtime.NODEJS_20_X
@@ -102,7 +103,7 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     })
     credProviderLambda.addEnvironment("PROXY_INVOKE_ROLE_ARN", proxyInvokeRole.roleArn)
 
-    restapi.root.addResource("azure_openai_proxy_credential").addMethod(
+    restapi_plugin.addResource("aoai_proxy_credential").addMethod(
       "POST",
       new apigateway.LambdaIntegration(credProviderLambda),
       {

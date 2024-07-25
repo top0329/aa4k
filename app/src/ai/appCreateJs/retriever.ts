@@ -45,7 +45,7 @@ export class CodeTemplateRetriever extends BaseRetriever {
 
     const response = await kintone.plugin.app.proxy(
       this.pluginId,
-      `${import.meta.env.VITE_API_ENDPOINT}/code_template/retrieve`,
+      `${import.meta.env.VITE_API_ENDPOINT}/plugin/com/code_template/retrieve`,
       "POST",
       {},
       {

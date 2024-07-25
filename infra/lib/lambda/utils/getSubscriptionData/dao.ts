@@ -7,9 +7,10 @@ import { SubscriptionResultRow } from "./type"
  * @param id
  * @returns クエリ実行結果
  */
-export const selectSubscription = async (dbClient: Client, subscriptionId: string): Promise<QueryResult<SubscriptionResultRow>> => {
+export const selectSubscription = async (dbClient: Client, subscriptionId: string, subdomain?: string): Promise<QueryResult<SubscriptionResultRow>> => {
   const pram = [
     subscriptionId,
+    subdomain,
   ]
   let sql = "";
   sql += `select`;
@@ -28,6 +29,7 @@ export const selectSubscription = async (dbClient: Client, subscriptionId: strin
   sql += ` subscription_id = $1`;
   sql += ` and subscription.start_date <= CURRENT_DATE`;
   sql += ` and (subscription.end_date is null or subscription.end_date > CURRENT_DATE)`;
+  sql += ` and subdomain.subdomain = $2`;
 
   return await dbClient.query(sql, pram);
 };

@@ -287,7 +287,7 @@ export const langchainLogInsert = (props: LangchainLogsInsertCallbackHandlerProp
 
   kintone.plugin.app.proxy(
     props.pluginId,
-    `${import.meta.env.VITE_API_ENDPOINT}/langchain_log`,
+    `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/langchain_log`,
     "POST",
     {},
     body,

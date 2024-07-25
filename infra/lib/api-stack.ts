@@ -89,7 +89,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // ------------------------------
     // Lambda 関数を定義
     const authorizerFunction = new nodelambda.NodejsFunction(this, "AuthorizerFunction", {
-      entry: __dirname + "/lambda/authorizer/index.ts",
+      entry: __dirname + "/lambda/authorizer/plugin/index.ts",
       handler: 'index.handler',
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -146,10 +146,14 @@ export class Aa4kApiStack extends cdk.Stack {
     // ------------------------------
     // プラグイン機能
     // ------------------------------
+    const restapi_plugin = restapi.root.addResource("plugin")
+    const restapi_plugin_com = restapi_plugin.addResource("com")
+    const restapi_plugin_js_gen = restapi_plugin.addResource("js_gen")
+
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
       description: "コードテンプレート管理API",
-      entry: __dirname + "/lambda/api/codeTemplate/index.ts",
+      entry: __dirname + "/lambda/api/plugin/com/codeTemplate/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -169,7 +173,7 @@ export class Aa4kApiStack extends cdk.Stack {
     secretsStack.azureSecret.grantRead(codeTemplateLambda)
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(codeTemplateLambda)
     parameterStack.aa4kConstParameter.grantRead(codeTemplateLambda);
-    restapi.root.addResource("code_template").addProxy({
+    restapi_plugin_com.addResource("code_template").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(codeTemplateLambda),
       anyMethod: true,
       defaultMethodOptions: {
@@ -181,7 +185,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // conversationHistory Lambda
     const conversationHistoryLambda = new nodelambda.NodejsFunction(this, "ConversationHistoryLambda", {
       description: "会話履歴API",
-      entry: __dirname + "/lambda/api/conversationHistory/index.ts",
+      entry: __dirname + "/lambda/api/plugin/js_gen/conversationHistory/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -201,7 +205,7 @@ export class Aa4kApiStack extends cdk.Stack {
     secretsStack.azureSecret.grantRead(conversationHistoryLambda);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(conversationHistoryLambda);
     parameterStack.aa4kConstParameter.grantRead(conversationHistoryLambda);
-    restapi.root.addResource("conversation_history").addProxy({
+    restapi_plugin_js_gen.addResource("conversation_history").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(conversationHistoryLambda),
       anyMethod: true,
       defaultMethodOptions: {
@@ -213,7 +217,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // generatedCode Lambda
     const generatedCodeLambda = new nodelambda.NodejsFunction(this, "GeneratedCodeLambda", {
       description: "最新JSコード取得API",
-      entry: __dirname + "/lambda/api/generatedCode/index.ts",
+      entry: __dirname + "/lambda/api/plugin/com/generatedCode/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
@@ -229,7 +233,7 @@ export class Aa4kApiStack extends cdk.Stack {
     });
     secretsStack.azureSecret.grantRead(generatedCodeLambda);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(generatedCodeLambda);
-    restapi.root.addResource("generated_code").addProxy({
+    restapi_plugin_com.addResource("generated_code").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(generatedCodeLambda),
       anyMethod: true,
       defaultMethodOptions: {
@@ -241,7 +245,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // pre-check Lambda
     const preCheck = new nodelambda.NodejsFunction(this, "preCheck", {
       description: "事前チェックAPI",
-      entry: __dirname + "/lambda/api/preCheck/index.ts",
+      entry: __dirname + "/lambda/api/plugin/com/preCheck/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
@@ -259,7 +263,7 @@ export class Aa4kApiStack extends cdk.Stack {
     secretsStack.azureSecret.grantRead(preCheck);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(preCheck)
     parameterStack.aa4kConstParameter.grantRead(preCheck);
-    restapi.root.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(preCheck), {
+    restapi_plugin_com.addResource("pre_check").addMethod("POST", new apigateway.LambdaIntegration(preCheck), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })
@@ -267,7 +271,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // speech Lambda
     const speech = new nodelambda.NodejsFunction(this, "SpeechLambda", {
       description: "Text To Speech API",
-      entry: __dirname + "/lambda/api/speech/index.ts",
+      entry: __dirname + "/lambda/api/plugin/com/speech/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG],
@@ -286,7 +290,7 @@ export class Aa4kApiStack extends cdk.Stack {
       resources: ['*']
     });
     speech.addToRolePolicy(policyStatement);
-    restapi.root.addResource("speech").addMethod("POST", new apigateway.LambdaIntegration(speech), {
+    restapi_plugin_com.addResource("speech").addMethod("POST", new apigateway.LambdaIntegration(speech), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     });
@@ -294,7 +298,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // LangchainLog Lambda
     const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
       description: "Langchain実行ログ登録API",
-      entry: __dirname + "/lambda/api/langchainLog/index.ts",
+      entry: __dirname + "/lambda/api/plugin/js_gen/langchainLog/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
@@ -310,7 +314,7 @@ export class Aa4kApiStack extends cdk.Stack {
     })
     secretsStack.azureSecret.grantRead(langchainLog);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(langchainLog)
-    restapi.root.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
+    restapi_plugin_js_gen.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })
@@ -318,7 +322,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // prompt Lambda
     const prompt = new nodelambda.NodejsFunction(this, "PromptLambda", {
       description: "プロンプト取得API",
-      entry: __dirname + "/lambda/api/prompt/index.ts",
+      entry: __dirname + "/lambda/api/plugin/com/prompt/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
@@ -334,7 +338,7 @@ export class Aa4kApiStack extends cdk.Stack {
     })
     secretsStack.azureSecret.grantRead(prompt);
     if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(prompt)
-    restapi.root.addResource("prompt").addMethod("POST", new apigateway.LambdaIntegration(prompt), {
+    restapi_plugin_com.addResource("prompt").addMethod("POST", new apigateway.LambdaIntegration(prompt), {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })
@@ -400,7 +404,7 @@ export class Aa4kApiStack extends cdk.Stack {
     // portal_speechLambda
     const portal_speechLambda = new nodelambda.NodejsFunction(this, "Portal_SpeechLambda", {
       description: "Text To Speech API",
-      entry: __dirname + "/lambda/api/speech/index.ts",
+      entry: __dirname + "/lambda/api/portal/com/speech/index.ts",
       handler: "handler",
       vpc: auroraStack.vpc,
       securityGroups: [auroraStack.auroraAccessableSG],

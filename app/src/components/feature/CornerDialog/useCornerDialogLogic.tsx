@@ -173,7 +173,7 @@ export const useCornerDialogLogic = () => {
       // 会話履歴一覧取得
       const resConversationHistory = await kintone.plugin.app.proxy(
         pluginId,
-        `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/list`,
+        `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/conversation_history/list`,
         "POST",
         {},
         { appId: appId, userId: userId },

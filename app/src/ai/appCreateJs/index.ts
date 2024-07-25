@@ -210,7 +210,7 @@ async function preGetResource(conversation: Conversation, sessionId: string) {
   // --------------------
   const res_jsCodeForDb = await kintone.plugin.app.proxy(
     pluginId,
-    `${import.meta.env.VITE_API_ENDPOINT}/generated_code/get-code`,
+    `${import.meta.env.VITE_API_ENDPOINT}/plugin/com/generated_code/get-code`,
     "POST",
     {},
     { appId: appId, userId: userId, deviceDiv: deviceDiv, conversationId: conversationId },
@@ -446,7 +446,7 @@ function insertConversation(pluginId: string, appId: number, userId: string, dev
     { appId, userId, deviceDiv, messageType, message, conversationId }
   kintone.plugin.app.proxy(
     pluginId,
-    `${import.meta.env.VITE_API_ENDPOINT}/conversation_history/insert`,
+    `${import.meta.env.VITE_API_ENDPOINT}/plugin/js_gen/conversation_history/insert`,
     "POST",
     {},
     body,

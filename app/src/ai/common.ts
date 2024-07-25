@@ -192,7 +192,7 @@ async function getAzureOpenAiProxyCredential(pluginId: string, sessionId: string
 
   const [resBody, _resStatus, _resHeaders] = await kintone.plugin.app.proxy(
     pluginId,
-    `${import.meta.env.VITE_AZURE_OPENAI_PROXY_CREDENTIAL_ENDPOINT}/azure_openai_proxy_credential`,
+    `${import.meta.env.VITE_AZURE_OPENAI_PROXY_CREDENTIAL_ENDPOINT}/plugin/aoai_proxy_credential`,
     'POST',
     {
       'Accept': 'application/json',

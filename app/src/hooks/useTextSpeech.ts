@@ -53,7 +53,7 @@ export const useTextSpeech = (
       audioPlaying.current = true;
       const resSpeech = (await kintone.plugin.app.proxy(
         pluginId,
-        `${import.meta.env.VITE_API_ENDPOINT}/speech`,
+        `${import.meta.env.VITE_API_ENDPOINT}/plugin/com/speech`,
         "POST",
         {},
         { text: sentence },
