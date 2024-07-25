@@ -151,7 +151,7 @@ export class Aa4kApiAiProxyStack extends cdk.Stack {
     })
     portal_credProviderLambda.addEnvironment("PROXY_INVOKE_ROLE_ARN", portal_proxyInvokeRole.roleArn)
 
-    restapi_portal.addResource("azure_openai_proxy_credential").addMethod(
+    restapi_portal.addResource("aoai_proxy_credential").addMethod(
       "POST",
       new apigateway.LambdaIntegration(portal_credProviderLambda),
       {

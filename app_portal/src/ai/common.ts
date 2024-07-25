@@ -172,7 +172,7 @@ interface Credentials {
 async function getAzureOpenAiProxyCredential(sessionId: string): Promise<Credentials> {
 
   const [resBody, _resStatus, _resHeaders] = await kintone.proxy(
-    `${import.meta.env.VITE_AZURE_OPENAI_PROXY_CREDENTIAL_ENDPOINT}/portal/azure_openai_proxy_credential`,
+    `${import.meta.env.VITE_AZURE_OPENAI_PROXY_CREDENTIAL_ENDPOINT}/portal/aoai_proxy_credential`,
     'POST',
     {
       'Accept': 'application/json',

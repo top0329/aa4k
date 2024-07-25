@@ -7,12 +7,11 @@ import { useUpdateEffect } from "react-use";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
 // import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState'; // TODO: Chat履歴をstateに格納
 import { AppDialogVisibleState } from '~/state/appDialogVisibleState';
-// import { PromptInfoListState } from '~/state/promptState';
+import { PromptInfoListState } from '~/state/promptState';
 // import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
-// import { KintoneError } from "~/util/customErrors";
-// import { getApiErrorMessage } from '~/util/getErrorMessage';
-// import { preCheck } from "~/util/preCheck";
-// import { getPromptInfoList } from "~/util/getPrompt"
+import { checkRole } from "~/util/checkRole";
+import { preCheck } from "~/util/preCheck";
+import { getPromptInfoList } from "~/util/getPrompt"
 
 type DragPosition = { x: number; y: number };
 
@@ -23,8 +22,9 @@ const getSavedPosition = (): DragPosition | null => {
 };
 
 export const useCornerDialogLogic = () => {
+  const [isBannerDisplay, setIsBannerDisplay] = useState<boolean>(false);
   // const [, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
-  // const [, setPromptInfoList] = useAtom(PromptInfoListState);
+  const [, setPromptInfoList] = useAtom(PromptInfoListState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isAppDialogVisible, setIsAppDialogVisible] = useAtom(AppDialogVisibleState);
   const [humanMessage, setHumanMessage] = useState("");
@@ -73,89 +73,48 @@ export const useCornerDialogLogic = () => {
     }
   }
 
-  // TODO: app用に調整
-  // // 事前チェックを実行
-  // const execPreCheck = async () => {
-  //   try {
-  //     const appId = kintone.app.getId();
+  // 事前チェックを実行
+  const execPreCheck = async () => {
+    try {
+      // 操作ユーザがAA4k利用権限があるかをチェック
+      const hasRole = await checkRole(kintone.getLoginUser().code);
+      if (!hasRole) {
+        return;
+      }
 
-  //     // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
-  //     if (appId === null) {
-  //       setIsBannerClicked(false);
-  //       setDockState({
-  //         dialogVisible: false,
-  //         chatVisible: false,
-  //         codeEditorVisible: false,
-  //         spChatVisible: false,
-  //       });
-  //       showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`, ToastPosition.TopCenter);
-  //       return;
-  //     }
+      // 事前チェックの呼び出し
+      const { resStatus: resPreCheckStatus } = await preCheck();
+      if (resPreCheckStatus !== 200) {
+        return;
+      }
+      setIsBannerDisplay(true);
 
-  //     // 事前チェックの呼び出し
-  //     const { preCheckResult, resStatus: resPreCheckStatus } = await preCheck(pluginId);
-  //     if (resPreCheckStatus !== 200) {
-  //       setIsBannerClicked(false);
-  //       setDockState({
-  //         dialogVisible: false,
-  //         chatVisible: false,
-  //         codeEditorVisible: false,
-  //         spChatVisible: false,
-  //       });
-  //       // APIエラー時のエラーメッセージを取得
-  //       const errorMessage = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
-  //       // APIエラーの場合、エラーメッセージ表示
-  //       showErrorToast(errorMessage, ToastPosition.TopCenter);
-  //       return;
-  //     }
+      // プロンプト情報の取得
+      execGetPromptInfoList();
+    } catch (err) {
+      // 何もしない
+    }
+  }
 
-  //     setIsBannerClicked(false);
-  //     setIsInitVisible(true);
-  //     setIsReload(false);
+  // プロンプト情報の取得
+  const execGetPromptInfoList = async () => {
+    try {
+      const { promptResult, resStatus: _resPromptStatus } = await getPromptInfoList();
 
-  //     // プロンプト情報の取得
-  //     execGetPromptInfoList();
-  //   } catch (err) {
-  //     let message: string = '';
-  //     if (err instanceof KintoneError) {
-  //       message = err.message;
-  //     } else {
-  //       message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
-  //     }
-  //     setIsBannerClicked(false);
-  //     setDockState({
-  //       dialogVisible: false,
-  //       chatVisible: false,
-  //       codeEditorVisible: false,
-  //       spChatVisible: false,
-  //     });
-  //     showErrorToast(message, ToastPosition.TopCenter);
-  //   }
-  // }
+      const promptInfoList = promptResult.promptInfoList;
+      setPromptInfoList(promptInfoList);
+    } catch (err) {
+      // 何もしない
+    }
+  }
 
-  // TODO: プロンプト取得
-  // // プロンプト情報の取得
-  // const execGetPromptInfoList = async () => {
-  //   try {
-  //     const { promptResult, resStatus: _resPromptStatus } = await getPromptInfoList(pluginId);
+  // バナー表示時
+  useEffect(() => {
+    // 事前チェックを実行
+    execPreCheck();
+  }, []);
 
-  //     const promptInfoList = promptResult.promptInfoList;
-  //     setPromptInfoList(promptInfoList);
-  //   } catch (err) {
-  //     // 何もしない
-  //   }
-  // }
-
-  // TODO: 初回表示のタイミング調整
-  // useEffect(() => {
-  //   if (isVisible) {
-  //     // Dock初回表示の場合、事前チェックを行う
-  //     execPreCheck();
-  //   }
-  //   // setDisable(!dockState.dialogVisible);
-  // }, [isVisible]);
-
-  //　ダイアログ表示時にバナークリック状態をリセット
+  // ダイアログ表示時にバナークリック状態をリセット
   useEffect(() => {
     if (isAppDialogVisible) {
       setIsBannerClicked(false);
@@ -207,6 +166,7 @@ export const useCornerDialogLogic = () => {
     aiAnswer,
     setAiAnswer,
     finishAiAnswer,
-    setFinishAiAnswer
+    setFinishAiAnswer,
+    isBannerDisplay,
   };
 };

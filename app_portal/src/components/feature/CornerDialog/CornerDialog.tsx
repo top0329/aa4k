@@ -26,8 +26,10 @@ const CornerDialog = () => {
     setAiAnswer,
     finishAiAnswer,
     setFinishAiAnswer,
+    isBannerDisplay,
   } = useCornerDialogLogic();
 
+  if (!isBannerDisplay) return;
   return (
     <Dialog.Root open={isAppDialogVisible} >
       <motion.div
