@@ -2,7 +2,7 @@
 
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from 'react';
-// import { useUpdateEffect } from "react-use";
+import { useUpdateEffect } from "react-use";
 // import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
 // import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState'; // TODO: Chat履歴をstateに格納
@@ -28,7 +28,7 @@ export const useCornerDialogLogic = () => {
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isAppDialogVisible, setIsAppDialogVisible] = useAtom(AppDialogVisibleState);
   const [humanMessage, setHumanMessage] = useState("");
-  // const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
+  const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
 
   const [initialPosition, setInitialPosition] = useState<DragPosition>(() => {
     const savedPosition = getSavedPosition();
@@ -58,8 +58,7 @@ export const useCornerDialogLogic = () => {
   // 音声出力
   const [aiAnswer, setAiAnswer] = useState("");
   const [finishAiAnswer, setFinishAiAnswer] = useState(false);
-  const { setDisable } = useTextSpeech(
-  // const { setDisable, isSpeech } = useTextSpeech(
+  const { setDisable, isSpeech } = useTextSpeech(
     aiAnswer,
     setAiAnswer,
     finishAiAnswer,
@@ -181,17 +180,16 @@ export const useCornerDialogLogic = () => {
     }
   }, [getSavedPosition]);
 
-  // TODO: app用に調整
-  // const execCallbacks = () => {
-  //   callbackFuncs?.forEach((fn) => fn());
-  // };
+  const execCallbacks = () => {
+    callbackFuncs?.forEach((fn) => fn());
+  };
 
-  // // JS生成AI機能の呼び出し後、音声出力が完了したのを確認したのちにJS生成AI機能からのcallbacksを実行する
-  // useUpdateEffect(() => {
-  //   if (AppDialogVisibleState && !isSpeech) {
-  //     execCallbacks();
-  //   }
-  // }, [AppDialogVisibleState, isSpeech]);
+  // app生成AI機能の呼び出し後、音声出力が完了したのを確認したのちにapp生成AI機能からのcallbacksを実行する
+  useUpdateEffect(() => {
+    if (isAppDialogVisible && !isSpeech) {
+      execCallbacks();
+    }
+  }, [isAppDialogVisible, isSpeech, callbackFuncs]);
 
 
   return {
@@ -205,8 +203,7 @@ export const useCornerDialogLogic = () => {
     savedPosition,
     humanMessage,
     setHumanMessage,
-    // setCallbackFuncs,
-    // execCallbacks,
+    setCallbackFuncs,
     aiAnswer,
     setAiAnswer,
     finishAiAnswer,

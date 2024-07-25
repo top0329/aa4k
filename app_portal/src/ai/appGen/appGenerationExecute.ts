@@ -1,6 +1,7 @@
 import { setPrompt, executeLlm } from "../common"
 import {
-  AppGenerationExecuteResponse,
+  AppGenerationExecuteResponseSuccess,
+  AppGenerationExecuteResponseError,
   AppGenerationExecuteConversation,
   AppGenerationExecuteContext,
   PromptInfo,
@@ -33,7 +34,7 @@ interface KintoneFieldAddProperties {
  * @param conversation 
  * @returns AppGenerationExecuteResponse
  */
-export const appGenerationExecute = async (conversation: AppGenerationExecuteConversation): Promise<AppGenerationExecuteResponse> => {
+export const appGenerationExecute = async (conversation: AppGenerationExecuteConversation): Promise<AppGenerationExecuteResponseSuccess | AppGenerationExecuteResponseError> => {
   const { message } = conversation;
   const context = conversation.context as AppGenerationExecuteContext;
   const isGuestSpace = context.isGuestSpace;

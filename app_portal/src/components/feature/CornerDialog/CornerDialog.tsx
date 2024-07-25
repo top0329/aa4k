@@ -21,7 +21,7 @@ const CornerDialog = () => {
     savedPosition,
     humanMessage,
     setHumanMessage,
-    // setCallbackFuncs,
+    setCallbackFuncs,
     aiAnswer,
     setAiAnswer,
     finishAiAnswer,
@@ -69,7 +69,7 @@ const CornerDialog = () => {
               <AppGenerationDialog
                 humanMessage={humanMessage}
                 setHumanMessage={setHumanMessage}
-                // setCallbackFuncs={setCallbackFuncs}
+                setCallbackFuncs={setCallbackFuncs}
                 aiAnswer={aiAnswer}
                 setAiAnswer={setAiAnswer}
                 finishAiAnswer={finishAiAnswer}

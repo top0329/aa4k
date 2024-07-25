@@ -30,6 +30,12 @@ export const ActionType = {
 } as const;
 export type ActionType = keyof typeof ActionType;
 
+// 実行結果
+export const ExecResult = {
+  success: "success",
+  error: "error",
+} as const;
+export type ExecResult = keyof typeof ExecResult;
 
 // 契約ステータス
 export const ContractStatus = {
@@ -124,8 +130,8 @@ export const InfoMessage = {
 // エラーメッセージ
 export const ErrorMessage = {
   E_MSG001: "AI処理に失敗しました。",
-  E_MSG002: "新しいバージョンのプラグインが必要です。管理者にお問い合わせください。",
-  E_MSG003: "現在ご利用することができません。管理者にお問い合わせください。",
+  E_MSG002: "お手数ですが、再度、作成したいアプリを入力しなおしてください。\nより詳しい表現に変えるとAIが認識しやすくなります。\n事象が改善されない場合は管理者にお問い合わせください。",
+  E_MSG003: "アプリの生成に失敗しました。",
   E_MSG004: "JavaScriptの生成に失敗しました。",
   E_MSG005: "メッセージ送信中に画面操作されたため正しく処理できませんでした。",
   E_MSG006: "現在ご利用することができません。",

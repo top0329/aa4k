@@ -11,3 +11,11 @@ export const sAiMessage = style({
   fontWeight: 500,
   lineHeight: '32px',
 });
+
+export const sErrorAiResponseText = style({
+  color: 'red',
+});
+
+export const sErrorText = style({
+  color: '#5459FF',
+});

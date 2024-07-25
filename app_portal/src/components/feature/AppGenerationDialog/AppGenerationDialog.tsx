@@ -11,14 +11,14 @@ import { sAppGenerationDialog, sOuterFrame, sMiddleFrame } from "./AppGeneration
 type AppGenerationDialogProps = {
   humanMessage: string;
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
-  // setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
+  setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
   aiAnswer: string,
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   finishAiAnswer: boolean,
   setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage, setHumanMessage, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer }) => {
+const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer }) => {
 
   // AppGenerationDialogコンポーネントのロジックを管理するカスタムフック
   const {
@@ -28,7 +28,7 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
     setIsInitVisible,
     isLoadingVisible,
     createKintoneApp,
-  } = useAppGenerationDialogLogic({ setHumanMessage, setAiAnswer, setFinishAiAnswer });
+  } = useAppGenerationDialogLogic({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer });
 
   return (
     <Box className={sOuterFrame}>

@@ -2,39 +2,41 @@
 
 import { useAtom } from 'jotai';
 import { useRef, useState } from 'react';
-import { InfoMessage } from '~/constants';
+import { ActionType, ErrorMessage as ErrorMessageConst, ExecResult, InfoMessage, MessageType } from '~/constants';
 import { AppDialogVisibleState } from '~/state/appDialogVisibleState';
-
-import { MessageType } from "~/constants"
 import { PromptInfoListState } from '~/state/promptState';
 import { SettingInfoState } from '~/state/settingInfoState';
 import { SessionIdState } from "~/state/sessionIdState";
-import { AppGenerationExecuteContext, AppGenerationExecuteConversation } from '~/types';
-
+import { ActionTypeState } from '~/state/actionTypeState';
+import { ChatHistoryState } from '~/state/chatHistoryState';
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from '~/util/preCheck';
 import { insertConversation } from "~/util/insertConversationHistory"
+import { ErrorMessage, AppGenerationExecuteContext, AppGenerationExecuteConversation, ChatHistoryItem } from '~/types';
 import { InsertConversationRequest, InsertConversationResponseBody } from "~/types/apiInterfaces"
 import { appGenerationExecute } from "~/ai/appGen/appGenerationExecute"
 
 type AppGenerationDialogProps = {
   setHumanMessage: React.Dispatch<React.SetStateAction<string>>;
+  setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-export const useAppGenerationDialogLogic = ({ setHumanMessage, setAiAnswer, setFinishAiAnswer }: AppGenerationDialogProps) => {
+export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer }: AppGenerationDialogProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
   // ダイアログの表示状態を管理するアトム
   const [isVisible, setIsVisible] = useAtom(AppDialogVisibleState);
+  // AI応答のアクション種別を管理
+  const [, setActionType] = useAtom(ActionTypeState);
+  const [promptInfoList] = useAtom(PromptInfoListState);
+  const [settingInfo] = useAtom(SettingInfoState);
+  const [sessionId,] = useAtom(SessionIdState);
   // ダイアログが初期表示されているかどうかの状態を管理
   const [isInitVisible, setIsInitVisible] = useState<boolean>(true);
   // ロード画面を表示するかどうかの状態を管理
   const [isLoadingVisible, setIsLoadingVisible] = useState<boolean>(false);
-
-  const [promptInfoList] = useAtom(PromptInfoListState);
-  const [settingInfo] = useAtom(SettingInfoState);
-  const [sessionId,] = useAtom(SessionIdState);
 
   // ダイアログの表示状態を切り替える
   const toggleDialogVisibility = () => {
@@ -48,13 +50,13 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setAiAnswer, setF
   const toggleAiLoadVisibility = (text: string) => {
     setHumanMessage(text);
     setIsLoadingVisible(prevState => !prevState);
-    setAiAnswer(`${InfoMessage.I_MSG004}`)
-    setFinishAiAnswer(true);
   };
 
   // アプリを作成するボタン押下時の処理
   const createKintoneApp = async (text: string) => {
     toggleAiLoadVisibility(text);
+    setAiAnswer(`${InfoMessage.I_MSG004}`);
+    setFinishAiAnswer(true);
 
     const userId = kintone.getLoginUser().id;
 
@@ -63,8 +65,26 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setAiAnswer, setF
     if (resPreCheckStatus !== 200) {
       // APIエラー時のエラーメッセージを取得
       const errMsgStr = getApiErrorMessage(resPreCheckStatus, preCheckResult.errorCode);
-      // TODO: エラー動作
       console.log("errMsgStr:", errMsgStr)
+
+      const errorMessage: ErrorMessage = {
+        role: MessageType.error,
+        content: errMsgStr
+      };
+      const chatHistoryItem: ChatHistoryItem = {
+        human: {
+          role: MessageType.human,
+          content: text,
+        },
+        error: errorMessage,
+        conversationId: "",
+      };
+      toggleAiLoadVisibility(text);
+      setAiAnswer(`${ErrorMessageConst.E_MSG003}`); // 失敗時に音声出力するメッセージ
+      setFinishAiAnswer(true);
+      setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      setHumanMessage("");
+      setActionType(ActionType.error);
       return;
     }
     const contractStatus = preCheckResult.contractStatus;
@@ -80,8 +100,26 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setAiAnswer, setF
     const resJsonInsertConversation = JSON.parse(resBody) as InsertConversationResponseBody;
     if (resInsertConversationStatus !== 200) {
       const errMsgStr = getApiErrorMessage(resInsertConversationStatus, resJsonInsertConversation.errorCode);
-      // TODO: エラー動作
       console.log("errMsgStr:", errMsgStr)
+
+      const errorMessage: ErrorMessage = {
+        role: MessageType.error,
+        content: errMsgStr
+      };
+      const chatHistoryItem: ChatHistoryItem = {
+        human: {
+          role: MessageType.human,
+          content: text,
+        },
+        error: errorMessage,
+        conversationId: "",
+      };
+      toggleAiLoadVisibility(text);
+      setAiAnswer(`${ErrorMessageConst.E_MSG003}`); // 失敗時に音声出力するメッセージ
+      setFinishAiAnswer(true);
+      setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      setHumanMessage("");
+      setActionType(ActionType.error);
       return;
     }
     const conversationId = resJsonInsertConversation.conversationId;
@@ -102,9 +140,28 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setAiAnswer, setF
       context: context,
     }
     const response = await appGenerationExecute(conversation);
-    // TODO: エラー動作
-    // TODO: AI機能実行後の動作
-
+    if (response.result === ExecResult.error) {
+      const errorMessage: ErrorMessage = {
+        role: MessageType.error,
+        content: response.errorMessage
+      };
+      const chatHistoryItem: ChatHistoryItem = {
+        human: {
+          role: MessageType.human,
+          content: text,
+        },
+        error: errorMessage,
+        conversationId: "",
+      };
+      toggleAiLoadVisibility(text);
+      setAiAnswer(`${ErrorMessageConst.E_MSG003}`); // 失敗時に音声出力するメッセージ
+      setFinishAiAnswer(true);
+      setChatHistory([...chatHistoryItems, chatHistoryItem]);
+      setHumanMessage("");
+      setActionType(ActionType.error);
+      return;
+    }
+    setCallbackFuncs(response.callbacks);
   };
 
   return {

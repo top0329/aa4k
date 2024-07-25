@@ -112,3 +112,13 @@ export interface AppGenerationExecuteResponse {
   callbacks?: Function[];
   errorMessage?:string;
 }
+
+export interface AppGenerationExecuteResponseSuccess extends AppGenerationExecuteResponse {
+  result: "success";
+  callbacks: Function[];
+}
+
+export interface AppGenerationExecuteResponseError extends AppGenerationExecuteResponse {
+  result: "error";
+  errorMessage: string;
+}
