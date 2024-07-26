@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "run-s msw && vite",
     "msw": "msw init ./public --no-save",
-    "build": "tsc && vite build --mode development --config vite.config.ts",
+    "build": "tsc && vite build --mode development --config vite.config.ts && cp -p dist/aa4k_portal_demo.js dist/aa4k_portal_local.js",
     "build:prod": "tsc && vite build --mode production --config vite.config.ts",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

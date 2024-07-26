@@ -35,7 +35,7 @@
     ```
     - dist/src/desktop/desktop.jsが作成される
     - dist/src/config/config.jsが作成される
-    - distにplugin-dev.zipが作成される
+    - distにplugin_local.zipが作成される
     - `app/scripts/.env.development`に設定されているkintone環境へアップロードされる
 
 4. 各アプリでプラグインを導入
@@ -84,7 +84,7 @@ pluginからは`dist/src/desktop/desktop.js`と`dist/src/config/config.js`を参
     ```
     npm run package-stg
     ```
-    - distにplugin-stg.zipが作成される
+    - distにplugin_demo.zipが作成される
 
 3. 各アプリでプラグインを導入
     - Kintone の 各アプリの設定画面から アプリの設定 > 設定 > プラグイン の画面で、「[デモ用] Associate AI Hub for kintone」を選択して追加する

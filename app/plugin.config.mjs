@@ -29,9 +29,9 @@ export default {
     },
     dev: {
       name: {
-        en: '[dev用] Associate AI Hub for kintone',
-        ja: '[dev用] Associate AI Hub for kintone',
-        zh: '[dev用] Associate AI Hub for kintone',
+        en: '[開発用] Associate AI Hub for kintone',
+        ja: '[開発用] Associate AI Hub for kintone',
+        zh: '[開発用] Associate AI Hub for kintone',
       },
       desktop: {
         js: [`${localhost}/src/desktop/desktop.js`],
