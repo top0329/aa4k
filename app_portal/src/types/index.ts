@@ -7,7 +7,7 @@ export interface ChatMessage {
 }
 
 export interface SystemSettings {
-  historyUseCount: number;
+  pluginId: string;
 }
 export interface HumanMessage extends ChatMessage {
   role: "human";
@@ -100,6 +100,7 @@ export interface AppGenerationPlanningResponse {
 export interface AppGenerationExecuteContext extends AppGenerationContext {
   // 「アプリ作成の実行」独自のものがあればここに定義
   isGuestSpace: boolean;
+  systemSettings: SystemSettings;
 }
 export interface AppGenerationExecuteConversation {
   message: HumanMessage;

@@ -9,4 +9,5 @@ export type ContextProps = {
   openAIApiInstanceName: string,
   apiIpWhitelist: string[],
   apiMngIpWhitelist: string[],
+  pluginId: string,
 }

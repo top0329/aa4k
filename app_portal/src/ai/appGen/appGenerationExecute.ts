@@ -40,7 +40,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
   const isGuestSpace = context.isGuestSpace;
   const sessionId = context.sessionId;
 
-  const { promptInfoList } = context;
+  const { promptInfoList, systemSettings } = context;
   try {
     // --------------------
     // 前処理
@@ -687,7 +687,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
     // --------------------
     // 作成したアプリにAA4kプラグインを追加
     // --------------------
-    await setAa4kPlugin(appId, isGuestSpace);
+    await setAa4kPlugin(appId, systemSettings.pluginId, isGuestSpace);
 
     // --------------------
     // kintone 運用環境へのデプロイ(kintone REST API)
@@ -879,9 +879,10 @@ async function kintoneAppGenFieldAdd(appId: string, kintoneFieldAddProperties: K
 /**
  * アプリにAA4kプラグインを追加
  * @param appId 
+ * @param pluginId
  * @param isGuestSpace
  */
-async function setAa4kPlugin(appId: string, isGuestSpace: boolean) {
+async function setAa4kPlugin(appId: string, pluginId: string, isGuestSpace: boolean) {
   interface Plugins {
     id: string;
     name: string;
@@ -891,10 +892,6 @@ async function setAa4kPlugin(appId: string, isGuestSpace: boolean) {
   interface Plugin {
     plugins: Plugins[];
   }
-  // AA4kプラグイン名
-  const aa4kPluginName = import.meta.env.MODE === "development"
-    ? "[デモ用] Associate AI Hub for kintone" // 開発用
-    : "Associate AI Hub for kintone"; // 本番用
 
   // --------------------
   // プラグイン一覧の取得
@@ -910,8 +907,9 @@ async function setAa4kPlugin(appId: string, isGuestSpace: boolean) {
   // --------------------
   // AA4kプラグインのプラグインIDを名前から抽出
   // --------------------
-  const aa4kPluginId = response.plugins.find(plugin => plugin.name === aa4kPluginName)?.id;
+  const aa4kPluginId = response.plugins.find(plugin => plugin.id === pluginId)?.id;
   if (!aa4kPluginId) {
+    // 存在しない場合は何もしない
     return;
   }
 

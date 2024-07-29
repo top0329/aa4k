@@ -88,6 +88,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
       return;
     }
     const contractStatus = preCheckResult.contractStatus;
+    const systemSettings = preCheckResult.systemSettings;
 
     // ユーザ発話の登録
     const reqConversation: InsertConversationRequest = {
@@ -133,6 +134,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
       contractStatus: contractStatus,
       promptInfoList: promptInfoList,
       isGuestSpace: false,
+      systemSettings: systemSettings,
     }
     const conversation: AppGenerationExecuteConversation = {
       message: { role: MessageType.human, content: text },

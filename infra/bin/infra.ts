@@ -35,6 +35,8 @@ const API_MNG_WHITELIST = [
   "39.110.232.32/28",   // SCグローバルIP
   "118.238.251.130/32", // SCグローバルIP
 ];
+const PLUGIN_ID_STG = "jgakgonmbmpmajnnlnigjdoeiolioikg"
+const PLUGIN_ID_PROD = "pbcadebpeehbgjplojgeiekkkkfdbdem"
 
 const contextProps: ContextProps = {
   stageKey: stageKey,
@@ -47,6 +49,7 @@ const contextProps: ContextProps = {
   openAIApiInstanceName: stageName === "prod" ? "aa4k-prod-east-us" : "aa4k-dev-east-us",
   apiIpWhitelist: stageName === "prod" ? API_WHITELIST_PROD : API_WHITELIST_DEV,
   apiMngIpWhitelist: API_MNG_WHITELIST,
+  pluginId: stageName === "prod" ? PLUGIN_ID_PROD : PLUGIN_ID_STG,
 }
 
 const stackProps: cdk.StackProps = {
