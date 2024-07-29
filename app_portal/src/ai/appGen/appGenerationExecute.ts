@@ -685,6 +685,11 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
     });
 
     // --------------------
+    // 作成したアプリにAA4kプラグインを追加
+    // --------------------
+    await setAa4kPlugin(appId, isGuestSpace);
+
+    // --------------------
     // kintone 運用環境へのデプロイ(kintone REST API)
     // --------------------
     await kintone.api(
@@ -868,6 +873,57 @@ async function kintoneAppGenFieldAdd(appId: string, kintoneFieldAddProperties: K
     kintoneFormFieldsBody,
   ).catch((e: KintoneRestAPiError) => {
     throw e
+  });
+}
+
+/**
+ * アプリにAA4kプラグインを追加
+ * @param appId 
+ * @param isGuestSpace
+ */
+async function setAa4kPlugin(appId: string, isGuestSpace: boolean) {
+  interface Plugins {
+    id: string;
+    name: string;
+    isMarketPlugin: boolean;
+    version: string
+  }
+  interface Plugin {
+    plugins: Plugins[];
+  }
+  // AA4kプラグイン名
+  const aa4kPluginName = import.meta.env.MODE === "development"
+    ? "[デモ用] Associate AI Hub for kintone" // 開発用
+    : "Associate AI Hub for kintone"; // 本番用
+
+  // --------------------
+  // プラグイン一覧の取得
+  // --------------------
+  const response: Plugin = await kintone.api(
+    kintone.api.url("/k/v1/plugins.json", isGuestSpace),
+    "GET",
+    {},
+  ).catch((e: KintoneRestAPiError) => {
+    throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+  });
+
+  // --------------------
+  // AA4kプラグインのプラグインIDを名前から抽出
+  // --------------------
+  const aa4kPluginId = response.plugins.find(plugin => plugin.name === aa4kPluginName)?.id;
+  if (!aa4kPluginId) {
+    return;
+  }
+
+  // --------------------
+  // アプリにプラグインを追加する
+  // --------------------
+  await kintone.api(
+    kintone.api.url("/k/v1/preview/app/plugins.json", isGuestSpace),
+    "POST",
+    { app: appId, ids: [aa4kPluginId] },
+  ).catch((e: KintoneRestAPiError) => {
+    throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
   });
 }
 
