@@ -16,9 +16,11 @@ type AppGenerationDialogProps = {
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   finishAiAnswer: boolean,
   setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
+  isShowDetailDialogVisible: boolean;
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer }) => {
+const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible }) => {
 
   // AppGenerationDialogコンポーネントのロジックを管理するカスタムフック
   const {
@@ -28,7 +30,7 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
     setIsInitVisible,
     isLoadingVisible,
     createKintoneApp,
-  } = useAppGenerationDialogLogic({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer });
+  } = useAppGenerationDialogLogic({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible });
 
   return (
     <Box className={sOuterFrame}>
@@ -46,6 +48,7 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
             setIsInitVisible={setIsInitVisible}
             createKintoneApp={createKintoneApp}
             isLoadingVisible={isLoadingVisible}
+            setIsShowDetailDialogVisible={setIsShowDetailDialogVisible}
           />
           {!isLoadingVisible && (
             <PromptForm

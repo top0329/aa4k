@@ -21,9 +21,10 @@ type AppGenerationDialogProps = {
   setCallbackFuncs: React.Dispatch<React.SetStateAction<Function[] | undefined>>;
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer }: AppGenerationDialogProps) => {
+export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible }: AppGenerationDialogProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
   // ダイアログの表示状態を管理するアトム
@@ -43,6 +44,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
     if (window.confirm(`${InfoMessage.I_MSG001}`)) {
       setIsVisible(false);
       setHumanMessage("");
+      setIsShowDetailDialogVisible(false);
     }
   };
 
@@ -57,6 +59,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
     toggleAiLoadVisibility(text);
     setAiAnswer(`${InfoMessage.I_MSG004}`);
     setFinishAiAnswer(true);
+    setIsShowDetailDialogVisible(false);
 
     const userId = kintone.getLoginUser().id;
 

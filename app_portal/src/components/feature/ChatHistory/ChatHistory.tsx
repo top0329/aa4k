@@ -19,9 +19,10 @@ type ChatHistoryProps = {
   setIsInitVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isLoadingVisible: boolean;
   createKintoneApp: (text: string) => void;
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, isLoadingVisible, createKintoneApp }) => {
+export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, isLoadingVisible, createKintoneApp, setIsShowDetailDialogVisible }) => {
 
   // ChatHistoryコンポーネントのロジックを管理するカスタムフック
   const {
@@ -166,6 +167,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
         aiMessage={aiMessage}
         chatHistoryItem={item}
         actionType={actionType}
+        setIsShowDetailDialogVisible={setIsShowDetailDialogVisible}
       />
     );
   };

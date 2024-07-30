@@ -8,16 +8,18 @@ import { vars } from "~/styles/theme.css";
 import useTypewriter from "~/hooks/useTypeWriter";
 import { AiContentProps } from "~/types/aiContentTypes";
 import { ActionType, InfoMessage, ErrorMessage } from "~/constants";
+import { ShowDetailButton } from "../ShowDetailButton/ShowDetailButton";
 
 type AiMessageProps = AiContentProps & {
   isLoadingVisible: boolean;
   createKintoneApp: (text: string) => void;
   actionType: string;
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const { create, edit, duplicate, other, unknown, error } = ActionType;
 
-export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKintoneApp, aiMessage, /*chatHistoryItem,*/actionType }) => {
+export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKintoneApp, aiMessage, /*chatHistoryItem,*/actionType, setIsShowDetailDialogVisible }) => {
 
   // アプリを作成するボタンを表示するかどうかの状態を管理
   const [isDisplayedCreateAppBtn, setIsDisplayedCreateAppBtn] = useState<boolean>(false);
@@ -31,17 +33,18 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
   // タイプライター出力
   const { role, content } = aiMessage;
   const messageDetail = role === "ai" && aiMessage.messageDetail ? aiMessage.messageDetail : "";
-  const displayedText = useTypewriter(content, !isLoadingVisible && !resetTypewriter); // メインのAI応答
-  const displayedAppInfo = useTypewriter(messageDetail, isDisplayedAppInfo); // アプリの情報
+  const [displayedText, isTextComplete] = useTypewriter(content, !isLoadingVisible && !resetTypewriter); // メインのAI応答
+  const [displayedAppInfo, isAppInfoComplete] = useTypewriter(messageDetail, isDisplayedAppInfo); // アプリの情報
   const loadingMessage = InfoMessage.I_MSG006;
-  const displayedLoadingText = useTypewriter(loadingMessage, isLoadingVisible); // ロード画面でのAI応答（固定）
+  const [displayedLoadingText,] = useTypewriter(loadingMessage, isLoadingVisible); // ロード画面でのAI応答（固定）
   const errorMessage = ErrorMessage.E_MSG002;
-  const displayedErrorText = useTypewriter(errorMessage, isErrorDisplayed); // エラー画面でのAI応答（固定）
+  const [displayedErrorText,] = useTypewriter(errorMessage, isErrorDisplayed); // エラー画面でのAI応答（固定）
 
   // 表示内容と状態をリセットするuseEffect
   useEffect(() => {
     setIsDisplayedCreateAppBtn(false);
     setIsDisplayedAppInfo(false);
+    setIsShowDetailDialogVisible(false);
     setIsErrorDisplayed(false);
     setResetTypewriter(true); // resetTypewriterをtrueに設定してuseTypewriterフックをリセット
   }, [actionType, aiMessage]);
@@ -55,14 +58,14 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
 
   // 表示順序を調整するuseEffect
   useEffect(() => {
-    if (displayedText === content && content !== "") {
+    if (isTextComplete && content !== "") {
       setIsDisplayedCreateAppBtn(true);
       setTimeout(() => setIsDisplayedAppInfo(true), 300);
       if (actionType === error) {
         setTimeout(() => setIsErrorDisplayed(true), 300);
       }
     }
-  }, [displayedText, content, actionType]);
+  }, [isTextComplete, content, actionType]);
 
   if (actionType === create || actionType === edit) {
     return (
@@ -75,11 +78,16 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
             {!isLoadingVisible && isDisplayedCreateAppBtn && (
               <CreateAppButton onClick={(text) => createKintoneApp(text)} />
             )}
-            {!isLoadingVisible && isDisplayedAppInfo && (
-              <Box p={'2'} style={{ backgroundColor: vars.color.grayA.grayA1, borderRadius: 4, whiteSpace: "pre-wrap" }}>
-                {displayedAppInfo}
-              </Box>
-            )}
+            <Flex direction={'column'} style={{ backgroundColor: vars.color.grayA.grayA1, borderRadius: 4 }}>
+              {!isLoadingVisible && isDisplayedAppInfo && (
+                <Box p={'2'} style={{ whiteSpace: "pre-wrap" }}>
+                  {displayedAppInfo}
+                </Box>
+              )}
+              {!isLoadingVisible && isAppInfoComplete && (
+                <ShowDetailButton onClick={() => setIsShowDetailDialogVisible(prev => !prev)} />
+              )}
+            </Flex>
           </Flex>
         </Box>
       </Flex>

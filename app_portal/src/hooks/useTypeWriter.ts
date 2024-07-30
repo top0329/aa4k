@@ -12,6 +12,8 @@ import { useState, useEffect, useRef } from 'react';
 const useTypewriter = (text: string, isActive: boolean, delay: number = 60) => {
   // タイプライター効果で表示されるテキストを保持するための状態
   const [displayedText, setDisplayedText] = useState('');
+  // タイプライターの出力が完了したかどうかを示す状態
+  const [isComplete, setIsComplete] = useState(false);
   // 現在表示している文字のインデックスを保持するための参照
   const indexRef = useRef(0);
 
@@ -20,6 +22,7 @@ const useTypewriter = (text: string, isActive: boolean, delay: number = 60) => {
     if (isActive) {
       indexRef.current = 0;
       setDisplayedText('');
+      setIsComplete(false);
     }
   }, [isActive]);
 
@@ -29,13 +32,16 @@ const useTypewriter = (text: string, isActive: boolean, delay: number = 60) => {
       const timeout = setTimeout(() => {
         setDisplayedText((prev) => prev + text[indexRef.current]);
         indexRef.current++;
+        if (indexRef.current === text.length) {
+          setIsComplete(true); // 全ての文字が表示されたら完了フラグをtrueにする
+        }
       }, delay);
       // setTimeoutのリセット処理（1文字単位で実行）
       return () => clearTimeout(timeout);
     }
   }, [isActive, displayedText, text, delay]);
 
-  return displayedText;
+  return [displayedText, isComplete] as const;
 };
 
 export default useTypewriter;

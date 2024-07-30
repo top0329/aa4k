@@ -1,7 +1,7 @@
 // src/components/ui/CloseButton/CloseButton.tsx
 
 import crossButtonIcon from "~/assets/crossButtonIcon.svg";
-import { sCloseButtonIcon, sCloseButton } from './CloseButton.css';
+import { sCloseButtonIcon, sCloseButton, sCloseButtonSmall, sCloseButtonIconSmall } from './CloseButton.css';
 import { Box } from '@radix-ui/themes';
 import React from 'react';
 
@@ -10,16 +10,21 @@ type CloseButtonProps = {
   top?: number;
   right?: number;
   zIndex?: number;
+  className?: string;
 };
 
 const CloseButton: React.FC<CloseButtonProps> = ({ onClick,
   top = 8,
   right = 8,
-  zIndex = 2000
+  zIndex = 2000,
+  className
 }) => {
+  const buttonClass = className === 'small' ? sCloseButtonSmall : sCloseButton;
+  const iconClass = className === 'small' ? sCloseButtonIconSmall : sCloseButtonIcon;
+
   return (
     <Box
-      className={sCloseButton}
+      className={buttonClass}
       style={{
         top: `${top}px`,
         right: `${right}px`,
@@ -27,7 +32,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({ onClick,
       }}
       onClick={onClick}
     >
-      <img src={crossButtonIcon} alt="icon" className={sCloseButtonIcon} />
+      <img src={crossButtonIcon} alt="icon" className={iconClass} />
     </Box>
   );
 };

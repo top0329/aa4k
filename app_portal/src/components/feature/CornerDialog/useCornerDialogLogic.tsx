@@ -5,9 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useUpdateEffect } from "react-use";
 // import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
-// import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState'; // TODO: Chat履歴をstateに格納
 import { AppDialogVisibleState } from '~/state/appDialogVisibleState';
 import { PromptInfoListState } from '~/state/promptState';
+import { ShowDetailDialogVisibleState } from "~/state/showDetailDialogVisibleState";
 // import { AiMessage, ChatHistory, ChatHistoryItem, ErrorMessage, MessageType } from "~/types/ai";
 import { checkRole } from "~/util/checkRole";
 import { preCheck } from "~/util/preCheck";
@@ -23,10 +23,11 @@ const getSavedPosition = (): DragPosition | null => {
 
 export const useCornerDialogLogic = () => {
   const [isBannerDisplay, setIsBannerDisplay] = useState<boolean>(false);
-  // const [, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
   const [, setPromptInfoList] = useAtom(PromptInfoListState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isAppDialogVisible, setIsAppDialogVisible] = useAtom(AppDialogVisibleState);
+  // ダイアログの表示状態を管理するアトム
+  const [isShowDetailDialogVisible, setIsShowDetailDialogVisible] = useAtom(ShowDetailDialogVisibleState);
   const [humanMessage, setHumanMessage] = useState("");
   const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
 
@@ -154,6 +155,8 @@ export const useCornerDialogLogic = () => {
   return {
     isAppDialogVisible,
     setIsAppDialogVisible,
+    isShowDetailDialogVisible,
+    setIsShowDetailDialogVisible,
     handleBannerClick,
     isBannerClicked,
     initialPosition,

@@ -10,9 +10,10 @@ type AiContentsProps = AiContentProps & {
   isLoadingVisible: boolean;
   createKintoneApp: (text: string) => void;
   actionType: string;
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const AiContents: React.FC<AiContentsProps> = ({ isLoadingVisible, createKintoneApp, aiMessage, chatHistoryItem, actionType }) => {
+export const AiContents: React.FC<AiContentsProps> = ({ isLoadingVisible, createKintoneApp, aiMessage, chatHistoryItem, actionType, setIsShowDetailDialogVisible }) => {
   return (
     <Box className={sAiContents}>
       <Flex
@@ -25,6 +26,7 @@ export const AiContents: React.FC<AiContentsProps> = ({ isLoadingVisible, create
           aiMessage={aiMessage}
           chatHistoryItem={chatHistoryItem}
           actionType={actionType}
+          setIsShowDetailDialogVisible={setIsShowDetailDialogVisible}
         />
       </Flex>
     </Box>

@@ -42,6 +42,7 @@ export type ChatHistory = Array<ChatHistoryItem>;
 export interface Field {
   label: string;
   type: string;
+  displayType:string;
 }
 // 設定リスト
 export interface SettingInfo {

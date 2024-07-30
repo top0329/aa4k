@@ -8,6 +8,7 @@ import DragButton from "~/components/ui/DragButton/DragButton.tsx";
 import "~/styles/scrollbar.css";
 import { sDialogOverlay, sBannerButtonIcon } from './CornerDialog.css';
 import AppGenerationDialog from "../AppGenerationDialog/AppGenerationDialog.tsx";
+import ShowDetailDialog from "../ShowDetailDialog/ShowDetailDialog.tsx";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
 
 const CornerDialog = () => {
@@ -15,6 +16,8 @@ const CornerDialog = () => {
   // CornerDialogコンポーネントのロジックを管理するカスタムフック
   const {
     isAppDialogVisible,
+    isShowDetailDialogVisible,
+    setIsShowDetailDialogVisible,
     handleBannerClick,
     isBannerClicked,
     savePosition,
@@ -60,6 +63,19 @@ const CornerDialog = () => {
         onInteractOutside={(e) => e.preventDefault()} //外部クリックを無効にする
       >
         <AnimatePresence>
+          {/* ShowDetailDialogの表示にアニメーションを付ける（0.3秒で表示） */}
+          {isAppDialogVisible && isShowDetailDialogVisible && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ShowDetailDialog />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
           {/* AppGenerationDialogの表示にアニメーションを付ける（0.3秒で表示） */}
           {isAppDialogVisible && (
             <motion.div
@@ -76,6 +92,8 @@ const CornerDialog = () => {
                 setAiAnswer={setAiAnswer}
                 finishAiAnswer={finishAiAnswer}
                 setFinishAiAnswer={setFinishAiAnswer}
+                isShowDetailDialogVisible={isShowDetailDialogVisible}
+                setIsShowDetailDialogVisible={setIsShowDetailDialogVisible}
               />
             </motion.div>
           )}
