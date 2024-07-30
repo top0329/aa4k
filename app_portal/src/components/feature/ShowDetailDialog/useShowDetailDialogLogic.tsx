@@ -1,4 +1,4 @@
-// src\components\feature\ShowDetailDialog\ShowDetailDialogLogic.tsx
+// src\components\feature\ShowDetailDialog\useShowDetailDialogLogic.tsx
 
 import { useAtom } from 'jotai';
 import { useRef } from 'react';

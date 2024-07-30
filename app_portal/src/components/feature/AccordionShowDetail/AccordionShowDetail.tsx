@@ -9,7 +9,7 @@ import AccordionTrigger from '~/components/ui/Accordion/AccordionTrigger';
 import AccordionContent from '~/components/ui/Accordion/AccordionContent';
 import { DefaultFieldContent } from '~/components/ui/DefaultFieldContent/DefaultFieldContent';
 import { sAccordionShowDetail, sAccordionShowDetailItem } from './AccordionShowDetail.css';
-import { useAccordionShowDetailLogic } from './AccordionShowDetailLogic';
+import { useAccordionShowDetailLogic } from './useAccordionShowDetailLogic';
 
 type AccordionShowDetailProps = {
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -34,14 +34,18 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ scroll
         <Accordion.Root
           className={sAccordionShowDetail}
           type="single"
-          value={activeItem}
+          value={activeItem} // 現在選択されているAccordion.Itemのvalueと一致すると、対象のアイテムを展開する
           onValueChange={setActiveItem}
           collapsible
         >
           {settingInfoItems && settingInfoItems.fields.map((item, index) => {
             const contentText = item.label.slice(13);
             return (
-              <Accordion.Item className={sAccordionShowDetailItem} value={`item-${index}`} key={index}>
+              <Accordion.Item
+                className={sAccordionShowDetailItem}
+                value={`item-${index}`} // 各Accordion.Itemに一意の値を設定（トリガーをクリックするとvalueがRootのonValueChangeコールバック関数に渡される）
+                key={index}
+              >
                 <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item} hasContent={!!contentText} />
                 {contentText && (
                   <motion.div

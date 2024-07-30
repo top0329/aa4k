@@ -18,9 +18,10 @@ type PromptFormProps = {
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   finishAiAnswer: boolean,
   setFinishAiAnswer:React.Dispatch<React.SetStateAction<boolean>>,
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer,setIsShowDetailDialogVisible }) => {
 
   // PromptFormコンポーネントのロジックを管理するカスタムフック
   const {
@@ -32,7 +33,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
-  } = usePromptFormLogic({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer });
+  } = usePromptFormLogic({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer,setIsShowDetailDialogVisible });
 
   // 送信ボタンのアニメーションのバリエーションを定義
   const buttonVariants = {

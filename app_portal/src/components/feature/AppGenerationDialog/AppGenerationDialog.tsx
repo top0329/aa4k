@@ -61,6 +61,7 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
               setAiAnswer={setAiAnswer}
               finishAiAnswer={finishAiAnswer}
               setFinishAiAnswer={setFinishAiAnswer}
+              setIsShowDetailDialogVisible={setIsShowDetailDialogVisible}
             />
           )}
         </Box>

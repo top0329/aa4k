@@ -29,6 +29,7 @@ type PromptFormProps = {
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   finishAiAnswer: boolean,
   setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const usePromptFormLogic = ({
@@ -37,6 +38,7 @@ export const usePromptFormLogic = ({
   setIsInitVisible,
   setAiAnswer,
   setFinishAiAnswer,
+  setIsShowDetailDialogVisible,
 }: PromptFormProps) => {
   const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
   const [promptInfoList] = useAtom(PromptInfoListState);
@@ -85,6 +87,7 @@ export const usePromptFormLogic = ({
 
       setAiAnswer("");
       setFinishAiAnswer(false);
+      setIsShowDetailDialogVisible(false);
 
       const userId = kintone.getLoginUser().id;
 
@@ -258,6 +261,7 @@ export const usePromptFormLogic = ({
     if (window.confirm(`${InfoMessage.I_MSG002}`)) {
       setActionType("");
       setHumanMessage("");
+      setIsShowDetailDialogVisible(false);
       // 会話履歴をクリアする
       setChatHistory([]);
       // 初期表示フラグをオンにする

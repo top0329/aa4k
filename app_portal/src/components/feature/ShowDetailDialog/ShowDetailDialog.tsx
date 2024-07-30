@@ -4,7 +4,7 @@ import React from "react";
 import { Box, Flex, Separator, Text } from "@radix-ui/themes";
 import { sShowDetailDialog } from "./ShowDetailDialog.css";
 import CloseButton from "~/components/ui/CloseButton/CloseButton";
-import { useShowDetailDialogLogic } from "./ShowDetailDialogLogic";
+import { useShowDetailDialogLogic } from "./useShowDetailDialogLogic";
 import AccordionShowDetail from "../AccordionShowDetail/AccordionShowDetail";
 
 type ShowDetailDialogProps = {}
