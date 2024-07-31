@@ -149,6 +149,7 @@ export class Aa4kApiStack extends cdk.Stack {
     const restapi_plugin = restapi.root.addResource("plugin")
     const restapi_plugin_com = restapi_plugin.addResource("com")
     const restapi_plugin_js_gen = restapi_plugin.addResource("js_gen")
+    const restapi_plugin_data_gen = restapi_plugin.addResource("data_gen")
 
     // codeTemplate Lambda
     const codeTemplateLambda = new nodelambda.NodejsFunction(this, "CodeTemplateLambda", {
@@ -175,38 +176,6 @@ export class Aa4kApiStack extends cdk.Stack {
     parameterStack.aa4kConstParameter.grantRead(codeTemplateLambda);
     restapi_plugin_com.addResource("code_template").addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(codeTemplateLambda),
-      anyMethod: true,
-      defaultMethodOptions: {
-        authorizationType: apigateway.AuthorizationType.CUSTOM,
-        authorizer: lambdaAuthorizer,
-      }
-    });
-
-    // conversationHistory Lambda
-    const conversationHistoryLambda = new nodelambda.NodejsFunction(this, "ConversationHistoryLambda", {
-      description: "会話履歴API",
-      entry: __dirname + "/lambda/api/plugin/js_gen/conversationHistory/index.ts",
-      handler: "handler",
-      vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
-      environment: {
-        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
-        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
-        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
-        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
-        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
-        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
-        SUGURES_ENDPOINT: contextProps.suguresEndpoint,
-        SUGURES_CLIENT_ID: contextProps.suguresClientId,
-      },
-      timeout: cdk.Duration.seconds(300),
-      runtime: Runtime.NODEJS_20_X
-    });
-    secretsStack.azureSecret.grantRead(conversationHistoryLambda);
-    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(conversationHistoryLambda);
-    parameterStack.aa4kConstParameter.grantRead(conversationHistoryLambda);
-    restapi_plugin_js_gen.addResource("conversation_history").addProxy({
-      defaultIntegration: new apigateway.LambdaIntegration(conversationHistoryLambda),
       anyMethod: true,
       defaultMethodOptions: {
         authorizationType: apigateway.AuthorizationType.CUSTOM,
@@ -295,30 +264,6 @@ export class Aa4kApiStack extends cdk.Stack {
       authorizer: lambdaAuthorizer,
     });
 
-    // LangchainLog Lambda
-    const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
-      description: "Langchain実行ログ登録API",
-      entry: __dirname + "/lambda/api/plugin/js_gen/langchainLog/index.ts",
-      handler: "handler",
-      vpc: auroraStack.vpc,
-      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
-      environment: {
-        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
-        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
-        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
-        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
-        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
-      },
-      timeout: cdk.Duration.seconds(300),
-      runtime: Runtime.NODEJS_20_X
-    })
-    secretsStack.azureSecret.grantRead(langchainLog);
-    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(langchainLog)
-    restapi_plugin_js_gen.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
-      authorizationType: apigateway.AuthorizationType.CUSTOM,
-      authorizer: lambdaAuthorizer,
-    })
-
     // prompt Lambda
     const prompt = new nodelambda.NodejsFunction(this, "PromptLambda", {
       description: "プロンプト取得API",
@@ -342,6 +287,121 @@ export class Aa4kApiStack extends cdk.Stack {
       authorizationType: apigateway.AuthorizationType.CUSTOM,
       authorizer: lambdaAuthorizer,
     })
+
+    // js_gen conversationHistory Lambda
+    const conversationHistoryLambda = new nodelambda.NodejsFunction(this, "ConversationHistoryLambda", {
+      description: "会話履歴API",
+      entry: __dirname + "/lambda/api/plugin/js_gen/conversationHistory/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+        SUGURES_ENDPOINT: contextProps.suguresEndpoint,
+        SUGURES_CLIENT_ID: contextProps.suguresClientId,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    });
+    secretsStack.azureSecret.grantRead(conversationHistoryLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(conversationHistoryLambda);
+    parameterStack.aa4kConstParameter.grantRead(conversationHistoryLambda);
+    restapi_plugin_js_gen.addResource("conversation_history").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(conversationHistoryLambda),
+      anyMethod: true,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
+        authorizer: lambdaAuthorizer,
+      }
+    });
+
+    // js_gen LangchainLog Lambda
+    const langchainLog = new nodelambda.NodejsFunction(this, "LangchainLogLambda", {
+      description: "Langchain実行ログ登録API",
+      entry: __dirname + "/lambda/api/plugin/js_gen/langchainLog/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(langchainLog);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(langchainLog)
+    restapi_plugin_js_gen.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(langchainLog), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
+    })
+
+
+    // data_gen conversationHistory Lambda
+    const dataGen_conversationHistoryLambda = new nodelambda.NodejsFunction(this, "DataGen_ConversationHistoryLambda", {
+      description: "会話履歴API",
+      entry: __dirname + "/lambda/api/plugin/data_gen/conversationHistory/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG, parameterStack.ssmAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+        AA4K_CONST_PARAMETER_NAME: parameterStack.aa4kConstParameter.parameterName,
+        SUGURES_ENDPOINT: contextProps.suguresEndpoint,
+        SUGURES_CLIENT_ID: contextProps.suguresClientId,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    });
+    secretsStack.azureSecret.grantRead(dataGen_conversationHistoryLambda);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(dataGen_conversationHistoryLambda);
+    parameterStack.aa4kConstParameter.grantRead(dataGen_conversationHistoryLambda);
+    restapi_plugin_data_gen.addResource("conversation_history").addProxy({
+      defaultIntegration: new apigateway.LambdaIntegration(dataGen_conversationHistoryLambda),
+      anyMethod: true,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
+        authorizer: lambdaAuthorizer,
+      }
+    });
+
+    // js_gen LangchainLog Lambda
+    const dataGen_langchainLog = new nodelambda.NodejsFunction(this, "DataGen_LangchainLogLambda", {
+      description: "Langchain実行ログ登録API",
+      entry: __dirname + "/lambda/api/plugin/data_gen/langchainLog/index.ts",
+      handler: "handler",
+      vpc: auroraStack.vpc,
+      securityGroups: [auroraStack.auroraAccessableSG, elastiCacheStack.elastiCacheAccessableSG],
+      environment: {
+        AZURE_SECRET_NAME: secretsStack.azureSecret.secretName,
+        DB_ACCESS_SECRET_NAME: auroraStack.dbAdminSecret ? auroraStack.dbAdminSecret.secretName : "",
+        RDS_PROXY_ENDPOINT: auroraStack.rdsProxyEndpoint,
+        REDIS_ENDPOINT: elastiCacheStack.redisEndpoint,
+        REDIS_ENDPOINT_PORT: elastiCacheStack.redisEndpointPort,
+      },
+      timeout: cdk.Duration.seconds(300),
+      runtime: Runtime.NODEJS_20_X
+    })
+    secretsStack.azureSecret.grantRead(dataGen_langchainLog);
+    if (auroraStack.dbAdminSecret) auroraStack.dbAdminSecret.grantRead(dataGen_langchainLog)
+    restapi_plugin_data_gen.addResource("langchain_log").addMethod("POST", new apigateway.LambdaIntegration(dataGen_langchainLog), {
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      authorizer: lambdaAuthorizer,
+    })
+
+
 
     // ------------------------------
     // ポータル機能

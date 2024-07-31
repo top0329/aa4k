@@ -9,7 +9,8 @@ import { InsertLangchainProcessLogProps } from "./schema";
  */
 export const insertLangchainProcessLog = async (dbClient: Client, props: InsertLangchainProcessLogProps) => {
   const pram = [
-    props.subdomain,    // subdomain
+    props.subscriptionId,    // subscription_id
+    props.body.app_id ? props.body.app_id : null,    // app_id
     props.body.user_id ? props.body.user_id : null,    // user_id
     props.body.session_id ? props.body.session_id : null,    // session_id
     props.body.conversation_id ? props.body.conversation_id : null,    // conversation_id
@@ -25,9 +26,10 @@ export const insertLangchainProcessLog = async (dbClient: Client, props: InsertL
   ]
   let sql = "";
   sql += `insert into`;
-  sql += ` t_langchain_log_app_gen`;
+  sql += ` t_langchain_log_data_gen`;
   sql += ` (`;
-  sql += ` sub_domain`;
+  sql += ` subscription_id`;
+  sql += ` , app_id`
   sql += ` , user_id`
   sql += ` , session_id`;
   sql += ` , conversation_id`
@@ -57,6 +59,7 @@ export const insertLangchainProcessLog = async (dbClient: Client, props: InsertL
   sql += ` , $11`;
   sql += ` , $12`;
   sql += ` , $13`;
+  sql += ` , $14`;
   sql += ` , now()`;
   sql += ` )`;
 

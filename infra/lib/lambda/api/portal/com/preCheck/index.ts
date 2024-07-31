@@ -66,7 +66,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
       body: JSON.stringify({
         contractStatus: contractStatus,
         systemSettings: {
-          historyUseCount: aa4kConstParameterValue.historyUseCount,
+          pluginId: aa4kConstParameterValue.pluginId,
         }
       }),
     };

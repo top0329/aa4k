@@ -7,6 +7,7 @@ export interface AA4KConstParameterValue {
   retrieveScoreThreshold: number,
   historyUseCount: number,
   historyGetCount: number,
+  pluginId: string,
 }
 
 /**
