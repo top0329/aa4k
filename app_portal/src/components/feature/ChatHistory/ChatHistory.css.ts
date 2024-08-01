@@ -22,6 +22,9 @@ export const sChatHistorySuggest = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'start',
+  ":hover": {
+    backgroundColor: '#f0f0f0',
+  },
 });
 
 export const sChatHistorySuggestButtonIcon = style({

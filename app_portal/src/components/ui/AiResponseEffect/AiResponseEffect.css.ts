@@ -49,7 +49,7 @@ export const sInnerCircleAnimated = style({
   marginTop: '-16px',
   marginLeft: '-16px',
   borderRadius: '50%',
-  animation: `${innerCircleAnimation} 1.5s infinite ease-in-out`,
+  animation: `${innerCircleAnimation} 0.75s infinite ease-in-out`,
 });
 
 // 外側の枠のアニメーションを適用するスタイル
@@ -62,6 +62,6 @@ export const sOuterCircleAnimated = style({
   marginTop: '-20px',
   marginLeft: '-20px',
   borderRadius: '50%',
-  animation: `${outerCircleAnimation} 1.5s infinite ease-in-out`,
+  animation: `${outerCircleAnimation} 0.75s infinite ease-in-out`,
   animationDelay: '0.05s',
 });

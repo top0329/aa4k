@@ -1,11 +1,12 @@
 // src/components/feature/PromptForm/PromptForm.tsx
 
-import { faRotateRight, faPaperPlaneTop, faMicrophone } from '@fortawesome/pro-duotone-svg-icons';
+import { faRotateRight, faMicrophone } from '@fortawesome/pro-duotone-svg-icons';
+import { faPaperPlaneTop } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, Button, Flex, Separator, Text, Tooltip } from '@radix-ui/themes';
 import { motion } from "framer-motion";
 import { PromptTextArea } from '~/components/ui/PromptTextarea/PromptTextArea';
-import { sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
+import { sSendButtonHover, sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
 
 type PromptFormProps = {
@@ -17,11 +18,11 @@ type PromptFormProps = {
   aiAnswer: string,
   setAiAnswer: React.Dispatch<React.SetStateAction<string>>,
   finishAiAnswer: boolean,
-  setFinishAiAnswer:React.Dispatch<React.SetStateAction<boolean>>,
+  setFinishAiAnswer: React.Dispatch<React.SetStateAction<boolean>>,
   setIsShowDetailDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer,setIsShowDetailDialogVisible }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible }) => {
 
   // PromptFormコンポーネントのロジックを管理するカスタムフック
   const {
@@ -33,13 +34,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
-  } = usePromptFormLogic({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible,aiAnswer,setAiAnswer,finishAiAnswer,setFinishAiAnswer,setIsShowDetailDialogVisible });
-
-  // 送信ボタンのアニメーションのバリエーションを定義
-  const buttonVariants = {
-    enabled: { opacity: 1, scale: 1 },
-    disabled: { opacity: 0.5, scale: 0.95 },
-  };
+  } = usePromptFormLogic({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible });
 
   // 音声入力ボタンのclassNameを決定
   const getVoiceInputButtonClassName = () => {
@@ -81,12 +76,14 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
         <Flex gap="2" pt={'3'} pb={'18px'}
           align={'center'}
           justify={'between'}
+          style={{ marginRight: `1%` }}
         >
           <Flex
             align={'center'}
             justify={'start'}
             style={{
-              height: 20
+              height: 20,
+              marginTop: `-5%`,
             }}
           >
             <motion.div
@@ -104,19 +101,20 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
               </Text>
             </motion.div>
           </Flex>
-          <Flex gap={'3'}
+          <Flex gap={'4'}
             justify={'center'}
             align={'center'}
           >
             <Button
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: `50%`,
+                width: 42,
+                height: 42,
+                borderRadius: `20%`,
                 padding: 0,
                 cursor: 'pointer',
+                color: '#2E3192',
+                opacity: isSubmitting ? 0.5 : 1,
               }}
-              color={'gray'}
               variant={'ghost'}
               className={isSubmitting ? sClearConversationDisabled : sClearConversation}
               onClick={(e) => { handleClearConversation(e) }}
@@ -128,61 +126,62 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
                   zIndex: 10000,
                 }}
               >
-                <FontAwesomeIcon size='lg' icon={faRotateRight} />
+                <FontAwesomeIcon size='xl' icon={faRotateRight} />
               </Tooltip>
             </Button>
             <Separator orientation="vertical" />
             {voiceInputVisible && (<Button
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: `50%`,
+                width: 42,
+                height: 42,
+                borderRadius: `20%`,
                 padding: 0,
                 cursor: 'pointer',
+                color: isVoiceInput ? 'crimson' : '#2E3192',
+                opacity: isSubmitting ? 0.5 : 1,
               }}
               variant={'ghost'}
-              color={isVoiceInput ? 'crimson' : 'gray'}
               className={getVoiceInputButtonClassName()}
               onClick={(e) => handleVoiceInput(e)}
               disabled={isSubmitting}
             >
               <Tooltip
-                content={"音声入力を開始する"}
+                content={isVoiceInput ? "音声入力を終了する" : "音声入力を開始する"}
                 style={{
                   zIndex: 10000,
                 }}
               >
-                <FontAwesomeIcon size='lg' icon={faMicrophone} />
+                <FontAwesomeIcon size='xl' icon={faMicrophone} />
               </Tooltip>
             </Button>
             )}
             <Separator orientation="vertical" />
-            {/* 送信ボタンをmotion.divで囲み、アニメーションを制御する */}
-            <motion.div
-              variants={buttonVariants}
-              initial={humanMessage ? 'enabled' : 'disabled'}
-              animate={humanMessage ? 'enabled' : 'disabled'}
+            <Button
+              style={{
+                cursor: 'pointer',
+                width: 42,
+                height: 42,
+                borderRadius: `20%`,
+                padding: 0,
+                color: humanMessage ? 'white' : '#2E3192',
+                backgroundColor: humanMessage && '#5459FF',
+                opacity: isSubmitting ? 0.5 : 1,
+                transition: "opacity 0.2s",
+              }}
+              type="submit"
+              disabled={isSubmitting || !humanMessage}
+              variant={'ghost'}
+              className={!humanMessage && !isSubmitting ? sSendButtonHover : ''}
             >
-              <Button
-                color={'iris'}
-                type="submit" disabled={!humanMessage || isSubmitting}
-                variant={humanMessage ? 'solid' : 'ghost'}
+              <Tooltip
+                content={"送信する"}
                 style={{
-                  cursor: 'pointer',
-                  width: 32,
-                  height: 32,
+                  zIndex: 10000,
                 }}
               >
-                <Tooltip
-                  content={"送信する"}
-                  style={{
-                    zIndex: 10000,
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPaperPlaneTop} />
-                </Tooltip>
-              </Button>
-            </motion.div>
+                <FontAwesomeIcon size='xl' icon={faPaperPlaneTop} />
+              </Tooltip>
+            </Button>
           </Flex>
         </Flex>
       </form >

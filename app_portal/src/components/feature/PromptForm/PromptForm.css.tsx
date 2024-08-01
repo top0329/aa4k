@@ -2,17 +2,16 @@ import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "~/styles/theme.css";
 
 export const sVoiceInput = style({
-  borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
   ":hover": {
     opacity: 0.8,
+    backgroundColor:'#C8C9EB',
   },
 });
 
 export const sVoiceInputDisabled = style({
   opacity: 0.5,
-  borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
 });
@@ -33,6 +32,7 @@ export const sVoiceInputActive = style({
   animation: `${boxShadowAnimation} 2s infinite alternate`,
   ":hover": {
     opacity: 1,
+    backgroundColor:'#F8E2EF',
   },
 });
 
@@ -46,18 +46,25 @@ export const sPromptForm = style({
 
 // [新しく会話を始める]ボタンの活性時
 export const sClearConversation = style({
-  borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
   ":hover": {
     opacity: 0.8,
+    backgroundColor:'#C8C9EB',
   },
 });
 
 // [新しく会話を始める]ボタンの非活性時
 export const sClearConversationDisabled = style({
   opacity: 0.5,
-  borderRadius: `50%`,
   transition: "opacity 0.2s",
   cursor: "pointer",
+});
+
+// 送信ボタンのマウスホバー時
+export const sSendButtonHover = style({
+  ':hover': {
+    backgroundColor: '#C8C9EB',
+    opacity: 0.8,
+  },
 });
