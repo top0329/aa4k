@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       mkcert(),
       svgr(),
-      vanillaExtractPlugin(),
+      vanillaExtractPlugin({ identifiers: 'debug' }),
       replace({
         "use client": "",
         delimiters: ["", ""],

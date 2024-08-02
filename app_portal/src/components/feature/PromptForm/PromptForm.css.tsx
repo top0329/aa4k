@@ -18,10 +18,10 @@ export const sVoiceInputDisabled = style({
 
 export const boxShadowAnimation = keyframes({
   "0%": {
-    boxShadow: `0px 0px 2px 4px ${vars.color.crimsonA.crimsonA1}`,
+    boxShadow: `0px 0px 0px 0px ${vars.color.crimsonA.crimsonA1}`,
   },
   "100%": {
-    boxShadow: `0px 0px 4px 4px ${vars.color.crimsonA.crimsonA6}`,
+    boxShadow: `0px 0px 0px 2px ${vars.color.crimsonA.crimsonA6}`,
   },
 });
 
@@ -29,10 +29,9 @@ export const sVoiceInputActive = style({
   opacity: 1,
   transition: "opacity 0.2s",
   cursor: "pointer",
-  animation: `${boxShadowAnimation} 2s infinite alternate`,
+  animation: `${boxShadowAnimation} 2s infinite alternate !important`,
   ":hover": {
     opacity: 1,
-    backgroundColor:'#F8E2EF',
   },
 });
 
@@ -59,12 +58,4 @@ export const sClearConversationDisabled = style({
   opacity: 0.5,
   transition: "opacity 0.2s",
   cursor: "pointer",
-});
-
-// 送信ボタンのマウスホバー時
-export const sSendButtonHover = style({
-  ':hover': {
-    backgroundColor: '#C8C9EB',
-    opacity: 0.8,
-  },
 });

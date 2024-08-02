@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, Button, Flex, Separator, Text, Tooltip } from '@radix-ui/themes';
 import { motion } from "framer-motion";
 import { PromptTextArea } from '~/components/ui/PromptTextarea/PromptTextArea';
-import { sSendButtonHover, sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
+import { sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
 
 type PromptFormProps = {
@@ -138,6 +138,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
                 padding: 0,
                 cursor: 'pointer',
                 color: isVoiceInput ? 'crimson' : '#2E3192',
+                backgroundColor: isVoiceInput ? '#F8E2EF' : '',
                 opacity: isSubmitting ? 0.5 : 1,
               }}
               variant={'ghost'}
@@ -163,15 +164,14 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
                 height: 42,
                 borderRadius: `20%`,
                 padding: 0,
-                color: humanMessage ? 'white' : '#2E3192',
+                color: humanMessage && 'white',
                 backgroundColor: humanMessage && '#5459FF',
-                opacity: isSubmitting ? 0.5 : 1,
+                opacity: isSubmitting || !humanMessage ? 0.5 : 1,
                 transition: "opacity 0.2s",
               }}
               type="submit"
               disabled={isSubmitting || !humanMessage}
               variant={'ghost'}
-              className={!humanMessage && !isSubmitting ? sSendButtonHover : ''}
             >
               <Tooltip
                 content={"送信する"}
