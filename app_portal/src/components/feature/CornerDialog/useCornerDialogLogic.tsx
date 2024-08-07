@@ -1,7 +1,7 @@
 // src/components/feature/CornerDialog/useCornerDialogLogic.tsx
 
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUpdateEffect } from "react-use";
 // import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
@@ -12,6 +12,7 @@ import { ShowDetailDialogVisibleState } from "~/state/showDetailDialogVisibleSta
 import { checkRole } from "~/util/checkRole";
 import { preCheck } from "~/util/preCheck";
 import { getPromptInfoList } from "~/util/getPrompt"
+import { SettingInfoState } from "~/state/settingInfoState";
 
 type DragPosition = { x: number; y: number };
 
@@ -22,12 +23,14 @@ const getSavedPosition = (): DragPosition | null => {
 };
 
 export const useCornerDialogLogic = () => {
+  const showDetailDialogScrollRef = useRef<HTMLDivElement | null>(null); // 詳細を見るダイアログのスクロール参照
   const [isBannerDisplay, setIsBannerDisplay] = useState<boolean>(false);
   const [, setPromptInfoList] = useAtom(PromptInfoListState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isAppDialogVisible, setIsAppDialogVisible] = useAtom(AppDialogVisibleState);
   // ダイアログの表示状態を管理するアトム
   const [isShowDetailDialogVisible, setIsShowDetailDialogVisible] = useAtom(ShowDetailDialogVisibleState);
+  const [settingInfo] = useAtom(SettingInfoState);
   const [humanMessage, setHumanMessage] = useState("");
   const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
 
@@ -151,6 +154,14 @@ export const useCornerDialogLogic = () => {
     }
   }, [isAppDialogVisible, isSpeech, callbackFuncs]);
 
+  // 詳細を見るダイアログのスクロール位置をリセット
+  useEffect(() => {
+    if (showDetailDialogScrollRef.current) {
+      // フィールド情報が更新された時、スクロール位置をリセットする
+      showDetailDialogScrollRef.current.scrollTop = 0;
+    }
+  }, [settingInfo]);
+
 
   return {
     isAppDialogVisible,
@@ -171,5 +182,6 @@ export const useCornerDialogLogic = () => {
     finishAiAnswer,
     setFinishAiAnswer,
     isBannerDisplay,
+    showDetailDialogScrollRef,
   };
 };

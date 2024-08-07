@@ -12,10 +12,10 @@ import { sAccordionShowDetail, sAccordionShowDetailItem } from './AccordionShowD
 import { useAccordionShowDetailLogic } from './useAccordionShowDetailLogic';
 
 type AccordionShowDetailProps = {
-  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
+  showDetailDialogScrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ scrollRef }) => {
+export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ showDetailDialogScrollRef }) => {
   const {
     settingInfoItems,
     activeItem,
@@ -37,6 +37,7 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ scroll
           height: '568px',
           width: '260px',
         }}
+        ref={showDetailDialogScrollRef}
       >
         {settingInfoItems && settingInfoItems.fields.map((item, index) => {
           const contentText = item.label.slice(13);
@@ -79,7 +80,6 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ scroll
           );
         })}
         <DefaultFieldContent />
-        <div ref={scrollRef}></div>
       </ScrollArea>
     </Accordion.Root>
   );

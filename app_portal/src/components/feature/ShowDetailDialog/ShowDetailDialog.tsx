@@ -7,13 +7,14 @@ import CloseButton from "~/components/ui/CloseButton/CloseButton";
 import { useShowDetailDialogLogic } from "./useShowDetailDialogLogic";
 import AccordionShowDetail from "../AccordionShowDetail/AccordionShowDetail";
 
-type ShowDetailDialogProps = {}
+type ShowDetailDialogProps = {
+  showDetailDialogScrollRef: React.MutableRefObject<HTMLDivElement | null>;
+}
 
-const ShowDetailDialog: React.FC<ShowDetailDialogProps> = ({ }) => {
+const ShowDetailDialog: React.FC<ShowDetailDialogProps> = ({ showDetailDialogScrollRef }) => {
 
   // ShowDetailDialogコンポーネントのロジックを管理するカスタムフック
   const {
-    scrollRef,
     toggleShowDetailDialogVisibility,
   } = useShowDetailDialogLogic({});
 
@@ -49,7 +50,7 @@ const ShowDetailDialog: React.FC<ShowDetailDialogProps> = ({ }) => {
         </Text>
         <Separator size={'4'} style={{ backgroundColor: "#F9F9F9" }} />
       </Flex>
-      <AccordionShowDetail scrollRef={scrollRef} />
+      <AccordionShowDetail showDetailDialogScrollRef={showDetailDialogScrollRef} />
     </Box>
   );
 };

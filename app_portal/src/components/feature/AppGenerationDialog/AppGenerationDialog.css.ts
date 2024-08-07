@@ -16,10 +16,10 @@ export const sOuterFrame = style({
 });
 
 export const sMiddleFrame = style({
-  width: '956px',
-  height: '672px',
+  width: '958px',
+  height: '674px',
   flexShrink: 0,
-  borderRadius: '23px',
+  borderRadius: '26px',
   border: '3px solid rgba(255, 255, 255, 0.50)',
   display: 'flex',
   alignItems: 'center',

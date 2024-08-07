@@ -30,6 +30,7 @@ const CornerDialog = () => {
     finishAiAnswer,
     setFinishAiAnswer,
     isBannerDisplay,
+    showDetailDialogScrollRef,
   } = useCornerDialogLogic();
 
   if (!isBannerDisplay) return;
@@ -68,14 +69,18 @@ const CornerDialog = () => {
       >
         <AnimatePresence>
           {/* ShowDetailDialogの表示にアニメーションを付ける（0.3秒で表示） */}
-          {isAppDialogVisible && isShowDetailDialogVisible && (
+          {isAppDialogVisible && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
+              style={{
+                visibility: isShowDetailDialogVisible ? 'visible' : 'hidden', // falseで要素を非表示にする
+                height: isShowDetailDialogVisible ? 'auto' : '0', // falseでスペースを解放する
+              }}
             >
-              <ShowDetailDialog />
+              <ShowDetailDialog showDetailDialogScrollRef={showDetailDialogScrollRef} />
             </motion.div>
           )}
         </AnimatePresence>
