@@ -23,66 +23,65 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ scroll
   } = useAccordionShowDetailLogic();
 
   return (
-    <>
+    <Accordion.Root
+      className={sAccordionShowDetail}
+      type="single"
+      value={activeItem} // 現在選択されているAccordion.Itemのvalueと一致すると、対象のアイテムを展開する
+      onValueChange={setActiveItem}
+      collapsible
+    >
       <ScrollArea
         scrollbars='vertical'
+        type='auto'
         style={{
           height: '568px',
           width: '260px',
         }}
       >
-        <Accordion.Root
-          className={sAccordionShowDetail}
-          type="single"
-          value={activeItem} // 現在選択されているAccordion.Itemのvalueと一致すると、対象のアイテムを展開する
-          onValueChange={setActiveItem}
-          collapsible
-        >
-          {settingInfoItems && settingInfoItems.fields.map((item, index) => {
-            const contentText = item.label.slice(13);
-            return (
-              <Accordion.Item
-                className={sAccordionShowDetailItem}
-                value={`item-${index}`} // 各Accordion.Itemに一意の値を設定（トリガーをクリックするとvalueがRootのonValueChangeコールバック関数に渡される）
-                key={index}
-              >
-                <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item} hasContent={!!contentText} />
-                {contentText && (
-                  <motion.div
-                    key={index}
-                    // isOpenが変更されたときにアニメーションを実行
-                    animate={activeItem === `item-${index}` ? 'open' : 'closed'}
-                    variants={{
-                      open: {
-                        opacity: 1,
-                        height: 'auto',
-                        transition: { duration: 0.3 } // openのアニメーション設定
-                      },
-                      closed: {
-                        opacity: 0,
-                        height: 0,
-                        transition: { duration: 0.2 } // closedのアニメーション設定
-                      }
+        {settingInfoItems && settingInfoItems.fields.map((item, index) => {
+          const contentText = item.label.slice(13);
+          return (
+            <Accordion.Item
+              className={sAccordionShowDetailItem}
+              value={`item-${index}`} // 各Accordion.Itemに一意の値を設定（トリガーをクリックするとvalueがRootのonValueChangeコールバック関数に渡される）
+              key={index}
+            >
+              <AccordionTrigger isOpen={activeItem === `item-${index}`} text={item} hasContent={!!contentText} />
+              {contentText && (
+                <motion.div
+                  key={index}
+                  // isOpenが変更されたときにアニメーションを実行
+                  animate={activeItem === `item-${index}` ? 'open' : 'closed'}
+                  variants={{
+                    open: {
+                      opacity: 1,
+                      height: 'auto',
+                      transition: { duration: 0.3 } // openのアニメーション設定
+                    },
+                    closed: {
+                      opacity: 0,
+                      height: 0,
+                      transition: { duration: 0.2 } // closedのアニメーション設定
+                    }
+                  }}
+                >
+                  <AccordionContent
+                    style={{
+                      padding: '0 16px',
+                      cursor: 'auto',
                     }}
                   >
-                    <AccordionContent
-                      style={{
-                        padding: '0 16px',
-                        cursor: 'auto',
-                      }}
-                    >
-                      {contentText}
-                    </AccordionContent>
-                  </motion.div>
-                )}
-              </Accordion.Item>
-            );
-          })}
-          <DefaultFieldContent />
-        </Accordion.Root>
+                    {contentText}
+                  </AccordionContent>
+                </motion.div>
+              )}
+            </Accordion.Item>
+          );
+        })}
+        <DefaultFieldContent />
+        <div ref={scrollRef}></div>
       </ScrollArea>
-      <div ref={scrollRef}></div>
-    </>
+    </Accordion.Root>
   );
 };
 

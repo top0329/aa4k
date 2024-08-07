@@ -1,22 +1,22 @@
 .scrollbar,
-.ace_scrollbar,
 .w-100 {
   width: 100%;
 }
 
-.scrollbar::-webkit-scrollbar,
-.ace_scrollbar::-webkit-scrollbar {
-  width: 2px;
+.scrollbar::-webkit-scrollbar {
+  width: 6px;
   height: 2px;
 }
 
-.scrollbar::-webkit-scrollbar-track,
-.ace_scrollbar::-webkit-scrollbar-track {
-  background-color: rgba(255, 255, 255, 0.1);
+.scrollbar::-webkit-scrollbar-track {
+  background-color: #EFEFF1;
 }
 
-.scrollbar::-webkit-scrollbar-thumb,
-.ace_scrollbar::-webkit-scrollbar-thumb {
-  background-color: #bdbdbd;
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #B7B7B8;
   border-radius: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #7D7D8A;
 }

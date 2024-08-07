@@ -18,12 +18,8 @@ export const sPromptTextAreaContainer = style({
 });
 
 export const sPromptTextArea = style({
-  borderRadius: '16px',
-  border: '1px solid #EBEBEB',
-  background: '#FFF',
   width: '100%',
   height: '100%',
-  borderColor: '#ebebeb',
   overflow: 'hidden',
   position: 'relative',
 });

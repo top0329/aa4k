@@ -3,6 +3,7 @@
 import React from "react";
 import reflectButtonIcon from "~/assets/reflectButtonIcon.svg";
 import { Box, Card, ScrollArea, Flex, Text } from '@radix-ui/themes';
+import ScrollToBottom from "react-scroll-to-bottom";
 import { motion } from "framer-motion";
 import "~/styles/scrollbar.css";
 import { sChatHistorySuggestCard, sChatHistory, sChatHistorySuggest, sChatHistorySuggestButtonIcon } from "./ChatHistory.css";
@@ -187,21 +188,17 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
           height: '100%',
         }}
       >
-        <ScrollArea
-          scrollbars='vertical'
-          style={{
-            height: '100%',
-            width: '100%',
-          }}
-        >
-          {latestChatHistoryItem && (
-            <Flex direction={'column'}>
-              <UserContent humanMessage={!isLoadingVisible ? latestChatHistoryItem.human.content : humanMessage} />
-              {showAiOrErrorMessage(latestChatHistoryItem, actionType)}
-            </Flex>
-          )}
-          <div ref={scrollRef}></div>
-        </ScrollArea>
+        <ScrollToBottom className='w-100'>
+          {/* scrollRefを上に配置することで、自動スクロールを無効にする */}
+          <Box ref={scrollRef} className='scrollbar' style={{ overflowY: 'auto', maxHeight: '100%' }}>
+            {latestChatHistoryItem && (
+              <Flex direction={'column'}>
+                <UserContent humanMessage={!isLoadingVisible ? latestChatHistoryItem.human.content : humanMessage} />
+                {showAiOrErrorMessage(latestChatHistoryItem, actionType)}
+              </Flex>
+            )}
+          </Box>
+        </ScrollToBottom>
       </Flex>
     </Box>
   );

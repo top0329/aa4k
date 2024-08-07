@@ -34,7 +34,10 @@ const CornerDialog = () => {
 
   if (!isBannerDisplay) return;
   return (
-    <Dialog.Root open={isAppDialogVisible} >
+    <Dialog.Root
+      open={isAppDialogVisible}
+      modal={false} // ズームアップ・ズームアウトを可能にする為、外部要素とのやり取りを有効化
+    >
       <motion.div
         initial={{ opacity: 0 }}
         animate={isAppDialogVisible ? { opacity: 0 } : { opacity: 1 }}
@@ -58,8 +61,9 @@ const CornerDialog = () => {
           </DragButton>
         </Dialog.Trigger>
       </motion.div>
-      <Dialog.Overlay className={sDialogOverlay} />
+      <Dialog.Overlay />
       <Dialog.Content
+        className={sDialogOverlay}
         onInteractOutside={(e) => e.preventDefault()} //外部クリックを無効にする
       >
         <AnimatePresence>

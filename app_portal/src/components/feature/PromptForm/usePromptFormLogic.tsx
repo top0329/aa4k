@@ -53,6 +53,7 @@ export const usePromptFormLogic = ({
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
   const isPreviousCreateAction = useRef(false); // やり取りを開始している（actionTypeがcreateになった）かどうかの判定を行う為のRef
+  const initialFocusRef = useRef<HTMLDivElement>(null); // 初期表示時にダミー要素にフォーカスを当てる為のRef
 
   /**
    * useSpeechRecognitionフックから返されるオブジェクトのプロパティ
@@ -327,6 +328,13 @@ export const usePromptFormLogic = ({
   }, []);
 
   useEffect(() => {
+    if (initialFocusRef.current) {
+      // 初期表示時、ダミー要素にフォーカスし、テキストエリアにフォーカスさせない
+      initialFocusRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
     if (isVoiceInput && transcript) {
       // 音声入力中の内容をテキストエリアにリアルタイム反映
       setHumanMessage(currentHumanMessage + transcript);
@@ -354,5 +362,6 @@ export const usePromptFormLogic = ({
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
+    initialFocusRef,
   };
 };

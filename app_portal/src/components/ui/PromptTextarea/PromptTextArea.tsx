@@ -32,6 +32,7 @@ export const PromptTextArea: React.FC<PromptTextAreaProps> = ({ name, label, req
         onChange={onChange}
         onKeyDown={onKeyDown}
         placeholder="メッセージを入力してください…"
+        style={{borderRadius:'16px'}}
         {...rest}
       />
     </Box>

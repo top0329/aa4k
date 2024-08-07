@@ -34,6 +34,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
+    initialFocusRef,
   } = usePromptFormLogic({ humanMessage, setHumanMessage, scrollRef, isInitVisible, setIsInitVisible, aiAnswer, setAiAnswer, finishAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible });
 
   // 音声入力ボタンのclassNameを決定
@@ -52,6 +53,8 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
 
   return (
     <Box className={sPromptForm} >
+      {/* ダミーの非表示要素（初期フォーカスの対象） */}
+      <Box ref={initialFocusRef} tabIndex={-1} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
       <form
         onSubmit={(e) => handleSubmit(e)}
         style={{
