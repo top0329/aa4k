@@ -10,7 +10,7 @@ export const InsertRequestBodySchema = z.object({
   messageType: z.nativeEnum(MessageType),
   message: z.string(),
   conversationId: z.string().optional(),
-  generated_data: z.string().optional(),
+  generatedData: z.string().optional(),
 })
 export type InsertRequestBody = z.infer<typeof InsertRequestBodySchema>;
 

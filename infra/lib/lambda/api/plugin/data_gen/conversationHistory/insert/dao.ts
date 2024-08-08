@@ -55,7 +55,7 @@ export const insertConversationHistory = async (dbClient: Client, subscriptionId
 export const updateAiConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<QueryResultRow>> => {
   const pram = [
     reqBody.message,
-    reqBody.generated_data,
+    reqBody.generatedData,
     reqBody.conversationId,
   ];
 

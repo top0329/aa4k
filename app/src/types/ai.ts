@@ -46,6 +46,10 @@ export type ChatHistory = Array<ChatHistoryItem>;
 export interface SystemSettings {
   historyUseCount: number;
 }
+export interface DataGenSystemSettings {
+  oneDataGenMaxCount: number;
+}
+
 export interface AppCreateJsContext {
   appId: number;
   userId: string;
@@ -57,10 +61,20 @@ export interface AppCreateJsContext {
   pluginId: string;
   promptInfoList?: PromptInfo[]
 }
+export interface DataGenContext {
+  appId: number;
+  userId: string;
+  conversationId: string;
+  contractStatus: ContractStatus;
+  isGuestSpace: boolean;
+  systemSettings: DataGenSystemSettings;
+  pluginId: string;
+  promptInfoList?: PromptInfo[]
+}
 export interface Conversation {
   message: HumanMessage;
   chatHistory?: ChatHistory;
-  context?: AppCreateJsContext;
+  context?: AppCreateJsContext | DataGenContext;
 }
 
 export interface AiResponse {

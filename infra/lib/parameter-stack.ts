@@ -33,6 +33,7 @@ export class Aa4kParameterStack extends cdk.Stack {
       "retrieveScoreThreshold": 0.7,
       "historyUseCount": 10,
       "historyGetCount": 30,
+      "oneDataGenMaxCount": 3,
       "pluginId": contextProps.pluginId,
     };
 

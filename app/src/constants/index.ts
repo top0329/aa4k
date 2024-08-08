@@ -65,9 +65,22 @@ export type LlmType = keyof typeof LlmType;
 // サービス区分
 export const ServiceDiv = {
   jsCreate: "js_create",
-  jsCheck: "js_check"
+  jsCheck: "js_check",
+  dat_gen_count: "dat_gen_count",
+  dat_gen_record: "dat_gen_record",
+  dat_gen_record_retry: "dat_gen_record_retry",
 } as const;
 export type ServiceDiv = keyof typeof ServiceDiv;
+
+// アクション種別
+export const ActionType = {
+  create: "create",
+  other: "other",
+  unknown: "unknown",
+  error: "error",
+} as const;
+export type ActionType = keyof typeof ActionType;
+
 
 // エラーコード
 export const ErrorCode = {
