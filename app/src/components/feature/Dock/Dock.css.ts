@@ -31,3 +31,10 @@ export const sDockItem = style({
     backgroundColor: vars.color.gray.gray3,
   },
 });
+
+export const sControlBtn = style({
+  ":hover": {
+    opacity: 0.8,
+    backgroundColor: vars.color.gray.gray3,
+  },
+})

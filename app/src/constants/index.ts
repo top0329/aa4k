@@ -81,6 +81,13 @@ export const ActionType = {
 } as const;
 export type ActionType = keyof typeof ActionType;
 
+// ドックに表示する機能種別
+export const DockDisplayTypes = {
+  jsGen: "jsGen",
+  dataGen: "dataGen",
+} as const;
+export type DockDisplayTypes = (typeof DockDisplayTypes)[keyof typeof DockDisplayTypes] | null;
+
 
 // エラーコード
 export const ErrorCode = {

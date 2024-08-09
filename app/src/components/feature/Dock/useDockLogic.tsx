@@ -1,7 +1,7 @@
 // src/components/feature/Dock/useDockLogic.tsx
 import { useAtom } from "jotai";
-import { useEffect } from "react";
-import { InfoMessage } from "~/constants";
+import { useEffect, useState } from "react";
+import { InfoMessage, DockDisplayTypes } from "~/constants";
 import { useCodeAction } from "~/hooks/useCodeAction";
 import useToggleDockItem from "~/hooks/useToggleDockItem";
 import { DesktopIsChangeCodeState, MobileIsChangeCodeState } from '~/state/codeActionState';
@@ -23,6 +23,9 @@ export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) =>
   const [isDesktopChangeCode] = useAtom(DesktopIsChangeCodeState);
   const [isMobileChangeCode] = useAtom(MobileIsChangeCodeState);
   const { initCodeActionState } = useCodeAction(isPcViewMode);
+  const [dockDisplayType, setDockDisplayType] = useState<DockDisplayTypes>(null);
+
+  const { jsGen, dataGen } = DockDisplayTypes;
 
   const updateKintonePointerEvents = () => {
     document.body.style.pointerEvents = dockState.dialogVisible && (dockState.chatVisible || dockState.spChatVisible) || dockState.codeEditorVisible ? 'none' : '';
@@ -60,6 +63,18 @@ export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) =>
     }
   };
 
+  // js操作アイコンを押下した処理
+  const handleJsGenClick = () => {
+    setDockDisplayType(jsGen);
+    console.log("JS生成");
+  };
+
+  // data操作アイコンを押下した処理
+  const handleDataGenClick = () => {
+    setDockDisplayType(dataGen);
+    console.log("data生成");
+  };
+
   const deleteHistory = () => {
     // Implement the logic for deleting history if needed
   };
@@ -72,5 +87,8 @@ export const useDockLogic = ({ setHumanMessage, isChangeCodeRef }: DockProps) =>
     toggleChatVisibility,
     deleteHistory,
     handleDockClose,
+    dockDisplayType,
+    handleJsGenClick,
+    handleDataGenClick,
   };
 };

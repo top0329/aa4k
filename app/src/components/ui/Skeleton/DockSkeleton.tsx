@@ -17,17 +17,6 @@ const DockSkeleton = () => (
       py={'2'}
       px={'4'}
     >
-      <motion.div
-        initial={{ opacity: 0.2 }}
-        animate={{ opacity: 1 }}
-        transition={{ repeat: Infinity, duration: 1.8, repeatType: "reverse" }}
-        style={{
-          width: 40,
-          height: 40,
-          backgroundColor: vars.color.gray.gray8,
-          borderRadius: 8
-        }}
-      />
       <Flex
         align={'center'}
         gap={'3'}
@@ -37,7 +26,7 @@ const DockSkeleton = () => (
           animate={{ opacity: 1 }}
           transition={{ repeat: Infinity, duration: 1.8, repeatType: "reverse" }}
           style={{
-            width: 40,
+            width: 70,
             height: 40,
             backgroundColor: vars.color.gray.gray8,
             borderRadius: 8
@@ -68,6 +57,17 @@ const DockSkeleton = () => (
           }}
         />
       </Flex>
+      <motion.div
+        initial={{ opacity: 0.2 }}
+        animate={{ opacity: 1 }}
+        transition={{ repeat: Infinity, duration: 1.8, repeatType: "reverse" }}
+        style={{
+          width: 40,
+          height: 40,
+          backgroundColor: vars.color.gray.gray8,
+          borderRadius: 8
+        }}
+      />
 
     </Flex>
   </motion.div>

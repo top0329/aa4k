@@ -1,7 +1,6 @@
 // src/componetns/feature/CornerDialog/CornerDialog.tsx
 
-import { faSparkles } from "@fortawesome/pro-duotone-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import bannerButtonIcon from "~/assets/bannerButtonIcon.svg";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Box, Flex } from "@radix-ui/themes";
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,6 +14,7 @@ import Chat from "../Chat/Chat.tsx";
 import CodeEditor from "../CodeEditor/CodeEditor.tsx";
 import Dock from "../Dock/Dock.tsx";
 import { useCornerDialogLogic } from "./useCornerDialogLogic.tsx";
+import { sBannerButtonIcon } from "./CornerDialog.css.ts";
 
 const CornerDialog = () => {
   const {
@@ -57,7 +57,7 @@ const CornerDialog = () => {
             <Flex style={{
               cursor: 'pointer',
             }}>
-              <FontAwesomeIcon icon={faSparkles} color="white" />
+              <img src={bannerButtonIcon} alt="icon" className={sBannerButtonIcon} />
             </Flex>
           </DragButton>
         </Dialog.Trigger>

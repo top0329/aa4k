@@ -7,3 +7,9 @@ export const Sticky = style({
   bottom: 0,
   zIndex: 102,
 });
+
+export const sBannerButtonIcon = style({
+  width: '24px',
+  height: '24px',
+  pointerEvents: 'none',
+});
