@@ -5,6 +5,7 @@ export const sShowDetailButton = style({
   marginTop:'-8px',
   marginLeft:'8px',
   marginBottom:'4px',
+  marginRight:'680px',
   cursor: 'pointer',
 });
 
