@@ -34,6 +34,7 @@ const CornerDialog = () => {
     finishAiAnswerRef,
     isInitVisible,
     isInitialChatHistory,
+    isInitialDataGenChatHistory,
     isPcViewMode,
   } = useCornerDialogLogic();
 
@@ -65,7 +66,7 @@ const CornerDialog = () => {
       <Dialog.Overlay />
       <Dialog.Content>
         <AnimatePresence>
-          {dockState.codeEditorVisible && (
+          {dockState.codeEditorVisible && !dockState.dataGenChatVisible && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -77,7 +78,7 @@ const CornerDialog = () => {
           )}
         </AnimatePresence>
         <AnimatePresence>
-          {isPcViewMode && dockState.chatVisible && isInitialChatHistory && (
+          {isPcViewMode && dockState.chatVisible && !dockState.dataGenChatVisible && isInitialChatHistory && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -121,7 +122,20 @@ const CornerDialog = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        {dockState.chatVisible && !isInitialChatHistory ? <ChatSkeleton /> : null}
+        <AnimatePresence>
+          {isPcViewMode && dockState.dataGenChatVisible && !dockState.chatVisible && isInitialDataGenChatHistory && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Box>data生成</Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {dockState.chatVisible && !dockState.dataGenChatVisible && !isInitialChatHistory ? <ChatSkeleton /> : null}
+        {dockState.dataGenChatVisible && !dockState.chatVisible && !isInitialDataGenChatHistory ? <ChatSkeleton /> : null}
         <BarLoading isLoading={isLoading} />
         {isInitVisible ? (
           <Dock setHumanMessage={setHumanMessage} isChangeCodeRef={isChangeCodeRef} />

@@ -132,8 +132,8 @@ const Dock: React.FC<DockProps> = ({ setHumanMessage, isChangeCodeRef }) => {
             {renderIconTooltipButton(
               faMessageLines,
               'チャットを表示',
-              toggleChatVisibility,
-              dockState.chatVisible || dockState.spChatVisible,
+              () => toggleItemVisibility('dataGenChatVisible'),
+              dockState.dataGenChatVisible,
               isPcViewMode ? vars.color.primarySolidHover : vars.color.accentSolidHover
             )}
             <Separator orientation="vertical" />

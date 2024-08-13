@@ -28,6 +28,7 @@ export interface ConversationHistoryListResponseBody
   extends KintoneProxyResponseBody {
   desktopConversationHistoryList: ConversationHistory;
   mobileConversationHistoryList: ConversationHistory;
+  conversationHistoryList: ConversationHistory;
 }
 
 export interface PreCheckResponseBody extends KintoneProxyResponseBody {

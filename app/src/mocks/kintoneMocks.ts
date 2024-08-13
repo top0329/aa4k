@@ -165,6 +165,9 @@ const kintoneMocks = {
               mobileConversationHistoryList: [
                 // Optionally, you can mock different data for mobile, or replicate desktop
               ],
+              conversationHistoryList:[
+                // Optionally, you can mock different data for mobile, or replicate desktop
+              ],
             };
 
           const resConversationHistory: KintoneProxyResponse = [

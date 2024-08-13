@@ -8,7 +8,7 @@ import { useLoadingLogic } from "~/components/ui/Loading/useLoadingLogic";
 import { ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants";
 import { useChatHistory } from "~/hooks/useChatHistory";
 import { useTextSpeech } from "~/hooks/useTextSpeech";
-import { DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
+import { DataGenChatHistoryState, DesktopChatHistoryState, MobileChatHistoryState } from '~/state/chatHistoryState';
 import { PromptInfoListState } from '~/state/promptState';
 import { DockItemVisibleState } from "~/state/dockItemState";
 import { LatestAiResponseIndexState } from "~/state/latestAiResponseIndexState";
@@ -35,6 +35,7 @@ export const useCornerDialogLogic = () => {
   const [isPcViewMode, setIsPcViewMode] = useAtom(ViewModeState);
   const { chatHistoryItems } = useChatHistory(isPcViewMode);
   const [, setDesktopChatHistory] = useAtom(DesktopChatHistoryState);
+  const [, setDataGenChatHistory] = useAtom(DataGenChatHistoryState);
   const [, setPromptInfoList] = useAtom(PromptInfoListState);
   const [, setMobileChatHistory] = useAtom(MobileChatHistoryState);
   const [, setLatestAiResponseIndex] = useAtom(LatestAiResponseIndexState);
@@ -42,6 +43,7 @@ export const useCornerDialogLogic = () => {
   const [pluginId] = useAtom(PluginIdState);
   const [isBannerClicked, setIsBannerClicked] = useState<boolean>(false);
   const [isInitialChatHistory, setIsInitialChatHistory] = useState<boolean>(false);
+  const [isInitialDataGenChatHistory, setIsInitialDataGenChatHistory] = useState<boolean>(false);
   const [isInitVisible, setIsInitVisible] = useState<boolean>(false);
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [humanMessage, setHumanMessage] = useState("");
@@ -109,6 +111,7 @@ export const useCornerDialogLogic = () => {
         setDockState({
           dialogVisible: false,
           chatVisible: false,
+          dataGenChatVisible: false,
           codeEditorVisible: false,
           spChatVisible: false,
         });
@@ -123,6 +126,7 @@ export const useCornerDialogLogic = () => {
         setDockState({
           dialogVisible: false,
           chatVisible: false,
+          dataGenChatVisible: false,
           codeEditorVisible: false,
           spChatVisible: false,
         });
@@ -150,6 +154,7 @@ export const useCornerDialogLogic = () => {
       setDockState({
         dialogVisible: false,
         chatVisible: false,
+        dataGenChatVisible: false,
         codeEditorVisible: false,
         spChatVisible: false,
       });
@@ -157,7 +162,7 @@ export const useCornerDialogLogic = () => {
     }
   }
 
-  // 会話履歴一覧の取得
+  // 会話履歴一覧の取得（js生成）
   const getChatHistoryItemList = async () => {
     try {
       const appId = kintone.app.getId();
@@ -252,6 +257,99 @@ export const useCornerDialogLogic = () => {
     return chatHistoryItemList;
   }
 
+  // 会話履歴一覧の取得（data生成）
+  const getDataGenChatHistoryItemList = async () => {
+    try {
+      const appId = kintone.app.getId();
+      const userId = kintone.getLoginUser().id;
+
+      // 取得したアプリIDの確認（※利用できない画面の場合、nullになる為）
+      if (appId === null) {
+        setDockState(dockState => ({ ...dockState, dataChatVisible: false }));
+        showErrorToast(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00001}）`);
+        return;
+      }
+
+      // 会話履歴一覧取得
+      const resConversationHistory = await kintone.plugin.app.proxy(
+        pluginId,
+        `${import.meta.env.VITE_API_ENDPOINT}/plugin/data_gen/conversation_history/list`,
+        "POST",
+        {},
+        { appId: appId, userId: userId },
+      ).catch((resBody: string) => {
+        const e = JSON.parse(resBody) as KintoneRestAPiError;
+        throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
+      }) as KintoneProxyResponse;
+      const [resBody, resStatus] = resConversationHistory;
+      const resBodyConversationHistoryList = JSON.parse(resBody) as ConversationHistoryListResponseBody;
+      if (resStatus !== 200) {
+        setDockState(dockState => ({ ...dockState, dataChatVisible: false }));
+        // APIエラー時のエラーメッセージを取得
+        const errorMessage = getApiErrorMessage(resStatus, resBodyConversationHistoryList.errorCode);
+        // APIエラーの場合、エラーメッセージ表示
+        showErrorToast(errorMessage);
+        return;
+      }
+
+      // チャット履歴の変換
+      const dataGenChatHistoryItemList = convertDataGenChatHistory(resBodyConversationHistoryList.conversationHistoryList);
+
+      // チャット履歴の更新
+      setDataGenChatHistory(dataGenChatHistoryItemList);
+
+      setIsInitialDataGenChatHistory(true);
+    } catch (err) {
+      let message: string = '';
+      if (err instanceof KintoneError) {
+        message = err.message;
+      } else {
+        message = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+      }
+      setDockState(dockState => ({ ...dockState, dataChatVisible: false }));
+      showErrorToast(message);
+    }
+  }
+
+  // 取得した会話履歴一覧をChatHistory型に変換
+  const convertDataGenChatHistory = (conversationHistoryList: ConversationHistory): ChatHistory => {
+    let chatHistoryItemList: ChatHistory = [];
+    conversationHistoryList.forEach((conversationHistory: ConversationHistoryRow, index) => {
+      const chatHistoryItem: ChatHistoryItem = {
+        human: {
+          role: MessageType.human,
+          content: conversationHistory.user_message
+        },
+        conversationId: conversationHistory.id,
+        userRating: conversationHistory.user_rating,
+      };
+      if (conversationHistory.error_message) {
+        const errorMessage: ErrorMessage = {
+          role: MessageType.error,
+          content: conversationHistory.error_message,
+        };
+        chatHistoryItem["error"] = errorMessage;
+      } else {
+        let aiMessageContent = conversationHistory.ai_message || `${ErrorMessageConst.E_MSG005}（${ErrorCode.E00006}）`;
+        let aiMessageComment = conversationHistory.ai_message_comment || '';
+        if (isLoading && index === conversationHistoryList.length - 1) {
+          // AI回答待ち中の場合、AI回答にはエラーメッセージを表示しない
+          aiMessageContent = '';
+          aiMessageComment = '';
+        }
+        const aiMessage: AiMessage = {
+          role: MessageType.ai,
+          content: aiMessageContent,
+          comment: aiMessageComment,
+        };
+        chatHistoryItem["ai"] = aiMessage;
+      }
+      chatHistoryItemList.push(chatHistoryItem);
+    });
+
+    return chatHistoryItemList;
+  }
+
   // プロンプト情報の取得
   const execGetPromptInfoList = async () => {
     try {
@@ -284,12 +382,21 @@ export const useCornerDialogLogic = () => {
     setDisable(!dockState.dialogVisible);
   }, [dockState.dialogVisible, isInitVisible]);
 
+  // js生成
   useEffect(() => {
     if (dockState.chatVisible && !isInitialChatHistory) {
       // 会話モーダル初回表示の場合、会話履歴一覧を取得する
       getChatHistoryItemList();
     }
   }, [dockState.chatVisible, isInitialChatHistory]);
+
+  // data生成
+  useEffect(() => {
+    if (dockState.dataGenChatVisible && !isInitialDataGenChatHistory) {
+      // 会話モーダル初回表示の場合、会話履歴一覧を取得する
+      getDataGenChatHistoryItemList();
+    }
+  }, [dockState.dataGenChatVisible, isInitialDataGenChatHistory]);
 
   // 起動バナーの位置を保存
   const savePosition = (position: DragPosition) => {
@@ -323,6 +430,7 @@ export const useCornerDialogLogic = () => {
         await setDockState({
           dialogVisible: false,
           chatVisible: false,
+          dataGenChatVisible: false,
           codeEditorVisible: false,
           spChatVisible: false,
         });
@@ -363,5 +471,6 @@ export const useCornerDialogLogic = () => {
     finishAiAnswerRef,
     isInitVisible,
     isInitialChatHistory,
+    isInitialDataGenChatHistory,
   };
 };
