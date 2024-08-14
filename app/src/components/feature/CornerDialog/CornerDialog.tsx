@@ -36,8 +36,10 @@ const CornerDialog = () => {
     isInitialChatHistory,
     isInitialDataGenChatHistory,
     isPcViewMode,
+    isBannerDisplay,
   } = useCornerDialogLogic();
 
+  if (!isBannerDisplay) return;
   return (
     <Dialog.Root open={dockState.dialogVisible}
       modal={false}

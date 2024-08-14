@@ -22,6 +22,7 @@ import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from "~/util/preCheck";
 import { getPromptInfoList } from "~/util/getPrompt"
+import { checkRole } from "~/util/checkRole";
 
 type DragPosition = { x: number; y: number };
 
@@ -48,6 +49,7 @@ export const useCornerDialogLogic = () => {
   const [dockState, setDockState] = useAtom(DockItemVisibleState);
   const [humanMessage, setHumanMessage] = useState("");
   const [callbackFuncs, setCallbackFuncs] = useState<Function[] | undefined>([]);
+  const [isBannerDisplay, setIsBannerDisplay] = useState<boolean>(false);
 
   const [initialPosition, setInitialPosition] = useState<DragPosition>(() => {
     const savedPosition = getSavedPosition();
@@ -367,6 +369,28 @@ export const useCornerDialogLogic = () => {
     showToast(message, 0, false, position);
   }
 
+  // ロールチェックを実行
+  const execRoleCheck = async () => {
+    try {
+      // 操作ユーザがAA4k利用権限があるかをチェック
+      const hasRole = await checkRole(kintone.getLoginUser().code);
+      if (!hasRole) {
+        return;
+      }
+
+      setIsBannerDisplay(true);
+
+    } catch (err) {
+      // 何もしない
+    }
+  }
+
+  // バナー表示時
+  useEffect(() => {
+    // ロールチェックを実行
+    execRoleCheck();
+  }, []);
+
   // 会話履歴が更新されたら会話履歴の最新のインデックスを更新
   useEffect(() => {
     if (chatHistoryItems.length) {
@@ -472,5 +496,6 @@ export const useCornerDialogLogic = () => {
     isInitVisible,
     isInitialChatHistory,
     isInitialDataGenChatHistory,
+    isBannerDisplay,
   };
 };
