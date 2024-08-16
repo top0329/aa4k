@@ -35,6 +35,7 @@ const kintoneMocks = {
             contractStatus: "active", // Use an appropriate value from ContractStatus enum
             systemSettings: {
               historyUseCount: 0,
+              oneDataGenMaxCount: 3
             },
           };
           return [
@@ -165,7 +166,7 @@ const kintoneMocks = {
               mobileConversationHistoryList: [
                 // Optionally, you can mock different data for mobile, or replicate desktop
               ],
-              conversationHistoryList:[
+              conversationHistoryList: [
                 // Optionally, you can mock different data for mobile, or replicate desktop
               ],
             };

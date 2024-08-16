@@ -1,7 +1,7 @@
 // src/App.tsx
 import { useAtom } from "jotai";
-import CornerDialog from "./components/feature/CornerDialog/CornerDialog";
-import { ErrorToastProvider } from "./components/ui/ErrorToast/ErrorToastProvider";
+import CornerDialog from "./components/feature/Common/CornerDialog/CornerDialog";
+import { ErrorToastProvider } from "./components/ui/Origin/ErrorToast/ErrorToastProvider";
 import { PluginIdState } from "./state/pluginIdState";
 
 const App = ({ pluginId }: { pluginId: string }) => {

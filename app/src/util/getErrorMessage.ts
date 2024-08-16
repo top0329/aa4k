@@ -45,3 +45,26 @@ export const getApiErrorMessageForCreateJs = (resStatus: number, errorCode?: Err
 
   return errorMessage;
 }
+
+/**
+ * APIエラー時のエラーメッセージを取得（AI用）
+ * @returns エラーメッセージ
+ */
+export const getApiErrorMessageForAi = (resStatus: number, errorCode?: ErrorCode) => {
+  let errorMessage = '';
+  if (!errorCode) {
+    // API通信エラーの場合
+    errorMessage = `${ErrorMessage.E_MSG011}（${resStatus}）`;
+  } else if (errorCode === ErrorCode.A02002) {
+    // バージョン不正の場合
+    errorMessage = `${ErrorMessage.E_MSG002}（${errorCode}）`;
+  } else if (errorCode === ErrorCode.A01003 || errorCode === ErrorCode.A01004) {
+    // 未契約、契約外の場合
+    errorMessage = `${ErrorMessage.E_MSG003}（${errorCode}）`;
+  } else {
+    // 上記以外のAPIエラーの場合
+    errorMessage = `${ErrorMessage.E_MSG011}（${errorCode}）`;
+  }
+
+  return errorMessage;
+}

@@ -45,8 +45,6 @@ export type Context = Record<string, any>;
 export type ChatHistory = Array<ChatHistoryItem>;
 export interface SystemSettings {
   historyUseCount: number;
-}
-export interface DataGenSystemSettings {
   oneDataGenMaxCount: number;
 }
 
@@ -67,7 +65,7 @@ export interface DataGenContext {
   conversationId: string;
   contractStatus: ContractStatus;
   isGuestSpace: boolean;
-  systemSettings: DataGenSystemSettings;
+  systemSettings: SystemSettings;
   pluginId: string;
   promptInfoList?: PromptInfo[]
 }

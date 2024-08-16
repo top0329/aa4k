@@ -14,7 +14,7 @@ import { ContractExpiredError, ContractStatusError, GuidelineError, ApiError } f
 import { LlmError } from "~/util/customErrors"
 import { PromptInfo, PromptFunctionParameter } from "~/types/ai"
 import { getPromptInfoList } from "~/util/getPrompt"
-import { getApiErrorMessageForCreateJs } from "~/util/getErrorMessage";
+import { getApiErrorMessageForAi } from "~/util/getErrorMessage";
 
 import { Fetch } from "openai/core"
 import { HttpRequest } from '@aws-sdk/protocol-http';
@@ -340,7 +340,7 @@ export async function setPrompt(pluginId: string, targetDivList: string[], promp
     // プロンプト情報が取得できていない場合は取得
     const { promptResult, resStatus: resPromptStatus } = await getPromptInfoList(pluginId);
     if (resPromptStatus !== 200) {
-      const errorMessage = getApiErrorMessageForCreateJs(resPromptStatus, promptResult.errorCode)
+      const errorMessage = getApiErrorMessageForAi(resPromptStatus, promptResult.errorCode)
       throw new ApiError(errorMessage)
     }
     latestPromptInfoList = promptResult.promptInfoList;
@@ -419,7 +419,7 @@ export async function executeLlm(
       // レート制限に引っかかった場合、エラーを出力
       throw new LlmError(`${ErrorMessageConst.E_MSG007}（${ErrorCode.E00011}）`)
     } else {
-      throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00004}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E00004}）`)
     }
   })) as LLMResponse;
 
