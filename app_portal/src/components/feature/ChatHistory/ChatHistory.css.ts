@@ -30,7 +30,6 @@ export const sChatHistorySuggest = style({
   borderRadius: '100px',
   height: '56px',
   overflow: 'hidden',
-  width: '219px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'start',

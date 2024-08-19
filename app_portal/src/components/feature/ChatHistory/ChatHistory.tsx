@@ -65,7 +65,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
             style={{
               color: '#5459ff', // 文字色を一律で設定
               letterSpacing: 0.8,
-              lineHeight: 1.8,
+              lineHeight: 1.4,
               whiteSpace: "pre-wrap"
             }}>
             {animateText.split("").map((letter, index) => (
@@ -80,6 +80,15 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
             ))}
           </Text>
         </motion.div>
+        <Text
+          style={{
+            opacity: 0.5,
+            marginTop: `-1%`,
+            marginBottom: `-1%`,
+          }}
+        >
+          どのようなアプリをご希望ですか？
+        </Text>
         <ScrollArea
           scrollbars='vertical'
           style={{
@@ -94,7 +103,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
             <Card
               variant='ghost'
               className={sChatHistorySuggestCard}
-              onClick={() => setHumanMessage("議事録アプリを作成して")}
+              onClick={() => setHumanMessage("議事録アプリを作って")}
             >
               <Flex
                 gap='4'
@@ -110,7 +119,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  議事録アプリを作成して
+                  議事録アプリを作って
                 </Text>
                 <img src={reflectButtonIcon} alt="icon" className={sChatHistorySuggestButtonIcon} />
               </Flex>
@@ -118,7 +127,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
             <Card
               variant='ghost'
               className={sChatHistorySuggestCard}
-              onClick={() => setHumanMessage("日報アプリを作成して")}
+              onClick={() => setHumanMessage("入退室記録簿というアプリ名で入退室を管理をしたい")}
             >
               <Flex
                 gap='4'
@@ -134,7 +143,31 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  日報アプリを作成して
+                  入退室記録簿というアプリ名で入退室を管理をしたい
+                </Text>
+                <img src={reflectButtonIcon} alt="icon" className={sChatHistorySuggestButtonIcon} />
+              </Flex>
+            </Card>
+            <Card
+              variant='ghost'
+              className={sChatHistorySuggestCard}
+              onClick={() => setHumanMessage("製品・カテゴリ別にお客様の苦情を記録するアプリを作成したい")}
+            >
+              <Flex
+                gap='4'
+                className={sChatHistorySuggest}
+                style={{
+                  cursor: 'pointer',
+                }}
+              >
+                <Text
+                  size='2'
+                  weight={'medium'}
+                  style={{
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  製品・カテゴリ別にお客様の苦情を記録するアプリを作成したい
                 </Text>
                 <img src={reflectButtonIcon} alt="icon" className={sChatHistorySuggestButtonIcon} />
               </Flex>

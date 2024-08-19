@@ -11,7 +11,7 @@ export const useChatHistoryLogic = (isInitVisible: boolean) => {
   const [actionType] = useAtom(ActionTypeState);
   const controls = useAnimation();
 
-  const animateText = "アプリを自動作成します。\nどのようなアプリを作成しますか？";
+  const animateText = "Associate AI Hub はあなたの要望に\n最適化したkintoneアプリを作成します";
 
   useEffect(() => {
     const letters = animateText.split("");
