@@ -1,3 +1,4 @@
+// src\components\feature\PromptForm\PromptForm.css.tsx
 import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "~/styles/theme.css";
 
@@ -36,7 +37,7 @@ export const sVoiceInputActive = style({
 });
 
 export const sPromptForm = style({
-  height: '206px',
+  height: '31%',
   position: 'relative',
   width: '100%',
   background: 'transparent',

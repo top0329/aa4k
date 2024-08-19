@@ -1,8 +1,9 @@
+// src\components\feature\AppGenerationDialog\AppGenerationDialog.css.ts
 import { style } from "@vanilla-extract/css";
 
 export const sOuterFrame = style({
-  width: '968px',
-  height: '684px',
+  width: '50.9%',
+  height: '71.95%',
   flexShrink: 0,
   borderRadius: '28px',
   border: '2px solid rgba(255, 255, 255, 0.20)',
@@ -16,8 +17,8 @@ export const sOuterFrame = style({
 });
 
 export const sMiddleFrame = style({
-  width: '958px',
-  height: '674px',
+  width: '99.3%',
+  height: '98.9%',
   flexShrink: 0,
   borderRadius: '26px',
   border: '3px solid rgba(255, 255, 255, 0.50)',
@@ -35,13 +36,13 @@ export const sAppGenerationDialog = style({
   border: '4px solid',
   borderColor: '#ffffff',
   borderRadius: '22px',
-  height: '662px',
+  height: '99.1%',
   overflow: 'hidden',
   position: 'fixed',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '946px',
+  width: '99.4%',
   display: 'flex',
   flexDirection: 'column',
   zIndex: 100,

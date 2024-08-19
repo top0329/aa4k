@@ -1,8 +1,9 @@
+// src\components\ui\AiResponseEffect\AiResponseEffect.css.ts
 import { keyframes, style } from '@vanilla-extract/css';
 
 export const sAiResponseEffect = style({
-  height: '376px',
-  width: '48px',
+  height: 'auto',
+  width: '6.1%',
 });
 
 export const sBlueCircle = style({

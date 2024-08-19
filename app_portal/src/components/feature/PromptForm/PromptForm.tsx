@@ -58,9 +58,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ humanMessage, setHumanMessage, 
       <form
         onSubmit={(e) => handleSubmit(e)}
         style={{
-          paddingLeft: '56px',
-          paddingTop: '30px',
-          paddingRight: '56px',
+          paddingLeft: '6%',
+          paddingTop: '3.25%',
+          paddingRight: '6%',
           height: '100%',
         }}
       >

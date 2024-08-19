@@ -2,9 +2,9 @@
 import { style } from '@vanilla-extract/css';
 
 export const sAccordionShowDetail = style({
-  height: '568px',
+  height: '85.8%',
   position: 'relative',
-  width: '260px',
+  width:'100%',
 });
 
 export const sAccordionShowDetailItem = style({

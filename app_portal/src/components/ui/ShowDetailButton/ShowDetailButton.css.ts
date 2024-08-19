@@ -2,15 +2,13 @@
 import { style } from '@vanilla-extract/css';
 
 export const sShowDetailButton = style({
-  marginTop:'-8px',
-  marginLeft:'8px',
-  marginBottom:'4px',
-  marginRight:'680px',
-  cursor: 'pointer',
+  marginTop:'-1%',
+  marginLeft:'1%',
+  marginBottom:'0.5%',
 });
 
 export const sText = style({
-  pointerEvents: 'none',
+  cursor: 'pointer',
   color: '#2E3192',
   transition: 'color 0.3s',
   fontSize: '14px',

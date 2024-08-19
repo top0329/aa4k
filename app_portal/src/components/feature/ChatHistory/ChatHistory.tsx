@@ -48,9 +48,9 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
         p={'0'}
         gap={'6'}
         style={{
-          paddingLeft: '56px',
-          paddingTop: '56px',
-          paddingRight: '56px',
+          paddingLeft: '6%',
+          paddingTop: '6%',
+          paddingRight: '6%',
           height: '100%',
         }}
       >
@@ -182,9 +182,9 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ humanMessage, setHuman
         direction={'column'}
         p={'0'}
         style={{
-          paddingLeft: '56px',
-          paddingTop: '56px',
-          paddingRight: '56px',
+          paddingLeft: '6%',
+          paddingTop: '6%',
+          paddingRight: '6%',
           height: '100%',
         }}
       >

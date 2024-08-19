@@ -33,10 +33,6 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ showDe
       <ScrollArea
         scrollbars='vertical'
         type='auto'
-        style={{
-          height: '568px',
-          width: '260px',
-        }}
         ref={showDetailDialogScrollRef}
       >
         {settingInfoItems && settingInfoItems.fields.map((item, index) => {

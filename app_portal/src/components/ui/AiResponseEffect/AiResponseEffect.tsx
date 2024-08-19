@@ -3,25 +3,17 @@
 import { Box } from "@radix-ui/themes";
 import { sAiResponseEffect, sBlueCircle, sInnerCircleAnimated, sOuterCircleAnimated } from "./AiResponseEffect.css";
 
-type AiResponseEffectProps = {
-  top?: number;
-  left?: number;
-  zIndex?: number;
-}
+type AiResponseEffectProps = {}
 
-export const AiResponseEffect: React.FC<AiResponseEffectProps> = ({
-  top = 25,
-  left = 8,
-  zIndex,
-}) => {
+export const AiResponseEffect: React.FC<AiResponseEffectProps> = ({}) => {
+
   return (
     <Box className={sAiResponseEffect}>
       <Box
-        className={`${sBlueCircle} `}
+        className={sBlueCircle}
         style={{
-          top: top,
-          left: left,
-          zIndex: zIndex,
+          marginTop: '50%',
+          marginLeft: '20%',
         }}
       >
         <Box className={sInnerCircleAnimated}></Box>
