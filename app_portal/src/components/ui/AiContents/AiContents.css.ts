@@ -7,13 +7,19 @@ export const sAiContents = style({
   width: '100%',
   "@media": {
     "(max-height: 900px)": {
-      height: `39vh`,
+      height: `37vh`,
     },
     "(max-height: 850px)": {
-      height: `38.5vh`,
+      height: `36vh`,
     },
     "(max-height: 800px)": {
-      height: `38vh`,
+      height: `35vh`,
+    },
+    "(max-height: 700px)": {
+      height: `34vh`,
+    },
+    "(max-height: 600px)": {
+      height: `33vh`,
     },
   },
 });
