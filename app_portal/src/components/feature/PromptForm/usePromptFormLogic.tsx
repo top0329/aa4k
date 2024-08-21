@@ -86,9 +86,14 @@ export const usePromptFormLogic = ({
         setVoiceInput(false);
       }
 
+      // 初期化
       setAiAnswer("");
       setFinishAiAnswer(false);
       setIsShowDetailDialogVisible(false);
+
+      // AI問い合わせ時に音声出力するメッセージ
+      setAiAnswer(`${InfoMessage.I_MSG005}`);
+      setFinishAiAnswer(true);
 
       const userId = kintone.getLoginUser().id;
 
@@ -128,8 +133,6 @@ export const usePromptFormLogic = ({
           error: errorMessage,
           conversationId: "",
         };
-        setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
-        setFinishAiAnswer(true);
         setChatHistory([...chatHistoryItems, chatHistoryItem]);
         setHumanMessage("");
         setActionType(ActionType.error);
@@ -157,8 +160,6 @@ export const usePromptFormLogic = ({
           role: MessageType.error,
           content: errMsgStr,
         };
-        setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
-        setFinishAiAnswer(true);
         setChatHistory([...chatHistoryItems, chatHistoryItem]);
         setHumanMessage("");
         setActionType(ActionType.error);
@@ -195,24 +196,20 @@ export const usePromptFormLogic = ({
         chatHistoryItem.ai = response.message;
         let speechMessage = "";
         // actionTypeに基づいて、音声出力の内容を切り替える
-        if (actionType === ActionType.create || actionType === ActionType.edit || actionType === ActionType.duplicate) {
+        if (actionType === ActionType.create || actionType === ActionType.edit) {
           speechMessage = InfoMessage.I_MSG003;
-        } else if (actionType === ActionType.unknown) {
-          // AIが認識できなかったパターン
-          speechMessage = InfoMessage.I_MSG005;
         } else if (actionType === ActionType.other) {
           // 雑談等のパターン
           speechMessage = content;
         }
         setAiAnswer(speechMessage); // 成功時に音声出力するメッセージ
+        setFinishAiAnswer(true);
       } else {
         // AIメッセージオブジェクトの削除
         delete chatHistoryItem.ai;
         chatHistoryItem.error = response.message;
         setActionType(ActionType.error);
-        setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
       }
-      setFinishAiAnswer(true);
       if (responseIsCreating && actionType === ActionType.create) {
         if (isPreviousCreateAction.current) {
           // 作成（create） -> 作成（create）のパターンではそれまでの会話履歴をリセットする
@@ -247,8 +244,6 @@ export const usePromptFormLogic = ({
         error: errorMessage,
         conversationId: conversationId,
       };
-      setAiAnswer(`${ErrorMessageConst.E_MSG001}`); // 失敗時に音声出力するメッセージ
-      setFinishAiAnswer(true);
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setActionType(ActionType.error);

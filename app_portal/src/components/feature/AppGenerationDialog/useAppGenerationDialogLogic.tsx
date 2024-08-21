@@ -2,7 +2,7 @@
 
 import { useAtom } from 'jotai';
 import { useRef, useState } from 'react';
-import { ActionType, ErrorMessage as ErrorMessageConst, ExecResult, InfoMessage, MessageType } from '~/constants';
+import { ActionType, ExecResult, InfoMessage, MessageType } from '~/constants';
 import { AppDialogVisibleState } from '~/state/appDialogVisibleState';
 import { PromptInfoListState } from '~/state/promptState';
 import { SettingInfoState } from '~/state/settingInfoState';
@@ -83,8 +83,6 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
         conversationId: "",
       };
       toggleAiLoadVisibility(text);
-      setAiAnswer(`${ErrorMessageConst.E_MSG003}`); // 失敗時に音声出力するメッセージ
-      setFinishAiAnswer(true);
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setActionType(ActionType.error);
@@ -119,8 +117,6 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
         conversationId: "",
       };
       toggleAiLoadVisibility(text);
-      setAiAnswer(`${ErrorMessageConst.E_MSG003}`); // 失敗時に音声出力するメッセージ
-      setFinishAiAnswer(true);
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setActionType(ActionType.error);
@@ -159,8 +155,6 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
         conversationId: "",
       };
       toggleAiLoadVisibility(text);
-      setAiAnswer(`${ErrorMessageConst.E_MSG003}`); // 失敗時に音声出力するメッセージ
-      setFinishAiAnswer(true);
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setHumanMessage("");
       setActionType(ActionType.error);
