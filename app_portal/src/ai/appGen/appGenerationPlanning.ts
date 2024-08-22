@@ -463,9 +463,8 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     // --------------------
     else {
       if (typeLlmResult.userMessageType === ActionType.duplicate) {
-        // 「複製」の場合は以下のメッセージ TODO: メッセージの修正
-        typeLlmResult.response = `複製はこちらのページをご覧ください。
-https://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
+        // 「複製」の場合は以下のメッセージ
+        typeLlmResult.response = `本製品では既存アプリの複製(コピー)は出来ません。\nほかのアプリを再利用したい場合はこちらの手順を参考にしてください。\n\nhttps://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
       }
       // --------------------
       // 会話履歴登録

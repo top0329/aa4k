@@ -9,6 +9,7 @@ import useTypewriter from "~/hooks/useTypeWriter";
 import { AiContentProps } from "~/types/aiContentTypes";
 import { ActionType, InfoMessage, ErrorMessage } from "~/constants";
 import { ShowDetailButton } from "../ShowDetailButton/ShowDetailButton";
+import { useConvertToLinks } from "~/hooks/useConvertToLinks";
 
 type AiMessageProps = AiContentProps & {
   isLoadingVisible: boolean;
@@ -92,7 +93,20 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
         </Box>
       </Flex>
     );
-  } else if (actionType === duplicate || actionType === other || actionType === unknown) {
+  } else if (actionType === duplicate) {
+    return (
+      <Flex>
+        <Box className={sAiMessage}>
+          <Flex direction={'column'} gap={'4'}>
+            <Box
+              style={{ whiteSpace: "pre-wrap" }}
+              dangerouslySetInnerHTML={{ __html: useConvertToLinks(displayedText) }}>
+            </Box>
+          </Flex>
+        </Box>
+      </Flex>
+    );
+  } else if (actionType === other || actionType === unknown) {
     return (
       <Flex>
         <Box className={sAiMessage}>
