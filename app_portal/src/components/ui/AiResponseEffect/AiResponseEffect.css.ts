@@ -16,28 +16,14 @@ export const sBlueCircle = style({
 
 // 内側の枠のアニメーションの定義
 const innerCircleAnimation = keyframes({
-  '0%, 25%': {
-    border: '2px solid rgba(84, 89, 255, 0)',
-  },
-  '50%, 75%': {
-    border: '2px solid rgba(84, 89, 255, 0.5)',
-  },
-  '100%': {
-    border: '2px solid rgba(84, 89, 255, 0)',
-  },
+  '0%, 100%': { opacity: 1 },
+  '50%': { opacity: 0 },
 });
 
 // 外側の枠のアニメーションの定義
 const outerCircleAnimation = keyframes({
-  '0%, 50%': {
-    border: '2px solid rgba(84, 89, 255, 0)',
-  },
-  '75%': {
-    border: '2px solid rgba(84, 89, 255, 0.3)',
-  },
-  '100%': {
-    border: '2px solid rgba(84, 89, 255, 0)',
-  },
+  '0%, 100%': { opacity: 1 },
+  '50%': { opacity: 0 },
 });
 
 // 内側の枠のアニメーションを適用するスタイル
@@ -49,8 +35,10 @@ export const sInnerCircleAnimated = style({
   height: '32px',
   marginTop: '-16px',
   marginLeft: '-16px',
+  border: '2px solid rgba(84, 89, 255, 0.5)',
+  opacity:0,
   borderRadius: '50%',
-  animation: `${innerCircleAnimation} 0.75s infinite ease-in-out`,
+  animation: `${innerCircleAnimation} 1.5s infinite ease-in-out`,
 });
 
 // 外側の枠のアニメーションを適用するスタイル
@@ -62,7 +50,9 @@ export const sOuterCircleAnimated = style({
   height: '40px',
   marginTop: '-20px',
   marginLeft: '-20px',
+  border: '2px solid rgba(84, 89, 255, 0.3)',
+  opacity:0,
   borderRadius: '50%',
-  animation: `${outerCircleAnimation} 0.75s infinite ease-in-out`,
-  animationDelay: '0.05s',
+  animation: `${outerCircleAnimation} 1.5s infinite ease-in-out`,
+  animationDelay: '0.2s',
 });

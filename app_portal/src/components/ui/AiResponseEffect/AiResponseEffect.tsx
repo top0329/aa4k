@@ -2,10 +2,17 @@
 
 import { Box } from "@radix-ui/themes";
 import { sAiResponseEffect, sBlueCircle, sInnerCircleAnimated, sOuterCircleAnimated } from "./AiResponseEffect.css";
+import { AiMessage, ErrorMessage } from "~/types";
 
-type AiResponseEffectProps = {}
+type AiResponseEffectProps = {
+  aiMessage: AiMessage | ErrorMessage;
+  isLoadingVisible: boolean;
+}
 
-export const AiResponseEffect: React.FC<AiResponseEffectProps> = ({}) => {
+export const AiResponseEffect: React.FC<AiResponseEffectProps> = ({ aiMessage, isLoadingVisible }) => {
+
+  // アニメーションの活性/非活性
+  const isCircleEffectActive = !aiMessage.content || isLoadingVisible;
 
   return (
     <Box className={sAiResponseEffect}>
@@ -16,8 +23,12 @@ export const AiResponseEffect: React.FC<AiResponseEffectProps> = ({}) => {
           marginLeft: '20%',
         }}
       >
-        <Box className={sInnerCircleAnimated}></Box>
-        <Box className={sOuterCircleAnimated}></Box>
+        {isCircleEffectActive && (
+          <>
+            <Box className={sInnerCircleAnimated} />
+            <Box className={sOuterCircleAnimated} />
+          </>
+        )}
       </Box>
     </Box>
   );

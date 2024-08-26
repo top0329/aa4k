@@ -1,5 +1,5 @@
 // src\components\ui\AiContents\AiContents.css.ts
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 
 export const sAiContents = style({
   height: `39.5vh`,
@@ -23,3 +23,16 @@ export const sAiContents = style({
     },
   },
 });
+
+const fadeInOut = keyframes({
+  '0%, 100%': { opacity: 1 },
+  '50%': { opacity: 0 },
+});
+
+export const sStandbyMessage = style({
+  paddingTop:`2.8%`,
+  color: '#5459FF',
+  fontWeight: 500,
+  animation: `${fadeInOut} 1.5s infinite ease-in-out`,
+  animationDelay: '0.05s',
+})

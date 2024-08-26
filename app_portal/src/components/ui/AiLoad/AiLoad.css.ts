@@ -39,8 +39,8 @@ export const sDot = colors.map((color, index) =>
       height: '100%',
       background: 'inherit',
       borderRadius: 'inherit',
-      animation: `${wave} 2s ease-out infinite`,
-      animationDelay: `${index * 0.2}s`,
+      animation: `${wave} 1.493s ease-out infinite`,
+      animationDelay: `${1 + index * 0.2}s`,
     },
   })
 );
