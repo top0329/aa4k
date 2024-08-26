@@ -24,6 +24,7 @@ export interface SystemMessage extends ChatMessage {
 
 export interface ErrorMessage extends ChatMessage {
   role: "error";
+  messageDetail?: MessageContent;
 }
 export interface ChatHistoryItem {
   human: HumanMessage;

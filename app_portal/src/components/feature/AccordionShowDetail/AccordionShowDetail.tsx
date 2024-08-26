@@ -20,6 +20,7 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ showDe
     settingInfoItems,
     activeItem,
     setActiveItem,
+    lastChatHistoryItem,
   } = useAccordionShowDetailLogic();
 
   return (
@@ -35,7 +36,7 @@ export const AccordionShowDetail: React.FC<AccordionShowDetailProps> = ({ showDe
         type='auto'
         ref={showDetailDialogScrollRef}
       >
-        {settingInfoItems && settingInfoItems.fields.map((item, index) => {
+        {lastChatHistoryItem && lastChatHistoryItem.conversationId && settingInfoItems && settingInfoItems.fields.map((item, index) => {
           const contentText = item.label.slice(13);
           return (
             <Accordion.Item

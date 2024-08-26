@@ -200,7 +200,12 @@ export const usePromptFormLogic = ({
           speechMessage = InfoMessage.I_MSG003;
         } else if (actionType === ActionType.other) {
           // 雑談等のパターン
-          speechMessage = content;
+          if(response.message.messageDetail){
+            // messageDetail（アプリ情報）がある場合、固定文言を音声出力から除外
+            speechMessage = content.replace(ErrorMessageConst.E_MSG004,"");
+          }else{
+            speechMessage = content;
+          }
         }
         setAiAnswer(speechMessage); // 成功時に音声出力するメッセージ
         setFinishAiAnswer(true);

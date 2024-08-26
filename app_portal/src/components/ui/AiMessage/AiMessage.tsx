@@ -33,13 +33,13 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
 
   // タイプライター出力
   const { role, content } = aiMessage;
-  const messageDetail = role === "ai" && aiMessage.messageDetail ? aiMessage.messageDetail : "";
+  const messageDetail = (role === "ai" || role === "error") && aiMessage.messageDetail ? aiMessage.messageDetail : "";
   const [displayedText, isTextComplete] = useTypewriter(content, !isLoadingVisible && !resetTypewriter); // メインのAI応答
   const [displayedAppInfo, isAppInfoComplete] = useTypewriter(messageDetail, isDisplayedAppInfo); // アプリの情報
   const loadingMessage = InfoMessage.I_MSG006;
   const [displayedLoadingText,] = useTypewriter(loadingMessage, isLoadingVisible); // ロード画面でのAI応答（固定）
-  const errorMessage = ErrorMessage.E_MSG002;
-  const [displayedErrorText,] = useTypewriter(errorMessage, isErrorDisplayed); // エラー画面でのAI応答（固定）
+  const errorMessage = messageDetail ? ErrorMessage.E_MSG004 : ErrorMessage.E_MSG002;
+  const [displayedErrorText, isErrorTextComplete] = useTypewriter(errorMessage, isErrorDisplayed); // エラー画面でのAI応答（固定）
 
   // 表示内容と状態をリセットするuseEffect
   useEffect(() => {
@@ -60,15 +60,22 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
   // 表示順序を調整するuseEffect
   useEffect(() => {
     if (isTextComplete && content !== "") {
-      setIsDisplayedCreateAppBtn(true);
-      setTimeout(() => setIsDisplayedAppInfo(true), 300);
       if (actionType === error) {
-        setTimeout(() => setIsErrorDisplayed(true), 300);
+        // 「エラー」の場合、「AI応答 + 固定文言 + アプリ作成ボタン + フィールド情報」
+        setIsErrorDisplayed(true);
+        if (isErrorTextComplete) {
+          setIsDisplayedCreateAppBtn(true)
+          setTimeout(() => setIsDisplayedAppInfo(true), 300);
+        }
+      } else {
+        // 「エラー」以外の場合、「AI応答 + アプリ作成ボタン + フィールド情報」
+        setIsDisplayedCreateAppBtn(true);
+        setTimeout(() => setIsDisplayedAppInfo(true), 300);
       }
     }
-  }, [isTextComplete, content, actionType]);
+  }, [isTextComplete, content, actionType, isErrorTextComplete]);
 
-  if (actionType === create || actionType === edit) {
+  if (actionType === create || actionType === edit || actionType === other || actionType === unknown) {
     return (
       <Flex>
         <Box className={sAiMessage}>
@@ -76,16 +83,16 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
             <Box style={{ whiteSpace: "pre-wrap" }}>
               {!isLoadingVisible ? displayedText : displayedLoadingText}
             </Box>
-            {!isLoadingVisible && isDisplayedCreateAppBtn && (
+            {!isLoadingVisible && isDisplayedCreateAppBtn && messageDetail && (
               <CreateAppButton onClick={(text) => createKintoneApp(text)} />
             )}
             <Flex direction={'column'} style={{ backgroundColor: vars.color.grayA.grayA1, borderRadius: 4 }}>
-              {!isLoadingVisible && isDisplayedAppInfo && (
+              {!isLoadingVisible && isDisplayedAppInfo && messageDetail && (
                 <Box p={'2'} style={{ whiteSpace: "pre-wrap" }}>
                   {displayedAppInfo}
                 </Box>
               )}
-              {!isLoadingVisible && isAppInfoComplete && (
+              {!isLoadingVisible && isAppInfoComplete && messageDetail && (
                 <ShowDetailButton onClick={() => setIsShowDetailDialogVisible(prev => !prev)} />
               )}
             </Flex>
@@ -106,31 +113,32 @@ export const AiMessage: React.FC<AiMessageProps> = ({ isLoadingVisible, createKi
         </Box>
       </Flex>
     );
-  } else if (actionType === other || actionType === unknown) {
-    return (
-      <Flex>
-        <Box className={sAiMessage}>
-          <Flex direction={'column'} gap={'4'}>
-            <Box style={{ whiteSpace: "pre-wrap" }}>
-              {displayedText}
-            </Box>
-          </Flex>
-        </Box>
-      </Flex>
-    );
   } else if (actionType === error) {
     return (
       <Flex>
         <Box className={sAiMessage}>
-          <Flex direction={'column'}>
-            <Box className={sErrorAiResponseText} style={{ whiteSpace: "pre-wrap" }}>
-              {displayedText}
+          <Flex direction={'column'} gap={'4'}>
+            <Box className={!isLoadingVisible ? sErrorAiResponseText : ""} style={{ whiteSpace: "pre-wrap" }}>
+              {!isLoadingVisible ? displayedText : displayedLoadingText}
             </Box>
-            {isErrorDisplayed && (
+            {isErrorDisplayed && !isLoadingVisible && (
               <Box className={sErrorText} style={{ whiteSpace: "pre-wrap" }}>
                 {displayedErrorText}
               </Box>
             )}
+            {!isLoadingVisible && isDisplayedCreateAppBtn && messageDetail && (
+              <CreateAppButton onClick={(text) => createKintoneApp(text)} />
+            )}
+            <Flex direction={'column'} style={{ backgroundColor: vars.color.grayA.grayA1, borderRadius: 4 }}>
+              {!isLoadingVisible && isDisplayedAppInfo && messageDetail && (
+                <Box p={'2'} style={{ whiteSpace: "pre-wrap" }}>
+                  {displayedAppInfo}
+                </Box>
+              )}
+              {!isLoadingVisible && isAppInfoComplete && messageDetail && (
+                <ShowDetailButton onClick={() => setIsShowDetailDialogVisible(prev => !prev)} />
+              )}
+            </Flex>
           </Flex>
         </Box>
       </Flex>

@@ -9,6 +9,7 @@ import {
   ChatHistory,
   AppGenerationPlanningContext,
   Field,
+  ChatHistoryItem,
 } from "~/types";
 import { InsertConversationRequest } from "~/types/apiInterfaces"
 import { MessageType, ActionType, ServiceDiv, ErrorCode, ErrorMessage as ErrorMessageConst } from "~/constants"
@@ -462,9 +463,15 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     // その他 の処理
     // --------------------
     else {
+      const lastChatHistoryItem = chatHistory[chatHistory.length -1];
       if (typeLlmResult.userMessageType === ActionType.duplicate) {
         // 「複製」の場合は以下のメッセージ
         typeLlmResult.response = `本製品では既存アプリの複製(コピー)は出来ません。\nほかのアプリを再利用したい場合はこちらの手順を参考にしてください。\n\nhttps://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
+      } else {
+        if (getLatestMessageDetail(lastChatHistoryItem)) {
+          // 「雑談」「理解不能」、かつmessageDetail（アプリ情報）が存在する場合は以下のメッセージ
+          typeLlmResult.response = `${typeLlmResult.response}\n\n${ErrorMessageConst.E_MSG004}`
+        }
       }
       // --------------------
       // 会話履歴登録
@@ -485,8 +492,9 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       return {
         actionType: typeLlmResult.userMessageType,
         message: {
-          role: MessageType.ai, content: typeLlmResult.response,
+          role: MessageType.ai, content: typeLlmResult.response, messageDetail: getLatestMessageDetail(lastChatHistoryItem),
         },
+        settingInfo: context.settingInfo,
         sessionId: sessionId,
         isCreating: isCreating,
       }
@@ -494,6 +502,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
 
   } catch (e) {
     console.log(e)
+    const lastChatHistoryItem = chatHistory[chatHistory.length -1];
     if (e instanceof LlmError || e instanceof ApiError) {
       const message = e.message;
       const reqConversation: InsertConversationRequest = {
@@ -505,7 +514,15 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
         conversationId: context.conversationId,
       };
       await insertConversation(reqConversation);
-      return { actionType: ActionType.error, message: { role: MessageType.error, content: message, }, sessionId: sessionId, isCreating: isCreating }
+      return {
+        actionType: ActionType.error,
+        message: {
+          role: MessageType.error, content: message, messageDetail: getLatestMessageDetail(lastChatHistoryItem),
+        },
+        settingInfo: context.settingInfo,
+        sessionId: sessionId,
+        isCreating: isCreating
+      }
     } else {
       const message = `${ErrorMessageConst.E_MSG008}（${ErrorCode.E99999}）`;
       const reqConversation: InsertConversationRequest = {
@@ -517,7 +534,15 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
         conversationId: context.conversationId,
       };
       await insertConversation(reqConversation);
-      return { actionType: ActionType.error, message: { role: MessageType.error, content: message, }, sessionId: sessionId, isCreating: isCreating }
+      return {
+        actionType: ActionType.error,
+        message: {
+          role: MessageType.error, content: message, messageDetail: getLatestMessageDetail(lastChatHistoryItem),
+        },
+        settingInfo: context.settingInfo,
+        sessionId: sessionId,
+        isCreating: isCreating
+      }
     }
   }
 }
@@ -541,3 +566,19 @@ function setChatHistory(chatHistory: ChatHistory) {
   });
   return histories;
 }
+
+/**
+ * 最新のmessageDetailを取得
+ * @param lastChatHistoryItem 
+ * @returns messageDetail || ""
+ */
+function getLatestMessageDetail(lastChatHistoryItem: ChatHistoryItem) {
+  if (lastChatHistoryItem) {
+    if (lastChatHistoryItem.ai) {
+      return lastChatHistoryItem.ai.messageDetail || "";
+    } else if (lastChatHistoryItem.error) {
+      return lastChatHistoryItem.error.messageDetail || "";
+    }
+  }
+  return "";
+};
