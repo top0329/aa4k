@@ -45,7 +45,6 @@ export type Context = Record<string, any>;
 export type ChatHistory = Array<ChatHistoryItem>;
 export interface SystemSettings {
   historyUseCount: number;
-  oneDataGenMaxCount: number;
 }
 
 export interface AppCreateJsContext {
@@ -85,6 +84,14 @@ export interface CodeCheckResponse {
   message: string[];
 }
 
+export interface KintoneFormFieldsProperties {
+  [key: string]: {
+    label: string;
+    code: string;
+    type: string;
+    [key: string]: any;
+  };
+}
 export interface kintoneFormFields {
   properties: Record<string, any>;
   revision: string;

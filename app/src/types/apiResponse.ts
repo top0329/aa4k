@@ -8,6 +8,7 @@ export interface KintoneRestAPiError {
   id: string;
   code: string;
   message: string;
+  errors?: Record<string, any>;
 }
 export interface KintoneProxyResponseBody {
   message: string;

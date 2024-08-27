@@ -35,7 +35,6 @@ const kintoneMocks = {
             contractStatus: "active", // Use an appropriate value from ContractStatus enum
             systemSettings: {
               historyUseCount: 0,
-              oneDataGenMaxCount: 3
             },
           };
           return [
