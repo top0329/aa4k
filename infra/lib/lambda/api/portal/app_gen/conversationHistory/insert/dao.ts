@@ -62,6 +62,7 @@ export const updateAiConversationHistory = async (dbClient: Client, reqBody: Ins
     reqBody.resultMessageDetail,
     reqBody.aiResponse,
     reqBody.appId,
+    reqBody.sessionId,
     reqBody.conversationId,
   ];
 
@@ -75,8 +76,9 @@ export const updateAiConversationHistory = async (dbClient: Client, reqBody: Ins
   sql += ` , ai_response = $4`;
   sql += ` , result_message_at = now()`;
   sql += ` , app_id = $5`;
+  sql += ` , session_id = $6`;
   sql += ` where`;
-  sql += ` id = $6`;
+  sql += ` id = $7`;
 
   return dbClient.query(sql, pram);
 };

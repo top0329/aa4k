@@ -18,6 +18,7 @@ import { preCheck } from '~/util/preCheck';
 import { insertConversation } from "~/util/insertConversationHistory"
 import { InsertConversationRequest, InsertConversationResponseBody } from "~/types/apiInterfaces"
 import { appGenerationPlanning } from "~/ai/appGen/appGenerationPlanning"
+import { v4 as uuidv4 } from 'uuid';
 
 type PromptFormProps = {
   humanMessage: string;
@@ -42,7 +43,7 @@ export const usePromptFormLogic = ({
 }: PromptFormProps) => {
   const [chatHistoryItems, setChatHistory] = useAtom(ChatHistoryState);
   const [promptInfoList] = useAtom(PromptInfoListState);
-  const [settingInfo,setSettingInfo] = useAtom(SettingInfoState);
+  const [settingInfo, setSettingInfo] = useAtom(SettingInfoState);
   const [sessionId, setSessionId] = useAtom(SessionIdState);
   const [, setActionType] = useAtom(ActionTypeState); // AI応答のアクション種別を管理
   const [isVoiceInput, setVoiceInput] = useState(false);
@@ -190,7 +191,7 @@ export const usePromptFormLogic = ({
 
       chatHistoryItem.conversationId = conversationId;
       const { role, content } = response.message;
-      const { actionType, isCreating: responseIsCreating} = response;
+      const { actionType, isCreating: responseIsCreating } = response;
       setActionType(actionType);
       if (role === MessageType.ai) {
         chatHistoryItem.ai = response.message;
@@ -200,10 +201,10 @@ export const usePromptFormLogic = ({
           speechMessage = InfoMessage.I_MSG003;
         } else if (actionType === ActionType.other) {
           // 雑談等のパターン
-          if(response.message.messageDetail){
+          if (response.message.messageDetail) {
             // messageDetail（アプリ情報）がある場合、固定文言を音声出力から除外
-            speechMessage = content.replace(ErrorMessageConst.E_MSG004,"");
-          }else{
+            speechMessage = content.replace(ErrorMessageConst.E_MSG004, "");
+          } else {
             speechMessage = content;
           }
         }
@@ -234,8 +235,7 @@ export const usePromptFormLogic = ({
       if (err instanceof KintoneError) {
         messageContent = err.message;
       } else {
-        // TODO: 「ErrorMessageConst.E_MSG001」は、暫定でエラー時の音声出力内容を設定中
-        messageContent = `${ErrorMessageConst.E_MSG001}（${ErrorCode.E99999}）`;
+        messageContent = `${ErrorMessageConst.E_MSG011}（${ErrorCode.E99999}）`;
       }
       const errorMessage: ErrorMessage = {
         role: MessageType.error,
@@ -267,6 +267,8 @@ export const usePromptFormLogic = ({
       setChatHistory([]);
       // 初期表示フラグをオンにする
       setIsInitVisible(true);
+      // セッションIDを変更
+      setSessionId(uuidv4());
     }
   }
 

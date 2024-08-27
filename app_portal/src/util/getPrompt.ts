@@ -20,7 +20,7 @@ export const getPromptInfoList = async () => {
     { serviceDivList: Object.values(ServiceDiv) },
   ).catch((resBody: string) => {
     const e = JSON.parse(resBody) as KintoneRestAPiError;
-    throw new KintoneError(`${ErrorMessage.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
+    throw new KintoneError(`${ErrorMessage.E_MSG010}（${ErrorCode.E10007}）\n${e.message}\n(${e.code} ${e.id})`);
   }) as KintoneProxyResponse;
   const [resBody, resStatus] = resPromptInfoList;
   const promptResult = JSON.parse(resBody) as PromptInfoListResponseBody;

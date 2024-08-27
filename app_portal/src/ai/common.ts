@@ -56,12 +56,12 @@ export function openAIModel(sessionId: string, contractStatus: ContractStatus) {
       fetch: fetcherWrapper(LlmType.azure, sessionId),
     });
   } else if (contractStatus === ContractStatus.expired) {
-    throw new ContractExpiredError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00002}）`)
+    throw new ContractExpiredError(`${ErrorMessageConst.E_MSG010}（${ErrorCode.E10001}）`)
   } else {
     // @ts-expect-error
     // 変数:unexpectedは使用しないので、エラーを無視する
     const unexpected: never = contractStatus;
-    throw new ContractStatusError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00003}）`)
+    throw new ContractStatusError(`${ErrorMessageConst.E_MSG010}（${ErrorCode.E10002}）`)
   }
 };
 
@@ -316,7 +316,7 @@ export async function setPrompt(targetDivList: string[], promptInfoList?: Prompt
   }
   const promptInfo = latestPromptInfoList.filter(info => targetDivList.includes(info.service_div));
   if (!promptInfo) {
-    throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00013}）`);
+    throw new LlmError(`${ErrorMessageConst.E_MSG010}（${ErrorCode.E10007}）`);
   }
   return promptInfo;
 }
@@ -369,12 +369,12 @@ export async function executeLlm(message: string, histories: BaseMessage[], cont
   const chain = prompt.pipe(functionCallingModel).pipe(outputParser);
   const llmResponse = (await chain.invoke(promptParam, { callbacks: [handler] }).catch((err) => {
     if (err.code === "invalid_api_key") {
-      throw new LlmError(`${ErrorMessageConst.E_MSG003}（${ErrorCode.E00009}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10005}）`)
     } else if (err.code === "429") {
       // レート制限に引っかかった場合、エラーを出力
-      throw new LlmError(`${ErrorMessageConst.E_MSG007}（${ErrorCode.E00011}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG013}（${ErrorCode.E10006}）`)
     } else {
-      throw new LlmError(`${ErrorMessageConst.E_MSG009}（${ErrorCode.E00004}）`)
+      throw new LlmError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10003}）`)
     }
   })) as LLMResponse;
 

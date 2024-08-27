@@ -21,7 +21,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
   let dbClient;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A16099;
+  let retErrorCode: ErrorCode = ErrorCode.A106099;
   try {
     subdomain = event.headers[RequestHeaderName.aa4kSubdomain] as string;
     checkPortalJsVersion = event.headers[RequestHeaderName.aa4kPortalJsVersion] as string;
@@ -46,7 +46,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     if (!subdomainData) {
       retErrorStatus = 404;
       retErrorMessage = "SubdomainData is Not Found";
-      retErrorCode = ErrorCode.A16002;
+      retErrorCode = ErrorCode.A106002;
       throw new Error(retErrorMessage)
     }
     // スキーマ名
@@ -84,7 +84,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
-      retErrorCode = ErrorCode.A16001;
+      retErrorCode = ErrorCode.A106001;
     }
     response = {
       statusCode: retErrorStatus,

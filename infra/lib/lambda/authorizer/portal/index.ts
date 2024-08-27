@@ -44,7 +44,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
       };
       console.info(warnLog);
       // 許可IPアドレスでない場合はアクセスを拒否する
-      return generateDenyPolicy(event.methodArn, ErrorCode.A11002);
+      return generateDenyPolicy(event.methodArn, ErrorCode.A101002);
     }
 
     if (!subdomain) {
@@ -54,7 +54,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
       };
       console.info(warnLog);
       // subdomainを取得できない場合はアクセスを拒否する
-      return generateDenyPolicy(event.methodArn, ErrorCode.A11001);
+      return generateDenyPolicy(event.methodArn, ErrorCode.A101001);
     }
     // サブドメイン有効性チェック(存在チェック)
     const subdomainData = await getSubdomainData(subdomain, secret.dbAccessSecretValue)
@@ -64,7 +64,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
         subdomain: subdomain,
       };
       console.info(warnLog);
-      return generateDenyPolicy(event.methodArn, ErrorCode.A11003);
+      return generateDenyPolicy(event.methodArn, ErrorCode.A101003);
     }
 
     // サブドメイン有効性チェック(契約ステータスチェック)
@@ -75,7 +75,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
         subdomain: subdomain,
       };
       console.info(warnLog);
-      return generateDenyPolicy(event.methodArn, ErrorCode.A11004);
+      return generateDenyPolicy(event.methodArn, ErrorCode.A101004);
     }
     // アクセスを許可する
     return generateAllowPolicy(event.methodArn);
@@ -87,7 +87,7 @@ export const handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<
     });
     console.error(errorMessage);
 
-    return generateDenyPolicy(event.methodArn, ErrorCode.A11099);
+    return generateDenyPolicy(event.methodArn, ErrorCode.A101099);
   }
 };
 

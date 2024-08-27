@@ -30,7 +30,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   let body;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A19099;
+  let retErrorCode: ErrorCode = ErrorCode.A109099;
   try {
     subdomain = event.headers[RequestHeaderName.aa4kSubdomain] as string;
     portalJsVersion = event.headers[RequestHeaderName.aa4kPortalJsVersion] as string;
@@ -60,7 +60,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
       console.error(errorMessage);
       response = {
         statusCode: 404,
-        body: JSON.stringify({ message: "PromptData is Not Found", errorCode: ErrorCode.A19002 }),
+        body: JSON.stringify({ message: "PromptData is Not Found", errorCode: ErrorCode.A109002 }),
       };
       return response;
     }
@@ -82,7 +82,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
-      retErrorCode = ErrorCode.A19001;
+      retErrorCode = ErrorCode.A109001;
     }
     response = {
       statusCode: retErrorStatus,

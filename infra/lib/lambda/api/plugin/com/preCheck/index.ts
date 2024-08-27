@@ -68,7 +68,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
         contractStatus: contractStatus,
         systemSettings: {
           historyUseCount: aa4kConstParameterValue.historyUseCount,
-          oneDataGenMaxCount: aa4kConstParameterValue.oneDataGenMaxCount,
         }
       }),
     };

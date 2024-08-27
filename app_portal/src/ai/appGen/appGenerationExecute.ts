@@ -16,16 +16,60 @@ import {
   ErrorMessage as ErrorMessageConst,
 } from "~/constants"
 import { insertConversation } from "~/util/insertConversationHistory"
-import { KintoneError } from "~/util/customErrors"
+import { LlmError, KintoneError, ContractExpiredError, ContractStatusError, ApiError } from "~/util/customErrors"
+
+const RETRY_MAX_FIELD = 5 as const;
+const RETRY_MAX_LAYOUT = 2 as const;
 
 
+// LLM実行関数へ引き渡すためのパラメータ
 interface LlmContext {
   userId: string;
   conversationId: string;
   sessionId: string;
 }
+
+
+// --------------------
+// フィールド追加用
+// --------------------
+// kintone フィールド追加 API のパラメータ
 interface KintoneFieldAddProperties {
-  [key: string]: string;
+  type: string;
+  code: string;
+  [key: string]: any;
+}
+interface KintoneFieldAdd {
+  app: string;
+  properties: KintoneFieldAddProperties;
+}
+// LLMフィールド追加パラメータ
+interface LlmFieldParam {
+  responseMessage: string;
+  fields: KintoneFieldAddProperties;
+}
+
+
+// --------------------
+// レイアウト変更用
+// --------------------
+// kintone レイアウト変更 APIのパラメータ
+interface KintoneLayoutField {
+  type: string;
+  code?: string;
+}
+interface KintoneLayoutRow {
+  type: string;
+  fields: KintoneLayoutField[];
+}
+interface KintoneLayout {
+  app: string;
+  layout: KintoneLayoutRow[];
+}
+// LLMレイアウト変更パラメータ
+interface LlmLayoutParam {
+  responseMessage: string;
+  layout: KintoneLayoutRow[];
 }
 
 
@@ -45,644 +89,25 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
     // --------------------
     // 前処理
     // --------------------
-    const promptInfo = await setPrompt([ServiceDiv.app_gen_field, ServiceDiv.app_gen_field_retry, ServiceDiv.app_gen_layout], promptInfoList)
-    //     const promptInfo = [
-    //       {
-    //         service_div: "app_gen_field",
-    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
-
-    // フィールド名とタイプを与えるので、kintone アプリのフィールドを追加する API リクエストを作成してください。
-
-    // アプリ名は {appName} です。
-    // フィールド名とタイプは以下のとおりです。
-    // {fieldList}
-
-    // 出力は以下のような形式になります。
-    // {{
-    //   "responseMessage": "メッセージ",
-    //   "fields": {{
-    //     "文字列1行": {{
-    //       "type": "SINGLE_LINE_TEXT",
-    //       "code": "文字列1行",
-    //       "label": "文字列 (1行)",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "minLength": "",
-    //       "maxLength": "",
-    //       "expression": "",
-    //       "hideExpression": false,
-    //       "unique": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "リッチエディター": {{
-    //       "type": "RICH_TEXT",
-    //       "code": "リッチエディター",
-    //       "label": "リッチエディター",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "文字列複数行": {{
-    //       "type": "MULTI_LINE_TEXT",
-    //       "code": "文字列複数行",
-    //       "label": "文字列 (複数行)",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "数値": {{
-    //       "type": "NUMBER",
-    //       "code": "数値",
-    //       "label": "数値",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "minValue": "",
-    //       "maxValue": "",
-    //       "digit": false,
-    //       "unique": false,
-    //       "defaultValue": "",
-    //       "displayScale": "",
-    //       "unit": "",
-    //       "unitPosition": "BEFORE"
-    //     }},
-    //     "計算": {{
-    //       "type": "CALC",
-    //       "code": "計算",
-    //       "label": "計算",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "expression": "数値",
-    //       "format": "NUMBER",
-    //       "displayScale": "",
-    //       "hideExpression": false,
-    //       "unit": "",
-    //       "unitPosition": "BEFORE"
-    //     }},
-    //     "ラジオボタン": {{
-    //       "type": "RADIO_BUTTON",
-    //       "code": "ラジオボタン",
-    //       "label": "ラジオボタン",
-    //       "noLabel": false,
-    //       "required": true,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }}
-    //       }},
-    //       "defaultValue": "sample1",
-    //       "align": "HORIZONTAL"
-    //     }},
-    //     "チェックボックス": {{
-    //       "type": "CHECK_BOX",
-    //       "code": "チェックボックス",
-    //       "label": "チェックボックス",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }}
-    //       }},
-    //       "defaultValue": [],
-    //       "align": "HORIZONTAL"
-    //     }},
-    //     "複数選択": {{
-    //       "type": "MULTI_SELECT",
-    //       "code": "複数選択",
-    //       "label": "複数選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }},
-    //         "sample3": {{
-    //           "label": "sample3",
-    //           "index": "2"
-    //         }},
-    //         "sample4": {{
-    //           "label": "sample4",
-    //           "index": "3"
-    //         }}
-    //       }},
-    //       "defaultValue": []
-    //     }},
-    //     "ドロップダウン": {{
-    //       "type": "DROP_DOWN",
-    //       "code": "ドロップダウン",
-    //       "label": "ドロップダウン",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }}
-    //       }},
-    //       "defaultValue": ""
-    //     }},
-    //     "日付": {{
-    //       "type": "DATE",
-    //       "code": "日付",
-    //       "label": "日付",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "unique": false,
-    //       "defaultValue": "",
-    //       "defaultNowValue": true
-    //     }},
-    //     "時刻": {{
-    //       "type": "TIME",
-    //       "code": "時刻",
-    //       "label": "時刻",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "defaultValue": "",
-    //       "defaultNowValue": true
-    //     }},
-    //     "日時": {{
-    //       "type": "DATETIME",
-    //       "code": "日時",
-    //       "label": "日時",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "unique": false,
-    //       "defaultValue": "",
-    //       "defaultNowValue": true
-    //     }},
-    //     "添付ファイル": {{
-    //       "type": "FILE",
-    //       "code": "添付ファイル",
-    //       "label": "添付ファイル",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "thumbnailSize": "150"
-    //     }},
-    //     "リンク": {{
-    //       "type": "LINK",
-    //       "code": "リンク",
-    //       "label": "リンク",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "protocol": "WEB",
-    //       "minLength": "",
-    //       "maxLength": "",
-    //       "unique": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "ユーザー選択": {{
-    //       "type": "USER_SELECT",
-    //       "code": "ユーザー選択",
-    //       "label": "ユーザー選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "entities": [],
-    //       "defaultValue": []
-    //     }},
-    //     "組織選択": {{
-    //       "type": "ORGANIZATION_SELECT",
-    //       "code": "組織選択",
-    //       "label": "組織選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "entities": [],
-    //       "defaultValue": []
-    //     }},
-    //     "グループ選択": {{
-    //       "type": "GROUP_SELECT",
-    //       "code": "グループ選択",
-    //       "label": "グループ選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "entities": [],
-    //       "defaultValue": []
-    //     }},
-    //     "グループ": {{
-    //       "type": "GROUP",
-    //       "code": "グループ",
-    //       "label": "グループ",
-    //       "noLabel": false,
-    //       "openGroup": false
-    //     }},
-    //     "Table": {{
-    //       "type": "SUBTABLE",
-    //       "code": "Table",
-    //       "label": "Table",
-    //       "noLabel": false,
-    //       "fields": {{
-    //         "文字列1行": {{
-    //           "type": "SINGLE_LINE_TEXT",
-    //           "code": "文字列1行",
-    //           "label": "文字列 (1行)",
-    //           "noLabel": false,
-    //           "required": false,
-    //           "minLength": "",
-    //           "maxLength": "",
-    //           "expression": "",
-    //           "hideExpression": false,
-    //           "unique": false,
-    //           "defaultValue": ""
-    //         }}
-    //       }}
-    //     }}
-    //   }}
-    // }}
-    // `,
-    //         prompt_function_parameter: [
-    //           {
-    //             item_id: 1,
-    //             parent_item_id: null,
-    //             item_name: "responseMessage",
-    //             item_type: "string",
-    //             item_describe: "応答するメッセージ",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 2,
-    //             parent_item_id: null,
-    //             item_name: "fields",
-    //             item_type: "object",
-    //             item_describe: "フィールドの情報",
-    //             constants: "null",
-    //           }
-    //         ],
-    //       },
-    //       {
-    //         service_div: "app_gen_layout",
-    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
-
-    // kintone アプリのフィールド一覧を与えるので、適切なレイアウトを構成してください。
-    // 新規にフィールドは作成せず、既に定義されているフィールドのみでレイアウトを構成してください。
-    // 出力はフォームのレイアウトを変更する API に沿った形とします。
-
-    // フィールド一覧は以下のとおりです。
-    // {fields}
-    // `,
-    //         prompt_function_parameter: [
-    //           {
-    //             item_id: 1,
-    //             parent_item_id: null,
-    //             item_name: "responseMessage",
-    //             item_type: "string",
-    //             item_describe: "応答するメッセージ",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 2,
-    //             parent_item_id: null,
-    //             item_name: "layout",
-    //             item_type: "array",
-    //             item_describe: "フォームのレイアウト",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 3,
-    //             parent_item_id: 2,
-    //             item_name: "-",
-    //             item_type: "object",
-    //             item_describe: "フォームのレイアウト",
-    //             constants: "null",
-    //           },
-    //         ],
-    //       },
-    //       {
-    //         service_div: "app_gen_field_retry",
-    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
-
-    // kintone アプリのフィールドを追加する API を叩いたときにエラーが発生したので、エラーを解消してもう一度 API を叩くために必要な JSON を出力してください。
-
-    // API を叩いた時に用いたフィールドは以下のとおりです。
-    // {fieldParam}
-
-    // エラーレスポンスは以下のようになりました。
-    // {errorInfo}
-
-    // 出力は以下のような形式になります。
-    // {{
-    //   "responseMessage": "メッセージ",
-    //   "fields": {{
-    //     "文字列1行": {{
-    //       "type": "SINGLE_LINE_TEXT",
-    //       "code": "文字列1行",
-    //       "label": "文字列 (1行)",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "minLength": "",
-    //       "maxLength": "",
-    //       "expression": "",
-    //       "hideExpression": false,
-    //       "unique": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "リッチエディター": {{
-    //       "type": "RICH_TEXT",
-    //       "code": "リッチエディター",
-    //       "label": "リッチエディター",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "文字列複数行": {{
-    //       "type": "MULTI_LINE_TEXT",
-    //       "code": "文字列複数行",
-    //       "label": "文字列 (複数行)",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "数値": {{
-    //       "type": "NUMBER",
-    //       "code": "数値",
-    //       "label": "数値",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "minValue": "",
-    //       "maxValue": "",
-    //       "digit": false,
-    //       "unique": false,
-    //       "defaultValue": "",
-    //       "displayScale": "",
-    //       "unit": "",
-    //       "unitPosition": "BEFORE"
-    //     }},
-    //     "計算": {{
-    //       "type": "CALC",
-    //       "code": "計算",
-    //       "label": "計算",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "expression": "数値",
-    //       "format": "NUMBER",
-    //       "displayScale": "",
-    //       "hideExpression": false,
-    //       "unit": "",
-    //       "unitPosition": "BEFORE"
-    //     }},
-    //     "ラジオボタン": {{
-    //       "type": "RADIO_BUTTON",
-    //       "code": "ラジオボタン",
-    //       "label": "ラジオボタン",
-    //       "noLabel": false,
-    //       "required": true,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }}
-    //       }},
-    //       "defaultValue": "sample1",
-    //       "align": "HORIZONTAL"
-    //     }},
-    //     "チェックボックス": {{
-    //       "type": "CHECK_BOX",
-    //       "code": "チェックボックス",
-    //       "label": "チェックボックス",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }}
-    //       }},
-    //       "defaultValue": [],
-    //       "align": "HORIZONTAL"
-    //     }},
-    //     "複数選択": {{
-    //       "type": "MULTI_SELECT",
-    //       "code": "複数選択",
-    //       "label": "複数選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }},
-    //         "sample3": {{
-    //           "label": "sample3",
-    //           "index": "2"
-    //         }},
-    //         "sample4": {{
-    //           "label": "sample4",
-    //           "index": "3"
-    //         }}
-    //       }},
-    //       "defaultValue": []
-    //     }},
-    //     "ドロップダウン": {{
-    //       "type": "DROP_DOWN",
-    //       "code": "ドロップダウン",
-    //       "label": "ドロップダウン",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "options": {{
-    //         "sample1": {{
-    //           "label": "sample1",
-    //           "index": "0"
-    //         }},
-    //         "sample2": {{
-    //           "label": "sample2",
-    //           "index": "1"
-    //         }}
-    //       }},
-    //       "defaultValue": ""
-    //     }},
-    //     "日付": {{
-    //       "type": "DATE",
-    //       "code": "日付",
-    //       "label": "日付",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "unique": false,
-    //       "defaultValue": "",
-    //       "defaultNowValue": true
-    //     }},
-    //     "時刻": {{
-    //       "type": "TIME",
-    //       "code": "時刻",
-    //       "label": "時刻",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "defaultValue": "",
-    //       "defaultNowValue": true
-    //     }},
-    //     "日時": {{
-    //       "type": "DATETIME",
-    //       "code": "日時",
-    //       "label": "日時",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "unique": false,
-    //       "defaultValue": "",
-    //       "defaultNowValue": true
-    //     }},
-    //     "添付ファイル": {{
-    //       "type": "FILE",
-    //       "code": "添付ファイル",
-    //       "label": "添付ファイル",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "thumbnailSize": "150"
-    //     }},
-    //     "リンク": {{
-    //       "type": "LINK",
-    //       "code": "リンク",
-    //       "label": "リンク",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "protocol": "WEB",
-    //       "minLength": "",
-    //       "maxLength": "",
-    //       "unique": false,
-    //       "defaultValue": ""
-    //     }},
-    //     "ユーザー選択": {{
-    //       "type": "USER_SELECT",
-    //       "code": "ユーザー選択",
-    //       "label": "ユーザー選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "entities": [],
-    //       "defaultValue": []
-    //     }},
-    //     "組織選択": {{
-    //       "type": "ORGANIZATION_SELECT",
-    //       "code": "組織選択",
-    //       "label": "組織選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "entities": [],
-    //       "defaultValue": []
-    //     }},
-    //     "グループ選択": {{
-    //       "type": "GROUP_SELECT",
-    //       "code": "グループ選択",
-    //       "label": "グループ選択",
-    //       "noLabel": false,
-    //       "required": false,
-    //       "entities": [],
-    //       "defaultValue": []
-    //     }},
-    //     "グループ": {{
-    //       "type": "GROUP",
-    //       "code": "グループ",
-    //       "label": "グループ",
-    //       "noLabel": false,
-    //       "openGroup": false
-    //     }},
-    //     "Table": {{
-    //       "type": "SUBTABLE",
-    //       "code": "Table",
-    //       "label": "Table",
-    //       "noLabel": false,
-    //       "fields": {{
-    //         "文字列1行": {{
-    //           "type": "SINGLE_LINE_TEXT",
-    //           "code": "文字列1行",
-    //           "label": "文字列 (1行)",
-    //           "noLabel": false,
-    //           "required": false,
-    //           "minLength": "",
-    //           "maxLength": "",
-    //           "expression": "",
-    //           "hideExpression": false,
-    //           "unique": false,
-    //           "defaultValue": ""
-    //         }}
-    //       }}
-    //     }}
-    //   }}
-    // }}
-    // `,
-    //         prompt_function_parameter: [
-    //           {
-    //             item_id: 1,
-    //             parent_item_id: null,
-    //             item_name: "responseMessage",
-    //             item_type: "string",
-    //             item_describe: "応答するメッセージ",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 2,
-    //             parent_item_id: null,
-    //             item_name: "fields",
-    //             item_type: "object",
-    //             item_describe: "フィールドの情報",
-    //             constants: "null",
-    //           }
-    //         ],
-    //       }
-    //     ]
+    const promptInfo = await setPrompt([ServiceDiv.app_gen_field, ServiceDiv.app_gen_field_retry, ServiceDiv.app_gen_layout, ServiceDiv.app_gen_layout_retry], promptInfoList)
 
     // LLM連携用のcontext
     const llmContext: LlmContext = { userId: context.userId, conversationId: context.conversationId, sessionId: sessionId }
 
     // --------------------
-    // アプリ作成の実行
-    //   ・フィールド追加用パラメータ生成(LLM)
+    // アプリ作成とフィールド追加の実行
     //   ・アプリ作成の実行(kintone REST API)
+    //   ・フィールド追加用パラメータ生成(LLM)
+    //   ・フィールド追加の実行(kintone REST API)
     // --------------------
     const appName = context.settingInfo ? context.settingInfo.appName : "";
     const fieldList = context.settingInfo ? JSON.stringify(context.settingInfo.fields) : "";
     const { appId, fieldsParam } = await executeAppGeneration(message.content, appName, fieldList, context.contractStatus, llmContext, isGuestSpace, promptInfo)
 
     // --------------------
-    // レイアウト用パラメータ生成(LLM)
+    // レイアウト変更の実行
     // --------------------
-    const layoutPromptInfo = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_layout);
-    const layoutParam = {
-      fields: JSON.stringify(fieldsParam.fields)
-    }
-    const layoutParamLlmResult = await executeLlm("", [], context.contractStatus, layoutPromptInfo[0], layoutParam, llmContext)
-
-
-    // --------------------
-    // レイアウト変更の実行(kintone REST API)
-    // --------------------
-    const kintoneFormLayoutBody = {
-      app: appId,
-      layout: layoutParamLlmResult.layout,
-    };
-    await kintone.api(
-      kintone.api.url("/k/v1/preview/app/form/layout.json", isGuestSpace),
-      "PUT",
-      kintoneFormLayoutBody,
-    ).catch((e: KintoneRestAPiError) => {
-      throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
-    });
+    const layoutParam = await executeLayout(appId, message.content, fieldsParam, context.contractStatus, llmContext, isGuestSpace, promptInfo)
 
     // --------------------
     // 作成したアプリにAA4kプラグインを追加
@@ -697,7 +122,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
       "POST",
       { apps: [{ app: appId }] },
     ).catch((e: KintoneRestAPiError) => {
-      throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+      throw new KintoneError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10004}）\n${e.message}\n(${e.code} ${e.id})`)
     });
 
     // --------------------
@@ -711,7 +136,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
       resultMessageDetail: "",
       aiResponse: JSON.stringify({
         fieldsParam: fieldsParam,
-        layoutParam: layoutParamLlmResult.layout
+        layoutParam: layoutParam.layout
       }),
       appId: appId,
       conversationId: context.conversationId,
@@ -733,12 +158,33 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
       result: "success",
       callbacks: callbackFuncs,
     }
-  } catch (e) {
-    console.log(e)
-    return {
-      result: "error",
-      errorMessage: ErrorMessageConst.E_MSG009
+  } catch (err) {
+    console.log(err)
+    let message: string = "";
+    if (err instanceof LlmError
+      || err instanceof KintoneError
+      || err instanceof ContractExpiredError
+      || err instanceof ContractStatusError
+      || err instanceof ApiError
+    ) {
+      message = err.message
+    } else {
+      message = `${ErrorMessageConst.E_MSG011}（${ErrorCode.E99999}）`;
     }
+    // 会話履歴の登録
+    const reqConversation: InsertConversationRequest = {
+      userId: context.userId,
+      sessionId: sessionId,
+      actionType: ActionType.error,
+      resultMessage: message,
+      resultMessageDetail: "",
+      conversationId: context.conversationId,
+    };
+    await insertConversation(reqConversation);
+
+    // 返却
+    const resMessage = `${ErrorMessageConst.E_MSG003}（${ErrorCode.E99999}）\n${ErrorMessageConst.E_MSG002}`
+    return { result: ActionType.error, errorMessage: resMessage }
   }
 }
 
@@ -751,10 +197,10 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
  * @param contractStatus 
  * @param llmContext 
  * @param promptInfo 
- * @returns appId, fieldParam
+ * @returns appId, fieldsParam
  */
 async function executeAppGeneration(message: string, appName: string, fieldList: string, contractStatus: ContractStatus, llmContext: LlmContext, isGuestSpace: boolean, promptInfo: PromptInfo[]) {
-  let maxRetries = 5; // 最大リトライ回数
+  let maxRetries = RETRY_MAX_FIELD; // 最大リトライ回数
   let retryCount = 0;
   let success = false;
   let errorInfo = "";
@@ -768,29 +214,29 @@ async function executeAppGeneration(message: string, appName: string, fieldList:
     "POST",
     kintoneAppBody,
   ).catch((e: KintoneRestAPiError) => {
-    throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+    throw new KintoneError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10004}）\n${e.message}\n(${e.code} ${e.id})`)
   });
   const appId = kintoneAppResult.app;
 
   // フィールド追加用パラメータ生成(LLM)の実行
-  let fieldsParam = await llmAppGenFieldParam(message, appName, fieldList, contractStatus, llmContext, promptInfo);
+  let fieldsParam: LlmFieldParam = await llmAppGenFieldParam(message, appName, fieldList, contractStatus, llmContext, promptInfo);
   while (retryCount < maxRetries && !success) {
     try {
       if (retryCount !== 0) {
         // フィールド追加用パラメータ生成_リトライ(LLM)の実行
-        fieldsParam = await llmAppGenFieldRetryParam(message, appName, contractStatus, llmContext, promptInfo, JSON.stringify(fieldsParam.fields), errorInfo);
+        fieldsParam = await llmAppGenFieldRetryParam(message, appName, contractStatus, llmContext, promptInfo, fieldsParam, errorInfo);
       }
 
-      // アプリ作成の実行(kintone REST API)
-      await kintoneAppGenFieldAdd(appId, fieldsParam.fields, isGuestSpace);
+      // フィールド追加の実行(kintone REST API)
+      await kintoneAppGenFieldAdd(appId, fieldsParam, isGuestSpace);
       success = true;
     } catch (e) {
       // エラーの場合はエラー内容を設定
       errorInfo = JSON.stringify(e);
       retryCount++;
       if (retryCount >= maxRetries) {
-        // 最大リトライ回数を超えたらエラー TODO: エラーメッセージ
-        throw new Error("最大リトライ回数に達しました。アプリ作成に失敗しました。");  // TODO: エラーメッセージ
+        // 最大リトライ回数を超えたらエラー
+        throw new Error(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10008}）`);
       }
     }
   }
@@ -815,7 +261,13 @@ async function llmAppGenFieldParam(message: string, appName: string, fieldList: 
     fieldList: fieldList,
   };
   const result = await executeLlm(message, [], contractStatus, prompt[0], promptParam, llmContext)
-  return result;
+  // 型変換
+  const kintoneField: LlmFieldParam = {
+    responseMessage: result.responseMessage || "",
+    fields: result.fields || {},
+  };
+
+  return kintoneField;
 }
 
 
@@ -830,42 +282,34 @@ async function llmAppGenFieldParam(message: string, appName: string, fieldList: 
  * @param errorInfo 
  * @returns result
  */
-async function llmAppGenFieldRetryParam(message: string, appName: string, contractStatus: ContractStatus, llmContext: LlmContext, promptInfo: PromptInfo[], fieldParam: string, errorInfo: string) {
+async function llmAppGenFieldRetryParam(message: string, appName: string, contractStatus: ContractStatus, llmContext: LlmContext, promptInfo: PromptInfo[], fieldParam: LlmFieldParam, errorInfo: string) {
   const prompt = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_field_retry);
   const promptParam = {
     appName: appName,
-    fieldParam: fieldParam,
+    fieldParam: JSON.stringify(fieldParam.fields),
     errorInfo: errorInfo,
   };
+  // LLM実行
   const result = await executeLlm(message, [], contractStatus, prompt[0], promptParam, llmContext)
-  return result;
+  // 型変換
+  const kintoneField: LlmFieldParam = {
+    responseMessage: result.responseMessage || "",
+    fields: result.fields || {},
+  };
+
+  return kintoneField;
 }
 
 
 /**
- * アプリ作成の実行(kintone REST API)
+ * フィールド追加の実行(kintone REST API)
  * @param appId 
  * @param kintoneFieldAddProperties 
  */
-async function kintoneAppGenFieldAdd(appId: string, kintoneFieldAddProperties: KintoneFieldAddProperties, isGuestSpace: boolean) {
-
-  // TODO: kintone固有フィールドの除外 現状では不要だが、テストの結果、必要になったら戻す
-  // kintone固有フィールド一覧
-  // const kintoneFieldList = ["カテゴリー", "レコード番号", "作業者", "更新者", "作成者", "ステータス", "更新日時", "作成日時"]
-
-  // kintoneFieldAddPropertiesからkintone予約フィールドを削除
-  // Object.keys(kintoneFieldAddProperties).forEach(key => {
-  //   if (kintoneFieldList.includes(key)) {
-  //     delete kintoneFieldAddProperties[key];
-  //   }
-  // });
-  // console.log("  kintoneFieldAddProperties2: ", kintoneFieldAddProperties)
-
-
-
-  const kintoneFormFieldsBody = {
+async function kintoneAppGenFieldAdd(appId: string, fieldParam: LlmFieldParam, isGuestSpace: boolean) {
+  const kintoneFormFieldsBody: KintoneFieldAdd = {
     app: appId,
-    properties: kintoneFieldAddProperties,
+    properties: fieldParam.fields,
   };
   await kintone.api(
     kintone.api.url("/k/v1/preview/app/form/fields.json", isGuestSpace),
@@ -901,7 +345,7 @@ async function setAa4kPlugin(appId: string, pluginId: string, isGuestSpace: bool
     "GET",
     {},
   ).catch((e: KintoneRestAPiError) => {
-    throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+    throw new KintoneError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10004}）\n${e.message}\n(${e.code} ${e.id})`)
   });
 
   // --------------------
@@ -921,7 +365,167 @@ async function setAa4kPlugin(appId: string, pluginId: string, isGuestSpace: bool
     "POST",
     { app: appId, ids: [aa4kPluginId] },
   ).catch((e: KintoneRestAPiError) => {
-    throw new KintoneError(`${ErrorMessageConst.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`)
+    throw new KintoneError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10004}）\n${e.message}\n(${e.code} ${e.id})`)
   });
 }
 
+
+
+/**
+ * レイアウト変更の実行
+ * @param message 
+ * @param appName 
+ * @param fieldList 
+ * @param contractStatus 
+ * @param llmContext 
+ * @param promptInfo 
+ * @returns appId, fieldParam
+ */
+async function executeLayout(appId: string, message: string, fieldsParam: LlmFieldParam, contractStatus: ContractStatus, llmContext: LlmContext, isGuestSpace: boolean, promptInfo: PromptInfo[]) {
+  let maxRetries = RETRY_MAX_LAYOUT; // 最大リトライ回数
+  let retryCount = 0;
+  let success = false;
+  let errorInfo = "";
+
+  // レイアウト変更用パラメータ生成(LLM)の実行
+  let layoutParam = await llmLayoutParam(message, fieldsParam, contractStatus, llmContext, promptInfo);
+  let updatedLayout = addMissingFieldsToLayout(fieldsParam, layoutParam);
+  while (retryCount < maxRetries && !success) {
+    try {
+      if (retryCount !== 0) {
+        // レイアウト変更用パラメータ生成_リトライ(LLM)の実行
+        layoutParam = await llmLayoutParamRetry(message, contractStatus, llmContext, promptInfo, layoutParam, errorInfo);
+        updatedLayout = addMissingFieldsToLayout(fieldsParam, layoutParam);
+      }
+
+      // レイアウト変更の実行(kintone REST API)
+      await kintoneLayout(appId, updatedLayout, isGuestSpace);
+      success = true;
+    } catch (e) {
+      // エラーの場合はエラー内容を設定
+      errorInfo = JSON.stringify(e);
+      retryCount++;
+      if (retryCount >= maxRetries) {
+        // 最大リトライ回数を超えても何もしない(レイアウト変更なしでアプリ生成完了とする)
+      }
+    }
+  }
+
+  return updatedLayout;
+}
+
+/**
+ * レイアウト変更用パラメータ生成(LLM)
+ * @param message 
+ * @param appName 
+ * @param fieldList 
+ * @param contractStatus 
+ * @param llmContext 
+ * @param promptInfo 
+ * @returns result
+ */
+async function llmLayoutParam(message: string, fieldsParam: LlmFieldParam, contractStatus: ContractStatus, llmContext: LlmContext, promptInfo: PromptInfo[]) {
+  const prompt = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_layout);
+  const promptParam = {
+    fields: JSON.stringify(fieldsParam.fields),
+  };
+  // LLM実行
+  const result = await executeLlm(message, [], contractStatus, prompt[0], promptParam, llmContext)
+
+  //  結果をKintoneLayoutRow型に変換
+  const kintoneLayout: LlmLayoutParam = {
+    responseMessage: result.responseMessage || "",
+    layout: result.layout || [],
+  };
+
+  return kintoneLayout;
+}
+
+
+/**
+ * レイアウト変更用パラメータ生成_リトライ(LLM)
+ * @param message 
+ * @param appName 
+ * @param contractStatus 
+ * @param llmContext 
+ * @param promptInfo 
+ * @param layoutParam 
+ * @param errorInfo 
+ * @returns result
+ */
+async function llmLayoutParamRetry(message: string, contractStatus: ContractStatus, llmContext: LlmContext, promptInfo: PromptInfo[], layoutParam: LlmLayoutParam, errorInfo: string) {
+  const prompt = promptInfo.filter(info => info.service_div === ServiceDiv.app_gen_layout_retry);
+  const promptParam = {
+    layoutParam: JSON.stringify(layoutParam.layout),
+    errorInfo: errorInfo,
+  };
+  const result = await executeLlm(message, [], contractStatus, prompt[0], promptParam, llmContext)
+
+  //  結果をKintoneLayoutRow型に変換
+  const kintoneLayout: LlmLayoutParam = {
+    responseMessage: result.responseMessage || "",
+    layout: result.layout || [],
+  };
+
+  return kintoneLayout;
+}
+
+
+/**
+ * レイアウト変更の実行(kintone REST API)
+ * @param appId 
+ * @param layoutParam 
+ * @param isGuestSpace 
+ */
+async function kintoneLayout(appId: string, layoutParam: LlmLayoutParam, isGuestSpace: boolean) {
+
+  const kintoneFormLayoutBody: KintoneLayout = {
+    app: appId,
+    layout: layoutParam.layout,
+  };
+  await kintone.api(
+    kintone.api.url("/k/v1/preview/app/form/layout.json", isGuestSpace),
+    "PUT",
+    kintoneFormLayoutBody,
+  ).catch((e: KintoneRestAPiError) => {
+    throw e
+  });
+}
+
+
+/**
+ * レイアウト変更の調整
+ * レイアウト変更パラメータに不足しているフィールドを末尾に追加
+ * @param properties 
+ * @param layout 
+ * @returns 
+ */
+function addMissingFieldsToLayout(fieldsParam: LlmFieldParam, layoutParam: LlmLayoutParam): LlmLayoutParam {
+  const fieldCodesInLayout = new Set<string>();
+  layoutParam.layout.forEach(row => {
+    row.fields.forEach(field => {
+      if (field.code) {
+        fieldCodesInLayout.add(field.code);
+      }
+    });
+  });
+
+  const missingFields: KintoneLayoutField[] = [];
+  for (const code in fieldsParam.fields) {
+    if (fieldsParam.fields.hasOwnProperty(code) && !fieldCodesInLayout.has(code)) {
+      const field = fieldsParam.fields[code];
+      if (field.type !== "SUBTABLE") {
+        missingFields.push({ type: field.type, code: code });
+      }
+    }
+  }
+
+  if (missingFields.length > 0) {
+    layoutParam.layout.push({ type: "ROW", fields: missingFields });
+  }
+
+  return {
+    responseMessage: layoutParam.responseMessage,
+    layout: layoutParam.layout
+  };
+}

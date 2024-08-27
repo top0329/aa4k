@@ -15,7 +15,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   let portalJsVersion;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A12099;
+  let retErrorCode: ErrorCode = ErrorCode.A102099;
   try {
     subdomain = event.headers[RequestHeaderName.aa4kSubdomain] as string;
     portalJsVersion = event.headers[RequestHeaderName.aa4kPortalJsVersion] as string;
@@ -44,7 +44,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (!isVersionOk) {
       response = {
         statusCode: 422,
-        body: JSON.stringify({ message: "Unsupported Version", errorCode: ErrorCode.A12002 }),
+        body: JSON.stringify({ message: "Unsupported Version", errorCode: ErrorCode.A102002 }),
       };
       return response;
     }
@@ -54,7 +54,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (!subdomainData) {
       response = {
         statusCode: 404,
-        body: JSON.stringify({ message: "SubdomainData is Not Found", errorCode: ErrorCode.A12003 }),
+        body: JSON.stringify({ message: "SubdomainData is Not Found", errorCode: ErrorCode.A102003 }),
       };
       return response;
     }
@@ -81,7 +81,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
-      retErrorCode = ErrorCode.A12001;
+      retErrorCode = ErrorCode.A102001;
     }
     response = {
       statusCode: retErrorStatus,

@@ -13,7 +13,7 @@ export const insertHandler = async (req: Request, res: Response) => {
   let dbClient: Client | undefined;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A13099;
+  let retErrorCode: ErrorCode = ErrorCode.A103099;
 
   try {
     subdomain = req.header(RequestHeaderName.aa4kSubdomain) as string;
@@ -38,7 +38,7 @@ export const insertHandler = async (req: Request, res: Response) => {
     if (!subdomainData) {
       retErrorStatus = 404;
       retErrorMessage = "SubdomainData is Not Found";
-      retErrorCode = ErrorCode.A13002;
+      retErrorCode = ErrorCode.A103002;
       throw new Error("SubdomainData is Not Found")
     }
     // スキーマ名
@@ -73,7 +73,7 @@ export const insertHandler = async (req: Request, res: Response) => {
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
-      retErrorCode = ErrorCode.A13001;
+      retErrorCode = ErrorCode.A103001;
     }
     res.status(retErrorStatus).json({ message: retErrorMessage, errorCode: retErrorCode });
   } finally {

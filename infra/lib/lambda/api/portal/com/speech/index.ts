@@ -16,7 +16,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   let body;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A17099;
+  let retErrorCode: ErrorCode = ErrorCode.A107099;
   try {
     subdomain = event.headers[RequestHeaderName.aa4kSubdomain] as string;
     body = (event.body ? JSON.parse(event.body) : {}) as SpeechRequestBody;
@@ -48,7 +48,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
-      retErrorCode = ErrorCode.A17001;
+      retErrorCode = ErrorCode.A107001;
     }
     response = {
       statusCode: retErrorStatus,

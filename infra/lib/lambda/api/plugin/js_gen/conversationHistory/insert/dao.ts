@@ -16,8 +16,9 @@ interface InsertQueryResultRow {
  * @param reqBody
  * @returns クエリ実行結果
  */
-export const insertConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody): Promise<QueryResult<InsertQueryResultRow>> => {
+export const insertConversationHistory = async (dbClient: Client, reqBody: InsertRequestBody, subscriptionId: string): Promise<QueryResult<InsertQueryResultRow>> => {
   const pram = [
+    subscriptionId,
     reqBody.appId,
     reqBody.userId,
     reqBody.deviceDiv,
@@ -27,7 +28,8 @@ export const insertConversationHistory = async (dbClient: Client, reqBody: Inser
   sql += `insert into`;
   sql += ` t_conversation_history_js_gen`;
   sql += ` (`;
-  sql += ` app_id`;
+  sql += ` subscription_id`;
+  sql += ` , app_id`;
   sql += ` , user_id`;
   sql += ` , device_div`;
   sql += ` , user_message`;
@@ -39,6 +41,7 @@ export const insertConversationHistory = async (dbClient: Client, reqBody: Inser
   sql += ` , $2`;
   sql += ` , $3`;
   sql += ` , $4`;
+  sql += ` , $5`;
   sql += ` , now()`;
   sql += ` )`;
   sql += ` returning id`;

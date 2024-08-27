@@ -10,7 +10,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   let body;
   let retErrorStatus = 500;
   let retErrorMessage = "Internal server error";
-  let retErrorCode: ErrorCode = ErrorCode.A18099;
+  let retErrorCode: ErrorCode = ErrorCode.A108099;
   const client = new STSClient({});
   try {
     subdomain = event.headers[RequestHeaderName.aa4kSubdomain] as string;
@@ -40,7 +40,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (err instanceof ValidationError) {
       retErrorStatus = 400;
       retErrorMessage = "Bad Request";
-      retErrorCode = ErrorCode.A18001;
+      retErrorCode = ErrorCode.A108001;
     }
     response = {
       statusCode: retErrorStatus,

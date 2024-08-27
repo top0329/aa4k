@@ -58,7 +58,7 @@ export const insertHandler = async (req: Request, res: Response) => {
     switch (body.messageType) {
       case MessageType.human:
         // 会話履歴TBLへのユーザー発言の登録
-        const queryResult = await insertConversationHistory(dbClient, body);
+        const queryResult = await insertConversationHistory(dbClient, body, subscriptionId);
         res.status(200).json({ conversationId: queryResult.rows[0].id });
         break;
       case MessageType.ai:

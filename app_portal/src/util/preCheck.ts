@@ -19,7 +19,7 @@ export async function preCheck() {
     {},
   ).catch(async (resBody: string) => {
     const e = JSON.parse(resBody) as KintoneRestAPiError;
-    throw new KintoneError(`${ErrorMessage.E_MSG006}（${ErrorCode.E00007}）\n${e.message}\n(${e.code} ${e.id})`);
+    throw new KintoneError(`${ErrorMessage.E_MSG010}（${ErrorCode.E10004}）\n${e.message}\n(${e.code} ${e.id})`);
   }) as KintoneProxyResponse;
   const [resBody, resStatus] = resPreCheck;
   const preCheckResult = JSON.parse(resBody) as PreCheckResponseBody;
