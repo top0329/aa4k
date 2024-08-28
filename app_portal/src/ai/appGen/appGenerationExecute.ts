@@ -325,6 +325,75 @@ async function kintoneAppGenFieldAdd(appId: string, fieldParam: LlmFieldParam, i
 }
 
 /**
+ * プラグインのインストール
+ * @param isGuestSpace 
+ */
+async function installAa4kPlugin(isGuestSpace: boolean) {
+  // ===============================================
+  const fileName = import.meta.env.VITE_AA4K_PLUGIN_NAME
+  const s3Url = `${import.meta.env.VITE_AA4K_PLUGIN_S3_ENDPOINT}${fileName}`;
+  const STORAGE_KEY = import.meta.env.VITE_AA4K_PLUGIN_STORAGE_KEY
+  // ===============================================
+
+  // localStorageから前回の実行結果を取得
+  const storageValue = localStorage.getItem(STORAGE_KEY);
+  // 有効期間内で、前回成功している場合にインストール処理を行う
+  const storageValue_json = storageValue ? JSON.parse(storageValue) : {}
+  const status = storageValue_json.expired > new Date().getTime() ? storageValue_json.status : "";
+  if (status !== 'failed') {
+    // インストール処理
+    try {
+      // S3からzipファイルをダウンロード
+      const resFetch = await fetch(s3Url);
+      if (!resFetch.ok) {
+        return
+      }
+      const fileData = await resFetch.blob();
+
+      // kintoneにzipファイルをアップロードする
+      const formData = new FormData();
+      formData.append('file', new Blob([fileData], { type: 'application/zip' }), fileName);
+      formData.append("__REQUEST_TOKEN__", kintone.getRequestToken());
+      const headers = {
+        "X-Requested-With": "XMLHttpRequest",
+      };
+      // アップロード
+      const resp = await fetch(kintone.api.url("/k/v1/file.json", isGuestSpace), {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+      const respData = await resp.json();
+      const fileKey = respData.fileKey;
+
+      // kintoneにプラグインを読み込む(インストール)
+      const resPlugin = await kintone.api(
+        kintone.api.url("/k/v1/plugin.json", isGuestSpace),
+        "POST",
+        { fileKey: fileKey },
+      );
+      const pluginId = resPlugin.id;
+
+      // 結果をブラウザに保存(localStorage)
+      const setValue = {
+        status: 'success',
+        expired: new Date().getTime() + 1000 * 60 * 60 * 24, // 1日後
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(setValue));
+      return pluginId;
+
+    } catch (e) {
+      // 結果をブラウザに保存(localStorage)
+      const setValue = {
+        status: 'failed',
+        expired: new Date().getTime() + 1000 * 60 * 60 * 24, // 1日後
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(setValue));
+    }
+  }
+}
+
+/**
  * アプリにAA4kプラグインを追加
  * @param appId 
  * @param pluginId
@@ -355,10 +424,13 @@ async function setAa4kPlugin(appId: string, pluginId: string, isGuestSpace: bool
   // --------------------
   // AA4kプラグインのプラグインIDを名前から抽出
   // --------------------
-  const aa4kPluginId = response.plugins.find(plugin => plugin.id === pluginId)?.id;
+  let aa4kPluginId = response.plugins.find(plugin => plugin.id === pluginId)?.id;
   if (!aa4kPluginId) {
-    // 存在しない場合は何もしない
-    return;
+    // --------------------
+    // プラグインのインストール
+    // --------------------
+    aa4kPluginId = await installAa4kPlugin(isGuestSpace);
+    if (!aa4kPluginId) return;
   }
 
   // --------------------
@@ -368,8 +440,8 @@ async function setAa4kPlugin(appId: string, pluginId: string, isGuestSpace: bool
     kintone.api.url("/k/v1/preview/app/plugins.json", isGuestSpace),
     "POST",
     { app: appId, ids: [aa4kPluginId] },
-  ).catch((e: KintoneRestAPiError) => {
-    throw new KintoneError(`${ErrorMessageConst.E_MSG012}（${ErrorCode.E10004}）\n${e.message}\n(${e.code} ${e.id})`)
+  ).catch(() => {
+    // 何もしない
   });
 }
 
