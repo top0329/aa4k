@@ -32,6 +32,7 @@ export const sDot = colors.map((color, index) =>
     margin: '0.8em',
     borderRadius: '50%',
     background: color,
+    float: 'left',
     '::before': {
       position: 'absolute',
       content: '""',
@@ -44,3 +45,13 @@ export const sDot = colors.map((color, index) =>
     },
   })
 );
+
+export const sProcessingStateText = style({
+  opacity: 0.5,
+  fontSize: '15px',
+})
+
+export const sProcessingStateTextEllipses = style({
+  position: 'relative',
+  top:`20%`,
+});

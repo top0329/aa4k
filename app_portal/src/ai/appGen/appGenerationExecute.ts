@@ -78,7 +78,7 @@ interface LlmLayoutParam {
  * @param conversation 
  * @returns AppGenerationExecuteResponse
  */
-export const appGenerationExecute = async (conversation: AppGenerationExecuteConversation): Promise<AppGenerationExecuteResponseSuccess | AppGenerationExecuteResponseError> => {
+export const appGenerationExecute = async (conversation: AppGenerationExecuteConversation, setProcessingStateWhileLoadScreen: React.Dispatch<React.SetStateAction<string>>): Promise<AppGenerationExecuteResponseSuccess | AppGenerationExecuteResponseError> => {
   const { message } = conversation;
   const context = conversation.context as AppGenerationExecuteContext;
   const isGuestSpace = context.isGuestSpace;
@@ -100,13 +100,15 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
     //   ・フィールド追加用パラメータ生成(LLM)
     //   ・フィールド追加の実行(kintone REST API)
     // --------------------
+    setProcessingStateWhileLoadScreen("アプリを作成しています…");
     const appName = context.settingInfo ? context.settingInfo.appName : "";
     const fieldList = context.settingInfo ? JSON.stringify(context.settingInfo.fields) : "";
-    const { appId, fieldsParam } = await executeAppGeneration(message.content, appName, fieldList, context.contractStatus, llmContext, isGuestSpace, promptInfo)
+    const { appId, fieldsParam } = await executeAppGeneration(message.content, appName, fieldList, context.contractStatus, llmContext, isGuestSpace, promptInfo, setProcessingStateWhileLoadScreen)
 
     // --------------------
     // レイアウト変更の実行
     // --------------------
+    setProcessingStateWhileLoadScreen("アプリを反映中です…");
     const layoutParam = await executeLayout(appId, message.content, fieldsParam, context.contractStatus, llmContext, isGuestSpace, promptInfo)
 
     // --------------------
@@ -117,6 +119,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
     // --------------------
     // kintone 運用環境へのデプロイ(kintone REST API)
     // --------------------
+    setProcessingStateWhileLoadScreen("アプリに遷移します…");
     await kintone.api(
       kintone.api.url("/k/v1/preview/app/deploy.json", isGuestSpace),
       "POST",
@@ -199,7 +202,7 @@ export const appGenerationExecute = async (conversation: AppGenerationExecuteCon
  * @param promptInfo 
  * @returns appId, fieldsParam
  */
-async function executeAppGeneration(message: string, appName: string, fieldList: string, contractStatus: ContractStatus, llmContext: LlmContext, isGuestSpace: boolean, promptInfo: PromptInfo[]) {
+async function executeAppGeneration(message: string, appName: string, fieldList: string, contractStatus: ContractStatus, llmContext: LlmContext, isGuestSpace: boolean, promptInfo: PromptInfo[], setProcessingStateWhileLoadScreen:  React.Dispatch<React.SetStateAction<string>>) {
   let maxRetries = RETRY_MAX_FIELD; // 最大リトライ回数
   let retryCount = 0;
   let success = false;
@@ -223,6 +226,7 @@ async function executeAppGeneration(message: string, appName: string, fieldList:
   while (retryCount < maxRetries && !success) {
     try {
       if (retryCount !== 0) {
+        setProcessingStateWhileLoadScreen("アプリを再作成しています…");
         // フィールド追加用パラメータ生成_リトライ(LLM)の実行
         fieldsParam = await llmAppGenFieldRetryParam(message, appName, contractStatus, llmContext, promptInfo, fieldsParam, errorInfo);
       }

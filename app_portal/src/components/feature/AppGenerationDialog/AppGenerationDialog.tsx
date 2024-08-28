@@ -30,6 +30,7 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
     setIsInitVisible,
     isLoadingVisible,
     createKintoneApp,
+    processingStateWhileLoadScreen,
   } = useAppGenerationDialogLogic({ setHumanMessage, setCallbackFuncs, setAiAnswer, setFinishAiAnswer, setIsShowDetailDialogVisible });
 
   return (
@@ -39,7 +40,7 @@ const AppGenerationDialog: React.FC<AppGenerationDialogProps> = ({ humanMessage,
           <CloseButton
             onClick={() => toggleDialogVisibility()}
           />
-          {isLoadingVisible && (<AiLoad />)}
+          {isLoadingVisible && (<AiLoad processingStateWhileLoadScreen={processingStateWhileLoadScreen} />)}
           <ChatHistory
             humanMessage={humanMessage}
             setHumanMessage={setHumanMessage}

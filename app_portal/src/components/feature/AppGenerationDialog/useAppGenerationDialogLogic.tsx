@@ -38,6 +38,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
   const [isInitVisible, setIsInitVisible] = useState<boolean>(true);
   // ロード画面を表示するかどうかの状態を管理
   const [isLoadingVisible, setIsLoadingVisible] = useState<boolean>(false);
+  const [processingStateWhileLoadScreen, setProcessingStateWhileLoadScreen] = useState<string>("");
 
   // ダイアログの表示状態を切り替える
   const toggleDialogVisibility = () => {
@@ -60,6 +61,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
     setAiAnswer(`${InfoMessage.I_MSG004}`);
     setFinishAiAnswer(true);
     setIsShowDetailDialogVisible(false);
+    setProcessingStateWhileLoadScreen("AIを起動しています…");
 
     const userId = kintone.getLoginUser().id;
 
@@ -140,7 +142,7 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
       chatHistory: [],
       context: context,
     }
-    const response = await appGenerationExecute(conversation);
+    const response = await appGenerationExecute(conversation, setProcessingStateWhileLoadScreen);
     if (response.result === ExecResult.error) {
       const errorMessage: ErrorMessage = {
         role: MessageType.error,
@@ -173,5 +175,6 @@ export const useAppGenerationDialogLogic = ({ setHumanMessage, setCallbackFuncs,
     toggleAiLoadVisibility,
     createKintoneApp,
     scrollRef,
+    processingStateWhileLoadScreen,
   };
 };
