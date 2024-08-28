@@ -35,338 +35,6 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
     // --------------------
     const histories = setChatHistory(chatHistory)
     const promptInfo = await setPrompt([ServiceDiv.app_gen_type, ServiceDiv.app_gen_create_field, ServiceDiv.app_gen_edit_field], promptInfoList)
-    //     const promptInfo = [
-    //       {
-    //         service_div: "app_gen_type",
-    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
-
-    // ユーザのメッセージが以下のどのタイプに該当するかを判定して、userMessageType として出力してください。
-    // - 「other」の場合は、ユーザのメッセージへの応答を response として出力してください。
-    // - 「unknown」の場合は、「申し訳ありません、よくわかりませんでした。より詳しい表現に変えてお試しください。」を response として出力してください。
-    // - その他のタイプの場合は、userMessageType のみを出力してください。
-
-    // タイプ一覧
-    // - create: kintone アプリの新規作成の要望
-    // - edit: kintone アプリの編集の要望
-    // - duplicate: kintone アプリの複製の要望
-    // - unknown: kintone アプリに関係するが、「create」「edit」「duplicate」のいずれかに分類するのが難しいメッセージ
-    // - other: その他のメッセージ
-    // `,
-    //         prompt_function_parameter: [
-    //           {
-    //             item_id: 1,
-    //             parent_item_id: null,
-    //             item_name: "userMessageType",
-    //             item_type: "string",
-    //             item_describe: "「create」「edit」「duplicate」「unknown」「other」のいずれか",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 2,
-    //             parent_item_id: null,
-    //             item_name: "response",
-    //             item_type: "string",
-    //             item_describe: "type が「unknown」または「other」の場合に、応答するメッセージ",
-    //             constants: "null",
-    //           }
-    //         ],
-    //       },
-    //       {
-    //         service_div: "app_gen_create_field",
-    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
-
-    // ユーザからアプリ作成の要望がある場合
-    // - アプリに必要なフィールドの情報を fields として出力してください。
-    //     - fields は 8項目以上10項目以下で提案してください。
-    // - アプリ名を applicationName として出力してください。
-    // - 「以下の内容でよろしければ「アプリを作成する」をクリックしてください。\nまた、アプリ名やフィールドの変更をする場合はお知らせください。」を responseMessage として出力してください。
-
-    // 出力は以下のような形式になります。
-    // {{
-    //   "responseMessage": "メッセージ",
-    //   "applicationName": "アプリ名",
-    //   "fields": [
-    //     {{
-    //       "type": "SINGLE_LINE_TEXT",
-    //       "label": "文字列 (1行)",
-    //     }},
-    //     {{
-    //       "type": "RICH_TEXT",
-    //       "label": "リッチエディター",
-    //     }},
-    //     {{
-    //       "type": "MULTI_LINE_TEXT",
-    //       "label": "文字列 (複数行)",
-    //     }},
-    //     {{
-    //       "type": "NUMBER",
-    //       "label": "数値",
-    //     }},
-    //     {{
-    //       "type": "CALC",
-    //       "label": "計算",
-    //     }},
-    //     {{
-    //       "type": "RADIO_BUTTON",
-    //       "label": "ラジオボタン",
-    //     }},
-    //     {{
-    //       "type": "CHECK_BOX",
-    //       "label": "チェックボックス",
-    //     }},
-    //     {{
-    //       "type": "MULTI_SELECT",
-    //       "label": "複数選択",
-    //     }},
-    //     {{
-    //       "type": "DROP_DOWN",
-    //       "label": "ドロップダウン",
-    //     }},
-    //     {{
-    //       "type": "DATE",
-    //       "label": "日付",
-    //     }},
-    //     {{
-    //       "type": "TIME",
-    //       "label": "時刻",
-    //     }},
-    //     {{
-    //       "type": "DATETIME",
-    //       "label": "日時",
-    //     }},
-    //     {{
-    //       "type": "FILE",
-    //       "label": "添付ファイル",
-    //     }},
-    //     {{
-    //       "type": "LINK",
-    //       "label": "リンク",
-    //     }},
-    //     {{
-    //       "type": "USER_SELECT",
-    //       "label": "ユーザー選択",
-    //     }},
-    //     {{
-    //       "type": "ORGANIZATION_SELECT",
-    //       "label": "組織選択",
-    //     }},
-    //     {{
-    //       "type": "GROUP_SELECT",
-    //       "label": "グループ選択",
-    //     }},
-    //     {{
-    //       "type": "GROUP",
-    //       "label": "グループ",
-    //     }},
-    //     {{
-    //       "type": "SUBTABLE",
-    //       "label": "テーブル",
-    //     }}
-    //   ]
-    // }}
-    // `,
-    //         prompt_function_parameter: [
-    //           {
-    //             item_id: 1,
-    //             parent_item_id: null,
-    //             item_name: "responseMessage",
-    //             item_type: "string",
-    //             item_describe: "応答するメッセージ",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 2,
-    //             parent_item_id: null,
-    //             item_name: "applicationName",
-    //             item_type: "string",
-    //             item_describe: "アプリ名",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 3,
-    //             parent_item_id: null,
-    //             item_name: "fields",
-    //             item_type: "array",
-    //             item_describe: "代表するフィールドの一覧",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 4,
-    //             parent_item_id: 3,
-    //             item_name: "-",
-    //             item_type: "object",
-    //             item_describe: "フィールド",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 5,
-    //             parent_item_id: 4,
-    //             item_name: "label",
-    //             item_type: "string",
-    //             item_describe: "フィールド名",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 6,
-    //             parent_item_id: 4,
-    //             item_name: "type",
-    //             item_type: "string",
-    //             item_describe: "フィールドの種類",
-    //             constants: "null",
-    //           }
-    //         ],
-    //       },
-    //       {
-    //         service_div: "app_gen_edit_field",
-    //         prompt: `あなたは kintone アプリの作成方法に詳しい優秀なプログラマーです。
-
-    // ユーザからフィールドの追加・更新・削除の要望があれば、要望を反映したフィールドの情報を fields として出力してください。
-    // - 追加・更新のあったフィールドを先頭に並べてください。
-    // - 「以下の内容でよろしければ「アプリを作成する」をクリックしてください。\nまた、アプリ名やフィールドの変更をする場合はお知らせください。」を response として出力してください。
-
-    // アプリ名は {applicationName} です。
-    // 現在のフィールドは以下のとおりです。
-    // {settingInfo}
-
-    // 出力は以下のような形式になります。
-    // {{
-    //   "responseMessage": "メッセージ",
-    //   "applicationName": "アプリ名",
-    //   "fields": [
-    //     {{
-    //       "type": "SINGLE_LINE_TEXT",
-    //       "label": "文字列 (1行)",
-    //     }},
-    //     {{
-    //       "type": "RICH_TEXT",
-    //       "label": "リッチエディター",
-    //     }},
-    //     {{
-    //       "type": "MULTI_LINE_TEXT",
-    //       "label": "文字列 (複数行)",
-    //     }},
-    //     {{
-    //       "type": "NUMBER",
-    //       "label": "数値",
-    //     }},
-    //     {{
-    //       "type": "CALC",
-    //       "label": "計算",
-    //     }},
-    //     {{
-    //       "type": "RADIO_BUTTON",
-    //       "label": "ラジオボタン",
-    //     }},
-    //     {{
-    //       "type": "CHECK_BOX",
-    //       "label": "チェックボックス",
-    //     }},
-    //     {{
-    //       "type": "MULTI_SELECT",
-    //       "label": "複数選択",
-    //     }},
-    //     {{
-    //       "type": "DROP_DOWN",
-    //       "label": "ドロップダウン",
-    //     }},
-    //     {{
-    //       "type": "DATE",
-    //       "label": "日付",
-    //     }},
-    //     {{
-    //       "type": "TIME",
-    //       "label": "時刻",
-    //     }},
-    //     {{
-    //       "type": "DATETIME",
-    //       "label": "日時",
-    //     }},
-    //     {{
-    //       "type": "FILE",
-    //       "label": "添付ファイル",
-    //     }},
-    //     {{
-    //       "type": "LINK",
-    //       "label": "リンク",
-    //     }},
-    //     {{
-    //       "type": "USER_SELECT",
-    //       "label": "ユーザー選択",
-    //     }},
-    //     {{
-    //       "type": "ORGANIZATION_SELECT",
-    //       "label": "組織選択",
-    //     }},
-    //     {{
-    //       "type": "GROUP_SELECT",
-    //       "label": "グループ選択",
-    //     }},
-    //     {{
-    //       "type": "GROUP",
-    //       "label": "グループ",
-    //     }},
-    //     {{
-    //       "type": "SUBTABLE",
-    //       "label": "テーブル",
-    //     }}
-    //   ]
-    // }}
-    // `,
-    //         prompt_function_parameter: [
-    //           {
-    //             item_id: 1,
-    //             parent_item_id: null,
-    //             item_name: "responseMessage",
-    //             item_type: "string",
-    //             item_describe: "応答するメッセージ",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 2,
-    //             parent_item_id: null,
-    //             item_name: "applicationName",
-    //             item_type: "string",
-    //             item_describe: "アプリ名",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 3,
-    //             parent_item_id: null,
-    //             item_name: "fields",
-    //             item_type: "array",
-    //             item_describe: "代表するフィールドの一覧",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 4,
-    //             parent_item_id: 3,
-    //             item_name: "-",
-    //             item_type: "object",
-    //             item_describe: "フィールド",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 5,
-    //             parent_item_id: 4,
-    //             item_name: "label",
-    //             item_type: "string",
-    //             item_describe: "フィールド名",
-    //             constants: "null",
-    //           },
-    //           {
-    //             item_id: 6,
-    //             parent_item_id: 4,
-    //             item_name: "type",
-    //             item_type: "string",
-    //             item_describe: "フィールドの種類",
-    //             constants: "null",
-    //           }
-    //         ],
-    //       }
-    //     ]
-
-
-
 
     // --------------------
     // タイプ判定（LLM）
@@ -405,9 +73,10 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
         LlmResult = editFieldLlmResult;
       }
 
+      let addMessage = "";
       // kintone固有フィールドの対応
       const kintoneFieldList = ["レコード番号", "レコードID", "リビジョン", "ステータス", "カテゴリー", "作業者", "作成日時", "更新日時", "作成者", "更新者"]
-      const filteredFields: Field[] = [];
+      let filteredFields: Field[] = [];
       const excludedLabels: string[] = [];
 
       LlmResult.fields.forEach((field: Field) => {
@@ -419,7 +88,19 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       });
 
       // kintone固有フィールドがあった場合、ユーザに表示するメッセージにその旨を追記
-      const addMessage = excludedLabels.length && typeLlmResult.userMessageType === ActionType.edit ? `${excludedLabels.join("、")}はkintoneの固定フィールドのため指定できません。\n\n` : "";
+      addMessage = excludedLabels.length && typeLlmResult.userMessageType === ActionType.edit ? `${excludedLabels.join("、")}はkintoneの固定フィールドのため指定できません。\n\n` : "";
+
+      // フィールド数の制限 (20件)
+      const beforeFiledCount = context.settingInfo ? context.settingInfo.fields.length : 0;
+      const afterFieldCount = filteredFields.length;
+      const isAddField = beforeFiledCount && beforeFiledCount < afterFieldCount ? true : false;
+      const isLimitFieldCount = isAddField && afterFieldCount > 20 ? true : false;
+
+      if (isLimitFieldCount) {
+        addMessage = "フィールドの数が多すぎるため、追加できませんでした。\n\n"
+        filteredFields = context.settingInfo ? context.settingInfo.fields : [];
+      }
+
       const resultMessage = `${addMessage}${LlmResult.responseMessage}`
 
       // 結果回答詳細
@@ -466,7 +147,7 @@ export const appGenerationPlanning = async (conversation: AppGenerationPlanningC
       const lastChatHistoryItem = chatHistory[chatHistory.length -1];
       if (typeLlmResult.userMessageType === ActionType.duplicate) {
         // 「複製」の場合は以下のメッセージ
-        typeLlmResult.response = `本製品では既存アプリの複製(コピー)は出来ません。\nほかのアプリを再利用したい場合はこちらの手順を参考にしてください。\n\nhttps://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
+        typeLlmResult.response = `本製品では既存アプリの複製(コピー)はできません。\nほかのアプリを再利用したい場合はこちらの手順を参考にしてください。\n\nhttps://jp.cybozu.help/k/ja/user/create_app/app_recycle.html`
       } else {
         if (getLatestMessageDetail(lastChatHistoryItem)) {
           // 「雑談」「理解不能」、かつmessageDetail（アプリ情報）が存在する場合は以下のメッセージ

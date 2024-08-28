@@ -129,7 +129,7 @@ export const dataGenerationExecute = async (conversation: Conversation, setIsRel
           responseMessage = `データの登録に失敗しました。お手数ですが、もう一度お試しください。`
         } else {
           // 一部失敗した場合
-          responseMessage = `${condition}のデータを${resultAddRecord.successCount}件登録しましたが、一部、データの生成が出来ませんでした。\n内容をご確認いただき、必要に応じて再度お試しください。`
+          responseMessage = `${condition}のデータを${resultAddRecord.successCount}件登録しましたが、一部、データの生成ができませんでした。\n内容をご確認いただき、必要に応じて再度お試しください。`
         }
       }
       // --------------------
