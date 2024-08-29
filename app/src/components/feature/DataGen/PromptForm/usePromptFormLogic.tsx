@@ -6,7 +6,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import { dataGenerationExecute } from '~/ai/dataGen';
 import { useToast } from '~/components/ui/Origin/ErrorToast/ErrorToastProvider';
-import { ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
+import { DockDisplayTypes, ErrorCode, ErrorMessage as ErrorMessageConst, InfoMessage } from '~/constants';
 import { InTypeWriteState } from '~/state/inTypeWriteState';
 import { PluginIdState } from '~/state/pluginIdState';
 import { ReloadState } from "~/state/reloadState";
@@ -18,6 +18,7 @@ import { KintoneError } from "~/util/customErrors";
 import { getApiErrorMessage } from '~/util/getErrorMessage';
 import { preCheck } from '~/util/preCheck';
 import { DataGenChatHistoryState } from "~/state/chatHistoryState";
+import { ActiveFunctionState } from '~/state/activeFunctionState';
 
 type PromptFormProps = {
   startLoading?: () => void;
@@ -53,6 +54,8 @@ export const usePromptFormLogic = ({
   const [pluginId] = useAtom(PluginIdState);
   const [, setIsReload] = useAtom(ReloadState);
   const [promptInfoList] = useAtom(PromptInfoListState);
+  const [activeFunctionState, setActiveFunctionState] = useAtom(ActiveFunctionState);
+  const { dataGen } = DockDisplayTypes;
   const [currentHumanMessage, setCurrentHumanMessage] = useState("");
   // Ref
   const isVoiceInputRef = useRef<boolean>(false); // 音声入力中の判定を行いたい場所によってStateでは判定できないので、Refを使って判定する
@@ -90,6 +93,7 @@ export const usePromptFormLogic = ({
 
       aiAnswerRef.current = '';
       finishAiAnswerRef.current = false;
+      setActiveFunctionState(dataGen);
 
       const appId = kintone.app.getId();
       const userId = kintone.getLoginUser().id;
@@ -139,6 +143,7 @@ export const usePromptFormLogic = ({
         setInTypeWrite(true);
         setIsSubmitting(false);
         stopLoading?.();
+        setActiveFunctionState(null);
         return;
       }
 
@@ -169,6 +174,7 @@ export const usePromptFormLogic = ({
         setInTypeWrite(true);
         setIsSubmitting(false);
         stopLoading?.();
+        setActiveFunctionState(null);
         return;
       }
       const contractStatus = preCheckResult.contractStatus;
@@ -203,6 +209,7 @@ export const usePromptFormLogic = ({
         setInTypeWrite(true);
         setIsSubmitting(false);
         stopLoading?.();
+        setActiveFunctionState(null);
         return;
       }
       conversationId = resJsonInsertConversation.conversationId;
@@ -246,6 +253,7 @@ export const usePromptFormLogic = ({
       finishAiAnswerRef.current = true;
       setChatHistory([...chatHistoryItems, chatHistoryItem]);
       setIsSubmitting(false);
+      setActiveFunctionState(null);
 
     } catch (err) {
       let messageContent: string = '';
@@ -273,6 +281,7 @@ export const usePromptFormLogic = ({
       setInTypeWrite(true);
       setIsSubmitting(false);
       stopLoading?.();
+      setActiveFunctionState(null);
     }
   };
 
@@ -414,5 +423,6 @@ export const usePromptFormLogic = ({
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
+    activeFunctionState,
   };
 };

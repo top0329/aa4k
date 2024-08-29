@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import { PromptTextArea } from "~/components/ui/Origin/PromptTextarea/PromptTextArea";
 // import ToggleSwitch from '~/components/ui/ToggleSwitch/ToggleSwitch';
 import { vars } from '~/styles/theme.css';
-import { sClearConversation, sClearConversationDisabled, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
+import { sClearConversation, sClearConversationDisabled, sProcessingStateActive, sPromptForm, sVoiceInput, sVoiceInputActive, sVoiceInputDisabled } from './PromptForm.css';
 import { usePromptFormLogic } from "./usePromptFormLogic";
+import { DockDisplayTypes, InfoMessage } from '~/constants';
 
 type PromptFormProps = {
   isLoading: boolean;
@@ -33,6 +34,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
     handleClearConversation,
     isSubmitting,
     voiceInputVisible,
+    activeFunctionState,
     // toggleChatVisibilityHandler
   } = usePromptFormLogic({ humanMessage, setHumanMessage, setCallbackFuncs, aiAnswerRef, finishAiAnswerRef, startLoading, stopLoading, isChangeCodeRef, scrollRef });
 
@@ -52,6 +54,10 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
       return sVoiceInput
     }
   }
+
+  // 他機能でAI実行中かどうかの判定フラグ（初期値はnull：どの機能でもAI未実行）
+  const { jsGen } = DockDisplayTypes;
+  const isActiveFunctionJsGen = !activeFunctionState || activeFunctionState === jsGen;
 
   return (
     <Box
@@ -109,8 +115,9 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
             }
             onKeyDown={(e) => handleKeyDown(e)}
             label=""
-            disabled={isSubmitting || isLoading}
+            disabled={!isActiveFunctionJsGen || isSubmitting || isLoading}
           />
+          {!isActiveFunctionJsGen && <Box className={sProcessingStateActive}>{InfoMessage.I_MSG006}</Box>}
         </Flex>
 
         <Flex gap="2" pt={'3'}
@@ -142,7 +149,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
               variant={'ghost'}
               className={isSubmitting || isLoading ? sClearConversationDisabled : sClearConversation}
               onClick={(e) => { handleClearConversation(e) }}
-              disabled={isSubmitting || isLoading}
+              disabled={!isActiveFunctionJsGen || isSubmitting || isLoading}
             >
               <Tooltip
                 content={"新しく会話を始める"}
@@ -165,7 +172,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ isLoading, startLoading, stopLo
               color={isVoiceInput ? 'crimson' : 'gray'}
               className={getVoiceInputButtonClassName()}
               onClick={(e) => handleVoiceInput(e)}
-              disabled={isSubmitting || isLoading}
+              disabled={!isActiveFunctionJsGen || isSubmitting || isLoading}
             >
               <FontAwesomeIcon size='lg' icon={faMicrophone} />
             </Button>

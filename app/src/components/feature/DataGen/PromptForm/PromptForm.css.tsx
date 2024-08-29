@@ -49,6 +49,16 @@ export const sPromptForm = style({
   },
 });
 
+export const sProcessingStateActive = style({
+  opacity: 0.5,
+  marginTop: '10%',
+  marginLeft: '2%',
+  position: 'absolute',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  pointerEvents: 'none',
+});
+
 // [新しく会話を始める]ボタンの活性時
 export const sClearConversation = style({
   borderRadius: `50%`,
