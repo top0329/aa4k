@@ -33,3 +33,5 @@ plugin/config.js
 
 # script
 scripts/.env.development
+
+plugin/ppk

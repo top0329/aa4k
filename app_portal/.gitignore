@@ -25,5 +25,3 @@ dist-ssr
 *.sw?
 
 .env
-
-/app/plugin/ppk
